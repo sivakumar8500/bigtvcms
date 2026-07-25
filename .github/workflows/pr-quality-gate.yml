@@ -1,0 +1,67 @@
+name: 🔒 PR Quality Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB: Full quality check on every PR
+  # ─────────────────────────────────────────
+  quality-gate:
+    name: 🔒 Quality Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Needed for coverage diff
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 ESLint check
+        run: pnpm lint
+
+      - name: 💅 Prettier format check
+        run: pnpm prettier --check "src/**/*.{ts,tsx,js,json,css}"
+
+      - name: 🧪 Run tests with coverage (threshold enforced)
+        run: pnpm test:coverage
+        env:
+          CI: true
+
+      - name: 📊 Upload PR coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ github.event.pull_request.number }}-coverage
+          path: coverage/lcov-report/
+          retention-days: 7
+
+      - name: 🏗️ Verify production build succeeds
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.bigtv.in
+          NEXT_PUBLIC_APP_NAME: BigTV CMS
+
+      - name: ✅ Quality gate passed
+        run: echo "✅ All quality gates passed! PR is ready for review."

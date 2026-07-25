@@ -1,0 +1,22 @@
+{
+  "title": "बिगटीवी न्यूज़रूम (BigTV Newsroom)",
+  "searchPlaceholder": "समाचार शीर्षक खोजें...",
+  "allCategories": "सभी श्रेणियां",
+  "allTypes": "सभी प्रकार",
+  "colImage": "चित्र (Image)",
+  "colCategory": "श्रेणी (Category)",
+  "colTitle": "शीर्षक और सामग्री",
+  "colType": "प्रकार और भाषा",
+  "colDate": "दिनांक और समय",
+  "colActions": "कार्रवाई",
+  "noRecords": "कोई मिलान समाचार रिकॉर्ड नहीं मिला।",
+  "menuCreate": "समाचार बनाएं",
+  "menuCategories": "श्रेणियां",
+  "menuLocations": "स्थान",
+  "menuCreators": "निर्माता",
+  "menuPostTypes": "पोस्ट के प्रकार",
+  "menuLanguages": "भाषाएँ",
+  "menuAiTags": "AiTags",
+  "menuReels": "रील्स",
+  "menuSettings": "सेटिंग्स"
+}

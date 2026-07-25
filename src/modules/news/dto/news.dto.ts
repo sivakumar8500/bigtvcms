@@ -1,0 +1,123 @@
+export interface NewsPostDto {
+  id?: number;
+  title?: string;
+  notificationtitle?: string;
+  imagetitel?: string;
+  content?: string;
+  created?: string;
+  post_name?: string;
+  totalLikes?: number;
+  totalViews?: number;
+  totalComments?: number;
+  image_url?: string;
+  video_url?: string;
+  video_platform?: string;
+  gallery?: string[];
+  type?: string;
+  totalShares?: number;
+  isReporter?: boolean;
+  reportedBy?: string;
+  categoryName?: string[];
+  postUrl?: string;
+  subType?: string;
+  isStickyPost?: boolean;
+  linkURLAndroid?: string;
+  linkURLIos?: string;
+  links?: string;
+  isBookmarked?: string[];
+  postOrder?: number;
+  draft?: boolean;
+  trash?: boolean;
+  schedule?: string;
+  language_id?: number;
+  category_ids?: number[];
+  location_ids?: number[];
+  post_type?: string;
+  is_sticky?: boolean;
+  device_id?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateNewsPostDto {
+  title: string;
+  notificationtitle: string;
+  imagetitel: string;
+  content: string;
+  created: string;
+  post_name: string;
+  totalLikes: number;
+  totalViews: number;
+  totalComments: number;
+  image_url: string;
+  video_url: string;
+  video_platform: string;
+  gallery: string[];
+  type: string;
+  totalShares: number;
+  isReporter: boolean;
+  reportedBy: string;
+  categoryName: string[];
+  postUrl: string;
+  subType: string;
+  isStickyPost: boolean;
+  linkURLAndroid: string;
+  linkURLIos: string;
+  links: string;
+  isBookmarked: string[];
+  postOrder: number;
+  draft: boolean;
+  trash: boolean;
+  schedule: string;
+  language_id: number;
+  language_code?: string;
+  category_ids: number[];
+  location_ids: number[];
+  post_type: string;
+  is_sticky?: boolean;
+  device_id?: string;
+}
+
+export interface UpdateNewsPostDto {
+  language_code?: string;
+  title?: string;
+  notificationtitle?: string;
+  imagetitel?: string;
+  content?: string;
+  created?: string;
+  post_name?: string;
+  totalLikes?: number;
+  totalViews?: number;
+  totalComments?: number;
+  image_url?: string;
+  video_url?: string;
+  video_platform?: string;
+  gallery?: string[];
+  type?: string;
+  totalShares?: number;
+  isReporter?: boolean;
+  reportedBy?: string;
+  categoryName?: string[];
+  postUrl?: string;
+  subType?: string;
+  isStickyPost?: boolean;
+  linkURLAndroid?: string;
+  linkURLIos?: string;
+  links?: string;
+  isBookmarked?: string[];
+  postOrder?: number;
+  draft?: boolean;
+  trash?: boolean;
+  schedule?: string;
+  language_id?: number;
+  category_ids?: number[];
+  location_ids?: number[];
+  post_type?: string;
+  is_sticky?: boolean;
+  device_id?: string;
+}
+
+export interface GetNewsPostsParams {
+  skip?: number;
+  limit?: number;
+}

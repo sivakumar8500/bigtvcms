@@ -1,0 +1,22 @@
+{
+  "title": "బిగ్‌టివి న్యూస్‌రూమ్ (BigTV Newsroom)",
+  "searchPlaceholder": "వార్తల శీర్షికను శోధించండి...",
+  "allCategories": "అన్ని విభాగాలు",
+  "allTypes": "అన్ని రకాలు",
+  "colImage": "చిత్రం (Image)",
+  "colCategory": "విభాగం (Category)",
+  "colTitle": "శీర్షిక & కంటెంట్",
+  "colType": "రకం & భాష",
+  "colDate": "తేదీ & సమయం",
+  "colActions": "చర్యలు",
+  "noRecords": "సరిపోలే వార్తల రికార్డులు కనుగొనబడలేదు.",
+  "menuCreate": "వార్తలను సృష్టించండి",
+  "menuCategories": "విభాగాలు",
+  "menuLocations": "ప్రాంతాలు",
+  "menuCreators": "సృష్టికర్తలు",
+  "menuPostTypes": "పోస్ట్ రకాలు",
+  "menuLanguages": "భాషలు",
+  "menuAiTags": "AiTags",
+  "menuReels": "రీల్స్",
+  "menuSettings": "సెట్టింగులు"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "ബിഗ് ടിവി ന്യൂസ് റൂം (BigTV Newsroom)",
+  "searchPlaceholder": "വാർത്താ തലക്കെട്ട് തിരയുക...",
+  "allCategories": "എല്ലാ വിഭാഗങ്ങളും",
+  "allTypes": "എല്ലാ തരങ്ങളും",
+  "colImage": "ചിത്രം (Image)",
+  "colCategory": "വിഭാഗം (Category)",
+  "colTitle": "തലക്കെട്ടും ഉള്ളടക്കവും",
+  "colType": "തരവും ഭാഷയും",
+  "colDate": "തീയതിയും സമയവും",
+  "colActions": "നടപടികൾ",
+  "noRecords": "പൊരുത്തപ്പെടുന്ന വാർത്തകളൊന്നും കണ്ടെത്തിയില്ല.",
+  "menuCreate": "വാർത്ത സൃഷ്ടിക്കുക",
+  "menuCategories": "വിഭാഗങ്ങൾ",
+  "menuLocations": "സ്ഥലങ്ങൾ",
+  "menuCreators": "സ്രഷ്‌ടാക്കൾ",
+  "menuPostTypes": "പോസ്റ്റ് തരങ്ങൾ",
+  "menuLanguages": "ഭാഷകൾ",
+  "menuAiTags": "AiTags",
+  "menuReels": "റീലുകൾ",
+  "menuSettings": "ക്രമീകരണങ്ങൾ"
+}

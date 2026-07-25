@@ -1,0 +1,22 @@
+{
+  "title": "BigTV Newsroom",
+  "searchPlaceholder": "Search News Title...",
+  "allCategories": "All Categories",
+  "allTypes": "All Types",
+  "colImage": "Image",
+  "colCategory": "Category",
+  "colTitle": "Title & Content",
+  "colType": "Type & Lang",
+  "colDate": "Date & Time",
+  "colActions": "Actions",
+  "noRecords": "No matching news records found.",
+  "menuCreate": "Create News",
+  "menuCategories": "Categories",
+  "menuLocations": "Locations",
+  "menuCreators": "Creators",
+  "menuPostTypes": "Post Types",
+  "menuLanguages": "Languages",
+  "menuAiTags": "AiTags",
+  "menuReels": "Reels",
+  "menuSettings": "Settings"
+}
