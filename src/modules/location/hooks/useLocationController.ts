@@ -88,12 +88,12 @@ export function useLocationController() {
 
     try {
       const updatePayload: UpdateStateDto = {
-        state_name_en: target.stateEn,
-        state_name_te: target.stateTe,
-        state_name_ml: target.stateMl,
-        state_name_hi: target.stateHi,
+        translations: {
+          en: target.stateEn || '',
+          te: target.stateTe || '',
+          ml: target.stateMl || '',
+        },
         is_active: newFollow,
-        status: newFollow,
       };
       await LocationRepository.update(id, updatePayload);
     } catch (error) {
@@ -168,23 +168,24 @@ export function useLocationController() {
     try {
       if (isEditMode && editingId !== null) {
         const updatePayload: UpdateStateDto = {
-          state_name_en: form.stateEn || '',
-          state_name_te: form.stateTe || '',
-          state_name_ml: form.stateMl || '',
-          state_name_hi: form.stateHi || '',
+          translations: {
+            en: form.stateEn || '',
+            te: form.stateTe || '',
+            ml: form.stateMl || '',
+          },
           is_active: form.status !== false,
-          status: form.status !== false,
         };
         const dto = await LocationRepository.update(editingId, updatePayload);
         const updatedItem = LocationMapper.toDomain(dto);
         setRows((prev) => prev.map((l) => (l.stateId === editingId ? updatedItem : l)));
       } else {
         const createPayload: CreateStateDto = {
-          state_name_en: form.stateEn || '',
-          state_name_te: form.stateTe || '',
-          state_name_ml: form.stateMl || '',
-          state_name_hi: form.stateHi || '',
-          status: form.status !== false,
+          translations: {
+            en: form.stateEn || '',
+            te: form.stateTe || '',
+            ml: form.stateMl || '',
+          },
+          is_active: form.status !== false,
         };
         const dto = await LocationRepository.create(createPayload);
         const newItem = LocationMapper.toDomain(dto);

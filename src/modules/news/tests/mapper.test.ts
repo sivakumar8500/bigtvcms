@@ -37,6 +37,7 @@ describe('NewsMapper', () => {
       language_id: 1,
       category_ids: [10, 20],
       location_ids: [5, 6],
+      aitag_ids: [0],
       post_type: 'Video',
       is_sticky: true,
       createdAt: '2026-07-22T05:00:00Z',
@@ -54,6 +55,7 @@ describe('NewsMapper', () => {
     expect(domain.languageId).toBe(1);
     expect(domain.categoryIds).toEqual([10, 20]);
     expect(domain.locationIds).toEqual([5, 6]);
+    expect(domain.aitagIds).toEqual([0]);
     expect(domain.postType).toBe('Video');
     expect(domain.isSticky).toBe(true);
   });
@@ -84,6 +86,7 @@ describe('NewsMapper', () => {
       languageId: 2,
       categoryIds: [101],
       locationIds: [201],
+      aitagIds: [0],
       postType: 'Standard',
       isSticky: true,
     };
@@ -101,6 +104,24 @@ describe('NewsMapper', () => {
     expect(createDto.location_ids).toEqual([201]);
     expect(createDto.post_type).toBe('Standard');
     expect(createDto.is_sticky).toBe(true);
+  });
+
+  it('should preserve isWebPost when set to true in CreateNewsPostDto and UpdateNewsPostDto', () => {
+    const domainPartial = {
+      title: 'Web Post Title',
+      isWebPost: true,
+      web_post_url: 'https://example.com/news/1',
+    };
+
+    const createDto = NewsMapper.toCreateDto(domainPartial as any);
+    expect(createDto.isWebPost).toBe(true);
+    expect(createDto.is_web_post).toBe(true);
+    expect(createDto.web_post_url).toBe('https://example.com/news/1');
+
+    const updateDto = NewsMapper.toUpdateDto(domainPartial as any);
+    expect(updateDto.isWebPost).toBe(true);
+    expect(updateDto.is_web_post).toBe(true);
+    expect(updateDto.web_post_url).toBe('https://example.com/news/1');
   });
 
   it('should map domain model to UpdateNewsPostDto with all properties', () => {
@@ -139,6 +160,8 @@ describe('NewsMapper', () => {
       locationIds: [4],
       postType: 'Podcast',
       isSticky: true,
+      isWebPost: true,
+      web_post_url: 'http://example.com/web',
     };
 
     const updateDto = NewsMapper.toUpdateDto(domainPartial);
@@ -177,5 +200,9 @@ describe('NewsMapper', () => {
     expect(updateDto.location_ids).toEqual([4]);
     expect(updateDto.post_type).toBe('Podcast');
     expect(updateDto.is_sticky).toBe(true);
+    expect(updateDto.isWebPost).toBe(true);
+    expect(updateDto.is_web_post).toBe(true);
+    expect(updateDto.web_post_url).toBe('http://example.com/web');
   });
 });
+

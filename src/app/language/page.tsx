@@ -75,7 +75,10 @@ export default function LanguageSelectionPage() {
         if (!active) return;
         const systemLangsMapped = data.map((item: any) => {
           const nameEn = item.name?.en || '';
-          const code = (codeMap[nameEn] || nameEn.toLowerCase().slice(0, 2)) as SupportedLanguage;
+          const rawCode = (item.code || '').toLowerCase().trim();
+          const code = (['en', 'te', 'hi', 'ml'].includes(rawCode)
+            ? rawCode
+            : codeMap[nameEn] || (nameEn.toLowerCase().startsWith('mal') ? 'ml' : nameEn.toLowerCase().slice(0, 2))) as SupportedLanguage;
           return {
             languageId: item.id,
             languageName: nameEn,
@@ -130,7 +133,8 @@ export default function LanguageSelectionPage() {
       .catch((err) => {
         console.error('Failed to fetch languages, using fallback', err);
         if (!active) return;
-        const filteredFallback = fallbackOptions.filter((opt) => activeLanguages.includes(opt.key));
+        const currentActive = useLanguageStore.getState().activeLanguages || ['en', 'te', 'hi', 'ml'];
+        const filteredFallback = fallbackOptions.filter((opt) => currentActive.includes(opt.key));
         setActiveOptions(filteredFallback);
         setLoading(false);
       });
@@ -138,7 +142,7 @@ export default function LanguageSelectionPage() {
     return () => {
       active = false;
     };
-  }, [activeLanguages]);
+  }, []);
 
   const handleLanguageSelect = (key: SupportedLanguage) => {
     setLanguage(key);

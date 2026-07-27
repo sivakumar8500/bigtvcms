@@ -363,4 +363,76 @@ describe('CreateNewsForm component', () => {
       expect(screen.getByRole('option', { name: 'English' })).toBeInTheDocument();
     });
   });
+
+  it('should display pre-selected AI tags when mounted with initialData in edit mode', async () => {
+    const initialDataWithTags = {
+      titleEn: 'Existing News Title',
+      bodyEn: 'Existing content body',
+      categories: ['Entertainment'],
+      tags: ['Trending'],
+      aitagIds: [91],
+      location: ['Telangana'],
+      type: 'Standard',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c',
+      postLanguage: 'en' as const,
+      notificationTitle: 'Existing Notification Title',
+      imageTitle: 'Existing Image Title',
+    };
+
+    await act(async () => {
+      render(
+        <CreateNewsForm
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+          isDark={false}
+          language="en"
+          initialData={initialDataWithTags as any}
+        />
+      );
+    });
+
+    const tagsSelect = screen.getByLabelText('AI Mapped Tags *');
+    await act(async () => {
+      fireEvent.mouseDown(tagsSelect);
+    });
+
+    await waitFor(() => {
+      const option = screen.getByRole('option', { name: 'Trending' });
+      expect(option).toBeInTheDocument();
+      const checkbox = option.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      expect(checkbox.checked).toBe(true);
+    });
+  });
+
+  it('should pass isWebPost as true when web post is enabled by user', async () => {
+    const initialDataWebPost = {
+      titleEn: 'Test Title',
+      bodyEn: 'Test Body',
+      categories: ['Entertainment'],
+      tags: [],
+      location: ['Telangana'],
+      type: 'Standard',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c',
+      postLanguage: 'en' as const,
+      notificationTitle: 'Notif',
+      imageTitle: 'Img',
+      isWebPost: true,
+      webUrl: 'https://bigtvnews.com/post/1',
+    };
+
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={initialDataWebPost as any}
+      />
+    );
+
+    const checkboxes = screen.getAllByRole('checkbox', { checked: true });
+    expect(checkboxes.length).toBeGreaterThan(0);
+    expect(screen.getByDisplayValue('https://bigtvnews.com/post/1')).toBeInTheDocument();
+  });
 });
+

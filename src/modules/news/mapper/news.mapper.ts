@@ -37,8 +37,12 @@ export class NewsMapper {
       languageId: dto.language_id ?? 0,
       categoryIds: dto.category_ids || [],
       locationIds: dto.location_ids || [],
+      aitagIds: dto.aitag_ids || [],
       postType: dto.post_type || dto.type || 'Standard',
       isSticky: dto.is_sticky ?? dto.isStickyPost ?? false,
+      isWebPost: Boolean(dto.is_web_post || dto.isWebPost),
+      is_web_post: Boolean(dto.is_web_post || dto.isWebPost),
+      web_post_url: dto.web_post_url || (dto as any).webPostUrl || (dto as any).webUrl || dto.postUrl || '',
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
     };
@@ -78,10 +82,14 @@ export class NewsMapper {
       schedule: domain.schedule || now,
       language_id: domain.languageId ?? (domain as any).language_id ?? 0,
       language_code: (domain as any).languageCode ?? (domain as any).language_code ?? (domain as any).postLanguage ?? 'en',
-      category_ids: domain.categoryIds ?? (domain as any).category_ids ?? [],
-      location_ids: domain.locationIds ?? (domain as any).location_ids ?? [],
+      category_ids: (domain.categoryIds ?? (domain as any).category_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
+      location_ids: (domain.locationIds ?? (domain as any).location_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
+      aitag_ids: (domain.aitagIds ?? (domain as any).aitag_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       post_type: domain.postType ?? (domain as any).post_type ?? domain.type ?? 'Standard',
       is_sticky: domain.isSticky ?? (domain as any).is_sticky ?? domain.isStickyPost ?? false,
+      isWebPost: Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost),
+      is_web_post: Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost),
+      web_post_url: (domain as any).web_post_url || (domain as any).webPostUrl || (domain as any).webUrl || domain.postUrl || '',
     };
   }
 
@@ -125,16 +133,30 @@ export class NewsMapper {
       dto.language_id = domain.languageId ?? rawDomain.language_id;
     }
     if (domain.categoryIds !== undefined || rawDomain.category_ids !== undefined) {
-      dto.category_ids = domain.categoryIds ?? rawDomain.category_ids;
+      const raw = domain.categoryIds ?? rawDomain.category_ids ?? [];
+      dto.category_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
     }
     if (domain.locationIds !== undefined || rawDomain.location_ids !== undefined) {
-      dto.location_ids = domain.locationIds ?? rawDomain.location_ids;
+      const raw = domain.locationIds ?? rawDomain.location_ids ?? [];
+      dto.location_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
+    }
+    if (domain.aitagIds !== undefined || rawDomain.aitag_ids !== undefined) {
+      const raw = domain.aitagIds ?? rawDomain.aitag_ids ?? [];
+      dto.aitag_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
     }
     if (domain.postType !== undefined || rawDomain.post_type !== undefined) {
       dto.post_type = domain.postType ?? rawDomain.post_type;
     }
     if (domain.isSticky !== undefined || rawDomain.is_sticky !== undefined) {
       dto.is_sticky = domain.isSticky ?? rawDomain.is_sticky;
+    }
+    if (rawDomain.isWebPost !== undefined || rawDomain.is_web_post !== undefined || rawDomain.isWebpost !== undefined) {
+      const webVal = Boolean(rawDomain.isWebPost || rawDomain.is_web_post || rawDomain.isWebpost);
+      dto.isWebPost = webVal;
+      dto.is_web_post = webVal;
+    }
+    if (rawDomain.web_post_url !== undefined || rawDomain.webPostUrl !== undefined || rawDomain.webUrl !== undefined) {
+      dto.web_post_url = rawDomain.web_post_url || rawDomain.webPostUrl || rawDomain.webUrl;
     }
 
     return dto;

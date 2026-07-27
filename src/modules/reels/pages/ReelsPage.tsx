@@ -13,6 +13,8 @@ import {
   Button,
   Pagination,
   Avatar,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   AddCircleOutline,
@@ -29,6 +31,7 @@ import {
   Search,
   Add,
   Article,
+  YouTube,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -36,21 +39,26 @@ import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { useReelsController } from '../hooks/useReelsController';
 import { ReelsTable } from '../components/ReelsTable';
 import { ReelsDrawer } from '../components/ReelsDrawer';
+import { SyncChannelModal } from '../components/SyncChannelModal';
 import { Loader } from '@/shared/components/Loader';
 
 const translations = {
   en: {
     pageTitle: 'Reels CMS',
     colId: 'Reel ID',
-    colTitle: 'Reel Title',
+    colReel: 'Reel',
+    colTitle: 'Title',
+    colSource: 'Source',
     colDuration: 'Duration',
     colViews: 'Views',
     colLanguages: 'Languages',
     colStatus: 'Status',
+    colPublished: 'Published',
     colActions: 'Actions',
     searchTitle: 'Filter by Reel Title...',
     searchId: 'Filter by ID...',
     addReel: 'Add Reel',
+    syncYouTube: 'Sync YouTube',
     published: 'Published',
     draft: 'Draft',
     menuCreate: 'Create News',
@@ -66,15 +74,19 @@ const translations = {
   te: {
     pageTitle: 'రీల్స్ CMS',
     colId: 'రీల్ ID',
-    colTitle: 'రీల్ శీర్షిక',
+    colReel: 'రీల్',
+    colTitle: 'శీర్షిక',
+    colSource: 'మూలం',
     colDuration: 'వ్యవధి',
     colViews: 'వీక్షణలు',
     colLanguages: 'భాషలు',
     colStatus: 'స్థితి',
+    colPublished: 'ప్రచురించబడింది',
     colActions: 'చర్యలు',
     searchTitle: 'రీల్ శీర్షికతో శోధించండి...',
     searchId: 'ID తో శోధించండి...',
     addReel: 'రీల్‌ను జోడించండి',
+    syncYouTube: 'యూట్యూబ్ సింక్',
     published: 'ప్రచురించబడింది',
     draft: 'డ్రాఫ్ట్',
     menuCreate: 'వార్తలను సృష్టించండి',
@@ -90,15 +102,19 @@ const translations = {
   hi: {
     pageTitle: 'रील्स CMS',
     colId: 'रील ID',
-    colTitle: 'रील शीर्षक',
+    colReel: 'रील',
+    colTitle: 'शीर्षक',
+    colSource: 'स्रोत',
     colDuration: 'अवधि',
     colViews: 'व्यूज',
     colLanguages: 'भाषाएँ',
     colStatus: 'स्थिति',
+    colPublished: 'प्रकाशित',
     colActions: 'कार्रवाई',
     searchTitle: 'रील शीर्षक से खोजें...',
     searchId: 'ID से खोजें...',
     addReel: 'रील जोड़ें',
+    syncYouTube: 'यूट्यूब सिंक',
     published: 'सक्रिय',
     draft: 'ड्राफ्ट',
     menuCreate: 'समाचार बनाएं',
@@ -114,15 +130,19 @@ const translations = {
   ml: {
     pageTitle: 'റീലുകൾ CMS',
     colId: 'റീൽ ID',
-    colTitle: 'റീൽ ശീർഷകം',
+    colReel: 'റീൽ',
+    colTitle: 'ശീർഷകം',
+    colSource: 'ഉറവിടം',
     colDuration: 'ദൈർഘ്യം',
     colViews: 'കാഴ്ചകൾ',
     colLanguages: 'ഭാഷകൾ',
     colStatus: 'നില',
+    colPublished: 'പ്രസിദ്ധീകരിച്ചു',
     colActions: 'നടപടികൾ',
     searchTitle: 'റീൽ ശീർഷകം തിരയുക...',
     searchId: 'ID തിരയുക...',
     addReel: 'റീൽ ചേർക്കുക',
+    syncYouTube: 'യൂറ്റ്യൂബ് സമന്വയം',
     published: 'പ്രസിദ്ധീകരിച്ചു',
     draft: 'ഡ്രാഫ്റ്റ്',
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
@@ -161,6 +181,11 @@ export const ReelsPage: React.FC = () => {
     form,
     uploadedImage,
     errors,
+    syncModalOpen,
+    setSyncModalOpen,
+    syncMessage,
+    setSyncMessage,
+    handleSyncChannel,
     handleFieldChange,
     handleImageUploaded,
     handleEditClick,
@@ -168,18 +193,6 @@ export const ReelsPage: React.FC = () => {
     handleSubmit,
     deleteReel,
   } = useReelsController();
-
-  const menuItems = [
-    { text: t.menuCreate,     icon: <AddCircleOutline />, action: () => router.push('/dashboard') },
-    { text: t.menuReels,      icon: <Movie />,            active: true },
-    { text: t.menuCategories, icon: <CategoryIcon />,     action: () => router.push('/categories') },
-    { text: t.menuLocations,  icon: <LocationOn />,       action: () => router.push('/locations') },
-    { text: t.menuCreators,   icon: <People />,           action: () => router.push('/creators') },
-    { text: t.menuPostTypes,  icon: <Article />,          action: () => router.push('/post-types') },
-    { text: t.menuLanguages,  icon: <LanguageIcon />,     action: () => router.push('/languages') },
-    { text: t.menuAiTags,     icon: <AutoAwesome />,      action: () => router.push('/aitags') },
-    { text: t.menuSettings,   icon: <Settings />,         action: () => router.push('/settings') },
-  ];
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: isDark ? '#110d29' : '#ffffff', transition: 'all 0.3s ease' }}>
@@ -196,7 +209,7 @@ export const ReelsPage: React.FC = () => {
         {/* Content */}
         <Box sx={{ pt: 2, px: 2, pb: 4, flex: 1, overflowY: 'auto' }}>
 
-          {/* Toolbar: filter + add */}
+          {/* Toolbar: filter + add + sync */}
           <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
               placeholder={t.searchTitle}
@@ -262,6 +275,20 @@ export const ReelsPage: React.FC = () => {
 
             <Button
               variant="contained"
+              startIcon={<YouTube />}
+              onClick={() => setSyncModalOpen(true)}
+              sx={{
+                borderRadius: '12px', textTransform: 'none', fontWeight: 600,
+                backgroundColor: '#ff0000',
+                color: '#ffffff',
+                '&:hover': { backgroundColor: '#cc0000' },
+              }}
+            >
+              {t.syncYouTube}
+            </Button>
+
+            <Button
+              variant="contained"
               startIcon={<Add />}
               onClick={() => setDrawerOpen(true)}
               sx={{
@@ -317,6 +344,15 @@ export const ReelsPage: React.FC = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Sync Channel Modal */}
+      <SyncChannelModal
+        open={syncModalOpen}
+        onClose={() => setSyncModalOpen(false)}
+        onSync={handleSyncChannel}
+        isDark={isDark}
+        language={language}
+      />
 
       {/* Add/Edit Drawer */}
       <ReelsDrawer

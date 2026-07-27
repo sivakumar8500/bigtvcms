@@ -69,6 +69,10 @@ describe('NewsRepository', () => {
       draft: false,
       trash: false,
       schedule: '2026-07-22T05:00:00.000Z',
+      language_id: 1,
+      category_ids: [1],
+      location_ids: [1],
+      post_type: 'Standard',
     };
     const createdResponse = { ...createDto, id: 10, createdAt: '2026-07-22T05:01:00.000Z', updatedAt: '2026-07-22T05:01:00.000Z' };
     (apiClient.post as jest.Mock).mockResolvedValue(createdResponse);

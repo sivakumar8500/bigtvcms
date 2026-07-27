@@ -313,6 +313,8 @@ export interface CreateNewsFormData {
   languageId?: number;
   categoryIds?: number[];
   locationIds?: number[];
+  aitagIds?: number[];
+  aitag_ids?: number[];
   postType?: string;
   isSticky?: boolean;
   isStickyPost?: boolean;
@@ -532,7 +534,15 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initialData ? initialData.categories.map(mapCategoryToKey) : []
   );
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    if (!initialData) return [];
+    const raw = [
+      ...(initialData.tags || []),
+      ...(initialData.aitagIds || []),
+      ...(initialData.aitag_ids || []),
+    ];
+    return raw.map(String).filter(Boolean);
+  });
   const [location, setLocation] = useState<string[]>(initialData?.location || []);
   const [type, setType] = useState(() => {
     const validTypes = ['Standard', 'Video', 'Reel', 'Podcast'];
@@ -552,9 +562,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     return imgs.map((url) => ({ url }));
   });
   const [isSticky, setIsSticky] = useState<boolean>((initialData as any)?.isStickyPost ?? initialData?.isSticky ?? false);
-  const [isWebPost, setIsWebPost] = useState<boolean>((initialData as any)?.isWebPost || false);
-  const [webUrl, setWebUrl] = useState<string>((initialData as any)?.webUrl || '');
-  const [postUrl, setPostUrl] = useState<string>((initialData as any)?.postUrl || '');
+  const [isWebPost, setIsWebPost] = useState<boolean>(Boolean((initialData as any)?.isWebPost || (initialData as any)?.is_web_post || (initialData as any)?.isWebpost || false));
+  const [webUrl, setWebUrl] = useState<string>((initialData as any)?.webUrl || (initialData as any)?.web_post_url || (initialData as any)?.webPostUrl || (initialData as any)?.postUrl || '');
+  const [postUrl, setPostUrl] = useState<string>((initialData as any)?.postUrl || (initialData as any)?.webUrl || '');
+
   const [videoSource, setVideoSource] = useState<string>((initialData as any)?.videoSource || (initialData as any)?.video_platform || '');
   const [videoUrl, setVideoUrl] = useState<string>((initialData as any)?.videoUrl || (initialData as any)?.video_url || '');
   const [notificationTitle, setNotificationTitle] = useState<string>((initialData as any)?.notificationTitle || (initialData as any)?.notificationtitle || '');
@@ -578,12 +589,149 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     }
   }, [language]);
 
-  // Auto-reset Web Post state when switching to a non-supporting post type
+  // Map initial tags/aitagIds to dynamicTags keys so already selected tags are pre-selected in edit mode
   useEffect(() => {
-    if (!type.toLowerCase().startsWith('stand')) {
-      setIsWebPost(false);
-      setWebUrl('');
+    if (initialData) {
+      const rawTags: Array<string | number> = [
+        ...(initialData.tags || []),
+        ...(initialData.aitagIds || []),
+        ...(initialData.aitag_ids || []),
+      ];
+      if (rawTags.length > 0 && dynamicTags.length > 0) {
+        const resolvedKeys: string[] = [];
+        rawTags.forEach((raw) => {
+          if (raw === undefined || raw === null || raw === '') return;
+          const match = dynamicTags.find((dt) => {
+            if (dt.key === raw || String(dt.key) === String(raw)) return true;
+            if (dt.id === raw || String(dt.id) === String(raw)) return true;
+            if (dt.labelEn && dt.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+            if (dt.labelTe && dt.labelTe === String(raw)) return true;
+            if (dt.labelHi && dt.labelHi === String(raw)) return true;
+            if (dt.labelMl && dt.labelMl === String(raw)) return true;
+            return false;
+          });
+          if (match) {
+            resolvedKeys.push(match.key);
+          } else if (typeof raw === 'string') {
+            resolvedKeys.push(raw);
+          }
+        });
+        if (resolvedKeys.length > 0) {
+          const newSet = Array.from(new Set(resolvedKeys));
+          setSelectedTags((prev) => {
+            if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
+              return prev;
+            }
+            return newSet;
+          });
+        }
+      }
     }
+  }, [initialData, dynamicTags.map((t) => `${t.id}:${t.key}`).join(',')]);
+
+  // Map initial categories to dynamicCategories keys so already selected categories are checked in edit mode
+  useEffect(() => {
+    if (initialData && initialData.categories && initialData.categories.length > 0 && dynamicCategories.length > 0) {
+      const resolved: string[] = [];
+      initialData.categories.forEach((raw: any) => {
+        if (raw === undefined || raw === null || raw === '') return;
+        const match = dynamicCategories.find((dc) => {
+          if (dc.key === raw || String(dc.key) === String(raw)) return true;
+          if (dc.id === raw || String(dc.id) === String(raw)) return true;
+          if (dc.labelEn && dc.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+          if (dc.labelTe && dc.labelTe === String(raw)) return true;
+          if (dc.labelHi && dc.labelHi === String(raw)) return true;
+          if (dc.labelMl && dc.labelMl === String(raw)) return true;
+          return false;
+        });
+        if (match) {
+          resolved.push(match.key);
+        } else if (typeof raw === 'string') {
+          resolved.push(mapCategoryToKey(raw));
+        }
+      });
+      if (resolved.length > 0) {
+        const newSet = Array.from(new Set(resolved));
+        setSelectedCategories((prev) => {
+          if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
+            return prev;
+          }
+          return newSet;
+        });
+      }
+    }
+  }, [initialData, dynamicCategories.map((c) => `${c.id}:${c.key}`).join(',')]);
+
+  // Map initial locations to dynamicLocations keys so already selected locations are checked in edit mode
+  useEffect(() => {
+    if (initialData && initialData.location && initialData.location.length > 0 && dynamicLocations.length > 0) {
+      const resolved: string[] = [];
+      initialData.location.forEach((raw: any) => {
+        if (raw === undefined || raw === null || raw === '') return;
+        const match = dynamicLocations.find((dl) => {
+          if (dl.key === raw || String(dl.key) === String(raw)) return true;
+          if (dl.id === raw || String(dl.id) === String(raw)) return true;
+          if (dl.labelEn && dl.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+          if (dl.labelTe && dl.labelTe === String(raw)) return true;
+          if (dl.labelHi && dl.labelHi === String(raw)) return true;
+          if (dl.labelMl && dl.labelMl === String(raw)) return true;
+          return false;
+        });
+        if (match) {
+          resolved.push(match.key);
+        } else if (typeof raw === 'string') {
+          resolved.push(raw);
+        }
+      });
+      if (resolved.length > 0) {
+        const newSet = Array.from(new Set(resolved));
+        setLocation((prev) => {
+          if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
+            return prev;
+          }
+          return newSet;
+        });
+      }
+    }
+  }, [initialData, dynamicLocations.map((l) => `${l.id}:${l.key}`).join(',')]);
+
+  // Sync isWebPost and webUrl when initialData updates (e.g. after async fetch in edit mode)
+  useEffect(() => {
+    if (initialData) {
+      const isWeb = Boolean(
+        (initialData as any).isWebPost ||
+        (initialData as any).is_web_post ||
+        (initialData as any).isWebpost
+      );
+      if (isWeb) {
+        setIsWebPost(true);
+      }
+      const url =
+        (initialData as any).webUrl ||
+        (initialData as any).web_post_url ||
+        (initialData as any).webPostUrl ||
+        (initialData as any).postUrl ||
+        (initialData as any).post_url ||
+        '';
+      if (url) {
+        setWebUrl(url);
+        setPostUrl(url);
+      }
+    }
+  }, [
+    (initialData as any)?.isWebPost,
+    (initialData as any)?.is_web_post,
+    (initialData as any)?.isWebpost,
+    (initialData as any)?.webUrl,
+    (initialData as any)?.web_post_url,
+    (initialData as any)?.webPostUrl,
+    (initialData as any)?.postUrl,
+    (initialData as any)?.post_url,
+  ]);
+
+
+  // Reset video/gallery fields when switching post types
+  useEffect(() => {
     // Reset video fields when switching away from video types
     if (!type.toLowerCase().includes('video')) {
       setVideoSource('');
@@ -807,14 +955,58 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     }
 
     const languageId = initialData?.languageId || langIdMap[postLanguage] || 1;
-    const categoryIds = selectedCategories.map((catKey) => {
-      const found = dynamicCategories.find((dc) => dc.key === catKey);
-      return typeof found?.id === 'number' ? found.id : 0;
-    });
-    const locationIds = location.map((locKey) => {
-      const found = dynamicLocations.find((dl) => dl.key === locKey);
-      return typeof found?.id === 'number' ? found.id : 0;
-    });
+    const categoryIds = selectedCategories
+      .map((catKey) => {
+        const found = dynamicCategories.find(
+          (dc) =>
+            dc.key === catKey ||
+            dc.id === catKey ||
+            String(dc.id) === String(catKey) ||
+            dc.labelEn === catKey ||
+            dc.labelTe === catKey ||
+            dc.labelHi === catKey ||
+            dc.labelMl === catKey
+        );
+        const rawId = found?.id ?? (typeof catKey === 'number' ? catKey : parseInt(String(catKey), 10));
+        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+      })
+      .filter((id): id is number => id !== null && id > 0);
+
+    const locationIds = location
+      .map((locKey) => {
+        const found = dynamicLocations.find(
+          (dl) =>
+            dl.key === locKey ||
+            dl.id === locKey ||
+            String(dl.id) === String(locKey) ||
+            dl.labelEn === locKey ||
+            dl.labelTe === locKey ||
+            dl.labelHi === locKey ||
+            dl.labelMl === locKey
+        );
+        const rawId = found?.id ?? (typeof locKey === 'number' ? locKey : parseInt(String(locKey), 10));
+        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+      })
+      .filter((id): id is number => id !== null && id > 0);
+
+    const parsedAitagIds = selectedTags
+      .map((tagKey) => {
+        const found = dynamicTags.find(
+          (dt) =>
+            dt.key === tagKey ||
+            dt.id === tagKey ||
+            String(dt.id) === String(tagKey) ||
+            dt.labelEn === tagKey ||
+            dt.labelTe === tagKey ||
+            dt.labelHi === tagKey ||
+            dt.labelMl === tagKey
+        );
+        const rawId = found?.id ?? (typeof tagKey === 'number' ? tagKey : parseInt(String(tagKey), 10));
+        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+      })
+      .filter((id): id is number => id !== null && id > 0);
+
+    const aitagIds = parsedAitagIds;
 
     onSubmit({
       titleEn: postLanguage === 'en' ? title : '',
@@ -838,6 +1030,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       languageId,
       categoryIds,
       locationIds,
+      aitagIds,
+      aitag_ids: aitagIds,
       postType: type,
       isSticky,
       isStickyPost: isSticky,
@@ -1541,8 +1735,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Box>
               </Box>
 
-              {/* Is Web Post Toggle — only for Standard / StandardVideo */}
-              {type.toLowerCase().startsWith('stand') && (
+              {/* Is Web Post Toggle */}
               <Box sx={{ mt: 2 }}>
                 <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
                 <Box
@@ -1581,10 +1774,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   />
                 </Box>
               </Box>
-              )}
 
-              {/* Web URL — shown only when Web Post is ON and type supports it */}
-              {type.toLowerCase().startsWith('stand') && isWebPost && (
+              {/* Web URL — shown only when Web Post is ON */}
+              {isWebPost && (
                 <Box sx={{ mt: 1.5 }}>
                   <TextField
                     fullWidth

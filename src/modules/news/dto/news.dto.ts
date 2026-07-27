@@ -34,7 +34,11 @@ export interface NewsPostDto {
   location_ids?: number[];
   post_type?: string;
   is_sticky?: boolean;
+  isWebPost?: boolean;
+  is_web_post?: boolean;
+  web_post_url?: string;
   device_id?: string;
+  aitag_ids?: number[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -75,7 +79,11 @@ export interface CreateNewsPostDto {
   location_ids: number[];
   post_type: string;
   is_sticky?: boolean;
+  isWebPost?: boolean;
+  is_web_post?: boolean;
+  web_post_url?: string;
   device_id?: string;
+  aitag_ids?: number[];
 }
 
 export interface UpdateNewsPostDto {
@@ -114,7 +122,11 @@ export interface UpdateNewsPostDto {
   location_ids?: number[];
   post_type?: string;
   is_sticky?: boolean;
+  isWebPost?: boolean;
+  is_web_post?: boolean;
+  web_post_url?: string;
   device_id?: string;
+  aitag_ids?: number[];
 }
 
 export interface GetNewsPostsParams {

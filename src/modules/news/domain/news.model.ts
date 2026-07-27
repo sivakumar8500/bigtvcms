@@ -32,8 +32,13 @@ export interface NewsPost {
   languageId?: number;
   categoryIds?: number[];
   locationIds?: number[];
+  aitagIds?: number[];
   postType?: string;
   isSticky?: boolean;
+  isWebPost?: boolean;
+  is_web_post?: boolean;
+  web_post_url?: string;
   createdAt?: string;
   updatedAt?: string;
 }
+

@@ -118,23 +118,24 @@ describe('Location Repository', () => {
 
   it('should call apiClient.post on create', async () => {
     const payload = {
-      state_name_en: 'Telangana',
-      state_name_te: 'తెలంగాణ',
-      state_name_ml: 'തെലങ്കാന',
-      state_name_hi: 'तेलंगाना',
-      status: true,
+      translations: {
+        en: 'Telangana',
+        te: 'తెలంగాణ',
+        ml: 'തെലങ്കാന',
+      },
+      is_active: true,
     };
     (apiClient.post as jest.Mock).mockResolvedValue({
       message: 'State created successfully',
-      data: { stateId: 140, stateName: 'Telangana', status: true },
+      data: { state_id: 140, state_name: 'Telangana', isActive: true },
     });
     await LocationRepository.create(payload);
     expect(apiClient.post).toHaveBeenCalledWith('/admin/states/create', payload);
   });
 
   it('should call apiClient.put on update', async () => {
-    const payload = { state_name_en: 'Telangana', is_active: false, status: false };
-    (apiClient.put as jest.Mock).mockResolvedValue({ stateId: 19, ...payload });
+    const payload = { translations: { en: 'Telangana' }, is_active: false };
+    (apiClient.put as jest.Mock).mockResolvedValue({ state_id: 19, ...payload });
     await LocationRepository.update(19, payload);
     expect(apiClient.put).toHaveBeenCalledWith('/admin/states/19', payload);
   });
@@ -149,20 +150,18 @@ describe('Location Repository', () => {
 describe('useLocationController hook', () => {
   const mockStates = [
     {
-      stateId: 19,
-      stateName: 'తెలంగాణ',
+      state_id: 19,
+      state_name: 'తెలంగాణ',
       stateNameTranslations: { en: 'Telangana', te: 'తెలంగాణ', ml: 'തെലങ്കാന' },
       value: 'telangana',
       isActive: true,
-      status: true,
     },
     {
-      stateId: 21,
-      stateName: 'ఆంధ్రప్రదేశ్',
+      state_id: 21,
+      state_name: 'ఆంధ్రప్రదేశ్',
       stateNameTranslations: { en: 'Andhra Pradesh', te: 'ఆంధ్రప్రదేశ్', ml: 'ആന്ധ്രാപ്രദേശ്' },
       value: 'andhrapradesh',
       isActive: true,
-      status: true,
     },
   ];
 
@@ -179,7 +178,7 @@ describe('useLocationController hook', () => {
   });
 
   it('should toggle follow state and call update API', async () => {
-    (apiClient.put as jest.Mock).mockResolvedValue({ stateId: 19, isActive: false, status: false });
+    (apiClient.put as jest.Mock).mockResolvedValue({ state_id: 19, isActive: false });
     const { result } = renderHook(() => useLocationController());
     await act(async () => {});
 
@@ -189,18 +188,16 @@ describe('useLocationController hook', () => {
 
     expect(apiClient.put).toHaveBeenCalledWith('/admin/states/19', expect.objectContaining({
       is_active: false,
-      status: false,
     }));
   });
 
   it('should create new location on submit', async () => {
     const newDto = {
-      stateId: 139,
-      stateName: 'కేరళ',
+      state_id: 139,
+      state_name: 'కేరళ',
       stateNameTranslations: { en: 'Kerala', te: 'కేరళ', ml: 'കേരളം' },
       value: 'kerala',
       isActive: true,
-      status: true,
     };
     (apiClient.post as jest.Mock).mockResolvedValue(newDto);
     const { result } = renderHook(() => useLocationController());
@@ -218,8 +215,12 @@ describe('useLocationController hook', () => {
     });
 
     expect(apiClient.post).toHaveBeenCalledWith('/admin/states/create', expect.objectContaining({
-      state_name_en: 'Kerala',
-      state_name_te: 'కేరళ',
+      translations: {
+        en: 'Kerala',
+        te: 'కేరళ',
+        ml: 'കേരളം',
+      },
+      is_active: true,
     }));
   });
 

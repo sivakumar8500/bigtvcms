@@ -294,6 +294,43 @@ export default function DashboardPage() {
   const [editingPost, setEditingPost] = React.useState<null | any>(null);
   const [viewingPost, setViewingPost] = React.useState<null | any>(null);
 
+  // Fetch full post detail on edit to ensure aitag_ids and all fields are loaded
+  React.useEffect(() => {
+    if (editingPost && editingPost.id) {
+      NewsRepository.getById(editingPost.id)
+        .then((dto: any) => {
+          if (dto && dto.id === editingPost.id) {
+            const fetchedAitagIds = dto.aitag_ids || dto.aitagIds || [];
+            const fetchedCategories = dto.categoryName || dto.categories || dto.category_id || [];
+            setEditingPost((prev: any) => {
+              if (!prev || prev.id !== dto.id) return prev;
+              return {
+                ...prev,
+                aitag_ids: fetchedAitagIds,
+                aitagIds: fetchedAitagIds,
+                aiTags: fetchedAitagIds,
+                tags: prev.tags?.length ? prev.tags : fetchedAitagIds,
+                categories: Array.isArray(fetchedCategories) && fetchedCategories.length > 0 ? fetchedCategories : prev.categories,
+                notificationTitle: dto.notificationtitle || dto.notificationTitle || prev.notificationTitle,
+                imageTitle: dto.imagetitel || dto.imageTitle || prev.imageTitle,
+                is_web_post: Boolean((dto as any).is_web_post || (dto as any).isWebPost || (dto as any).isWebpost || prev?.is_web_post || prev?.isWebPost),
+                isWebPost: Boolean((dto as any).is_web_post || (dto as any).isWebPost || (dto as any).isWebpost || prev?.is_web_post || prev?.isWebPost),
+                web_post_url: (dto as any).web_post_url || (dto as any).webPostUrl || (dto as any).web_url || (dto as any).webUrl || (dto as any).postUrl || (dto as any).post_url || prev?.web_post_url || prev?.webPostUrl || prev?.postUrl || '',
+                webUrl: (dto as any).web_post_url || (dto as any).webPostUrl || (dto as any).web_url || (dto as any).webUrl || (dto as any).postUrl || (dto as any).post_url || prev?.web_post_url || prev?.webPostUrl || prev?.postUrl || '',
+                postUrl: (dto as any).web_post_url || (dto as any).webPostUrl || (dto as any).web_url || (dto as any).webUrl || (dto as any).postUrl || (dto as any).post_url || prev?.web_post_url || prev?.webPostUrl || prev?.postUrl || '',
+                is_sticky: dto.is_sticky ?? dto.isSticky ?? prev.is_sticky ?? prev.isSticky,
+                location: dto.state_name || dto.location || prev.location,
+                type: dto.typename || dto.type || prev.type,
+                video_url: dto.video_url || dto.videoUrl || prev.video_url || prev.videoUrl,
+                video_platform: dto.video_platform || dto.videoSource || prev.video_platform || prev.videoSource,
+              };
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [editingPost?.id]);
+
   // Multi-selection states
   const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>(
@@ -317,8 +354,10 @@ export default function DashboardPage() {
   const [apiLocations, setApiLocations] = React.useState<string[]>([]);
   const [apiAiTags, setApiAiTags] = React.useState<string[]>([]);
 
-  // Clear local saved filter options and selections whenever user changes language
+  // Fetch fresh API data matching current language
   React.useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
     setApiCategories([]);
     setApiPostTypes([]);
     setApiLocations([]);
@@ -327,12 +366,6 @@ export default function DashboardPage() {
     setSelectedLocation('All');
     setSelectedAiTag('All');
     setSelectedType('All');
-  }, [language]);
-
-  // Fetch fresh API data matching current language
-  React.useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
 
     // Helper for language-specific field extraction from any DTO
     const extractName = (item: any, prefix: string) => {
@@ -422,6 +455,7 @@ export default function DashboardPage() {
               ? langMap[item.language_id]
               : (language === 'te' ? 'Telugu' : language === 'hi' ? 'Hindi' : language === 'ml' ? 'Malayalam' : 'English');
 
+            const aitagIds = item.aitag_ids || item.aitagIds || item.aitags || [];
             return {
               id: item.id || Math.floor(Math.random() * 100000),
               title: item.title || 'Untitled',
@@ -435,6 +469,12 @@ export default function DashboardPage() {
               date: item.schedule ? String(item.schedule).slice(0, 10) : (item.createdAt ? String(item.createdAt).slice(0, 10) : new Date().toISOString().slice(0, 10)),
               time: item.schedule && String(item.schedule).includes('T') ? String(item.schedule).split('T')[1].slice(0, 5) : '12:00 PM',
               location: '',
+              aitag_ids: aitagIds,
+              aitagIds: aitagIds,
+              aiTags: aitagIds,
+              tags: item.tags || aitagIds,
+              notificationTitle: item.notificationtitle || item.title || '',
+              imageTitle: item.imagetitel || item.title || '',
             };
           });
 
@@ -737,9 +777,13 @@ export default function DashboardPage() {
       schedule: formatScheduleToISO(data.publishMode, data.scheduleTime),
       language_id: data.languageId ?? 0,
       language_code: data.language_code || data.postLanguage || 'en',
-      category_ids: data.categoryIds || [],
-      location_ids: data.locationIds || [],
+      category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
+      location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
+      aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
       post_type: data.postType || data.type || 'Standard',
+      isWebPost: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
+      is_web_post: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
+      web_post_url: data.webUrl || data.postUrl || '',
     };
 
     let createdId = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 820700;
@@ -787,10 +831,14 @@ export default function DashboardPage() {
       schedule: formatScheduleToISO(data.publishMode, data.scheduleTime),
       language_id: data.languageId ?? 0,
       language_code: data.language_code || data.postLanguage || 'en',
-      category_ids: data.categoryIds || [],
-      location_ids: data.locationIds || [],
+      category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
+      location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
+      aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
       post_type: data.postType || data.type || 'Standard',
       isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
+      isWebPost: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
+      is_web_post: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
+      web_post_url: data.webUrl || data.postUrl || '',
     };
 
     try {
@@ -860,14 +908,22 @@ export default function DashboardPage() {
                 bodyHi: editingPost.language === 'Hindi' ? editingPost.content : '',
                 titleMl: editingPost.language === 'Malayalam' ? editingPost.title : '',
                 bodyMl: editingPost.language === 'Malayalam' ? editingPost.content : '',
-                categories: editingPost.categories,
-                tags: [],
-                location: (editingPost as any).location ? ((editingPost as any).location as string).split(', ').filter(Boolean) : [],
-                type: editingPost.type,
-                imageUrl: editingPost.image,
-                postLanguage: editingPost.language === 'Telugu' ? 'te' : editingPost.language === 'Hindi' ? 'hi' : editingPost.language === 'Malayalam' ? 'ml' : 'en',
+                categories: Array.isArray(editingPost.categories) && editingPost.categories.length > 0 ? editingPost.categories : ((editingPost as any).categoryName || (editingPost as any).category_id || []),
+                tags: (editingPost as any).tags && (editingPost as any).tags.length > 0 ? (editingPost as any).tags : ((editingPost as any).aiTags || (editingPost as any).aitag_ids || (editingPost as any).aitagIds || []),
+                aitagIds: (editingPost as any).aitagIds || (editingPost as any).aitag_ids || (editingPost as any).aiTags || [],
+                aitag_ids: (editingPost as any).aitag_ids || (editingPost as any).aitagIds || (editingPost as any).aiTags || [],
+                location: (editingPost as any).location ? (Array.isArray((editingPost as any).location) ? (editingPost as any).location : ((editingPost as any).location as string).split(', ').filter(Boolean)) : (editingPost as any).state_name ? [(editingPost as any).state_name] : [],
+                type: editingPost.type || (editingPost as any).typename || 'Standard',
+                imageUrl: editingPost.image || (editingPost as any).imageUrl,
+                postLanguage: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 ? 'te' : editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 ? 'hi' : editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 ? 'ml' : 'en',
                 notificationTitle: (editingPost as any).notificationTitle || (editingPost as any).notificationtitle || editingPost.title || '',
                 imageTitle: (editingPost as any).imageTitle || (editingPost as any).imagetitel || editingPost.title || '',
+                isWebPost: Boolean((editingPost as any).is_web_post || (editingPost as any).isWebPost || (editingPost as any).isWebpost),
+                webUrl: (editingPost as any).web_post_url || (editingPost as any).webPostUrl || (editingPost as any).web_url || (editingPost as any).webUrl || (editingPost as any).postUrl || (editingPost as any).post_url || '',
+                postUrl: (editingPost as any).web_post_url || (editingPost as any).webPostUrl || (editingPost as any).web_url || (editingPost as any).webUrl || (editingPost as any).postUrl || (editingPost as any).post_url || '',
+                isSticky: Boolean((editingPost as any).is_sticky || (editingPost as any).isStickyPost || (editingPost as any).isSticky),
+                videoSource: (editingPost as any).video_platform || (editingPost as any).videoSource || '',
+                videoUrl: (editingPost as any).video_url || (editingPost as any).videoUrl || '',
               }}
             />
           ) : viewingPost ? (

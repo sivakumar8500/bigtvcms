@@ -166,9 +166,20 @@ export const useLanguageStore = create<LanguageState>()(
         set({ language: lang });
       },
       setActiveLanguages: (codes) => {
+        const current = get().activeLanguages;
+        if (current.length === codes.length && current.every((c, i) => c === codes[i])) {
+          return;
+        }
         set({ activeLanguages: codes });
       },
       setSystemLanguages: (langs) => {
+        const current = get().systemLanguages;
+        if (
+          current.length === langs.length &&
+          current.every((l, i) => l.languageId === langs[i]?.languageId && l.isSystemActive === langs[i]?.isSystemActive)
+        ) {
+          return;
+        }
         set({ systemLanguages: langs });
       },
       setCategories: (cats) => {

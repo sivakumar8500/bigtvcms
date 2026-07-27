@@ -6,27 +6,32 @@ export interface StateNameTranslations {
 }
 
 export interface StateResponseDto {
-  stateId: number;
-  stateName: string;
+  state_id?: number;
+  stateId?: number;
+  state_name?: string;
+  stateName?: string;
   stateNameTranslations?: StateNameTranslations;
+  translations?: StateNameTranslations;
   value?: string;
   isActive?: boolean;
+  is_active?: boolean;
   status?: boolean;
 }
 
 export interface CreateStateDto {
-  state_name_en: string;
-  state_name_te: string;
-  state_name_ml?: string;
-  state_name_hi?: string;
-  status: boolean;
+  translations: {
+    en?: string;
+    te?: string;
+    ml?: string;
+  };
+  is_active: boolean;
 }
 
 export interface UpdateStateDto {
-  state_name_en?: string;
-  state_name_te?: string;
-  state_name_ml?: string;
-  state_name_hi?: string;
+  translations?: {
+    en?: string;
+    te?: string;
+    ml?: string;
+  };
   is_active?: boolean;
-  status?: boolean;
 }

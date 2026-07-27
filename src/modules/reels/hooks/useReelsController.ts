@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Reel } from '../domain/reels.model';
 import { reelSchema } from '../validators/reels.validator';
+import { ReelsService } from '../services/reelsService';
 
 const initialReels: Reel[] = [
   {
@@ -8,7 +9,7 @@ const initialReels: Reel[] = [
     reelTitle: 'హైదరాబాద్ బిర్యానీ టూర్',
     duration: '0:30',
     views: '125K',
-    isPublished: true,
+    isPublished: false,
     titleEn: 'Hyderabad Biryani Tour',
     titleTe: 'హైదరాబాద్ బిర్యానీ టూర్',
     titleHi: 'हैदराबाद बिरयानी टूर',
@@ -19,7 +20,7 @@ const initialReels: Reel[] = [
     reelTitle: 'ఆంధ్రప్రదేశ్‌లో భారీ వర్షాలు',
     duration: '0:45',
     views: '84K',
-    isPublished: true,
+    isPublished: false,
     titleEn: 'Heavy Rains in AP',
     titleTe: 'ఆంధ్రప్రదేశ్‌లో భారీ వర్షాలు',
     titleHi: 'आंध्र प्रदेश में भारी बारिश',
@@ -30,7 +31,7 @@ const initialReels: Reel[] = [
     reelTitle: 'కొత్త సినిమా టీజర్ రివ్యూ',
     duration: '0:58',
     views: '210K',
-    isPublished: true,
+    isPublished: false,
     titleEn: 'New Movie Teaser Review',
     titleTe: 'కొత్త సినిమా టీజర్ రివ్యూ',
     titleHi: 'नया मूवी टीज़र रिव्यू',
@@ -49,24 +50,29 @@ const initialReels: Reel[] = [
   },
   {
     reelId: 105,
-    reelTitle: 'భక్తి గీతాలాపന',
+    reelTitle: 'భక్తి గీతాలాపన',
     duration: '0:35',
     views: '112K',
-    isPublished: true,
+    isPublished: false,
     titleEn: 'Devotional Chants',
     titleTe: 'భక్తి గీతాలాపన',
-    titleHi: 'भक्ति गीत गायन',
+    titleHi: 'భక్తి గీతాలాపన',
     titleMl: 'ഭക്തിഗാനങ്ങൾ',
   },
 ];
 
 export function useReelsController() {
   const [rows, setRows] = useState<Reel[]>(initialReels);
+  const [totalCount, setTotalCount] = useState<number>(initialReels.length);
   const [loading, setLoading] = useState(false);
   const [filterTitle, setFilterTitle] = useState('');
   const [filterId, setFilterId] = useState('');
   const [page, setPage] = useState(1);
   const recordsPerPage = 10;
+
+  // Sync Modal state
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   // Drawer states
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -80,12 +86,74 @@ export function useReelsController() {
     titleHi: '',
     titleMl: '',
     duration: '',
-    isPublished: true,
+    isPublished: false,
   };
   const [form, setForm] = useState(emptyForm);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+
+  // Fetch YouTube Shorts from API
+  const fetchShorts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const skip = (page - 1) * recordsPerPage;
+      const response = await ReelsService.fetchYouTubeShorts(skip, recordsPerPage);
+      if (response && response.data && Array.isArray(response.data)) {
+        const mappedReels: Reel[] = response.data.map((item) => {
+          const durSec = item.duration_seconds;
+          const formattedDuration = durSec
+            ? `${Math.floor(durSec / 60)}:${(durSec % 60).toString().padStart(2, '0')}`
+            : item.duration || '0:30';
+
+          return {
+            reelId: item.id,
+            reelTitle: item.title,
+            duration: formattedDuration,
+            views: item.view_count !== undefined ? String(item.view_count) : String(item.totalViews || 0),
+            isPublished: false,
+            titleEn: item.title,
+            titleTe: item.title,
+            titleHi: item.title,
+            titleMl: item.title,
+            imageUrl: item.thumbnail_url || item.image_url,
+            videoId: item.video_id || item.video_url,
+            channelTitle: item.channel_title,
+            url: item.url || item.postUrl,
+            publishedAt: item.published_at || item.created,
+          };
+        });
+
+        setRows(mappedReels);
+        if (typeof response.total === 'number') {
+          setTotalCount(response.total);
+        }
+      }
+    } catch {
+      // Fallback to local initial items if API endpoint fails (e.g. offline/mock test)
+    } finally {
+      setLoading(false);
+    }
+  }, [page, recordsPerPage]);
+
+  useEffect(() => {
+    fetchShorts();
+  }, [fetchShorts]);
+
+  // YouTube Sync Action
+  const handleSyncChannel = async (channelId: string = 'BIGTVTeluguLive', maxResults: number = 50) => {
+    try {
+      const res = await ReelsService.syncYouTubeChannel({ channelId, maxResults, syncInBackground: true });
+      if (res && res.message) {
+        setSyncMessage(res.message);
+      } else {
+        setSyncMessage(`YouTube sync for channel '${channelId}' initiated in background.`);
+      }
+      await fetchShorts();
+    } catch {
+      setSyncMessage(`Failed to initiate sync for channel '${channelId}'.`);
+    }
+  };
 
   // Filter & Pagination logic
   const filtered = rows.filter((r) => {
@@ -102,8 +170,8 @@ export function useReelsController() {
     setPage(1);
   }, [filterTitle, filterId]);
 
-  const totalPages = Math.ceil(filtered.length / recordsPerPage) || 1;
-  const paginatedData = filtered.slice((page - 1) * recordsPerPage, page * recordsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / recordsPerPage));
+  const paginatedData = filtered.slice(0, recordsPerPage);
 
   const togglePublish = (id: number) => {
     setRows((prev) =>
@@ -197,7 +265,7 @@ export function useReelsController() {
         )
       );
     } else {
-      const newId = Math.max(...rows.map((r) => r.reelId)) + 1;
+      const newId = Math.max(0, ...rows.map((r) => r.reelId)) + 1;
       setRows((prev) => [
         {
           reelId: newId,
@@ -241,6 +309,12 @@ export function useReelsController() {
     form,
     uploadedImage,
     errors,
+    syncModalOpen,
+    setSyncModalOpen,
+    syncMessage,
+    setSyncMessage,
+    handleSyncChannel,
+    fetchShorts,
     handleFieldChange,
     handleImageUploaded,
     handleEditClick,

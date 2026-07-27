@@ -55,6 +55,7 @@ export function formatApiErrorMessage(apiError: any, defaultMessage: string): st
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;
+  private inFlightGetRequests = new Map<string, Promise<any>>();
 
   constructor(baseURL: string) {
     this.axiosInstance = axios.create({
@@ -62,7 +63,7 @@ export class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 15000,
+      timeout: 30000,
     });
 
     this.setupInterceptors();
@@ -90,33 +91,39 @@ export class ApiClient {
               localStorage.setItem('bigtv_cms_device_id', deviceId);
               localStorage.setItem('device_id', deviceId);
             }
-            if (config.headers) {
-              config.headers['device_id'] = deviceId;
-              config.headers['device-id'] = deviceId;
-              config.headers['x-device-id'] = deviceId;
-              config.headers['X-Device-Id'] = deviceId;
-            }
             const isBypassDeviceId =
               config.url?.includes('/generate-upload-url') ||
               config.url?.includes('/creators') ||
-              config.url?.includes('/aitags');
+              config.url?.includes('/aitags') ||
+              config.url?.includes('/states') ||
+              config.url?.includes('/locations');
 
-            if (config.method?.toLowerCase() === 'get') {
-              if (isBypassDeviceId) {
-                if (config.params) {
-                  delete config.params.device_id;
-                  delete config.params.deviceId;
-                }
-              } else {
-                config.params = { device_id: deviceId, ...config.params };
+            if (isBypassDeviceId) {
+              if (config.headers) {
+                delete config.headers['device_id'];
+                delete config.headers['device-id'];
+                delete config.headers['x-device-id'];
+                delete config.headers['X-Device-Id'];
               }
-            }
-            if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
-              if (isBypassDeviceId) {
+              if (config.params) {
+                delete config.params.device_id;
+                delete config.params.deviceId;
+              }
+              if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
                 delete (config.data as any).device_id;
                 delete (config.data as any).deviceId;
-              } else if (!(config.data as any).device_id && !(config.data as any).deviceId) {
-                (config.data as any).device_id = deviceId;
+              }
+            } else {
+              if (config.headers) {
+                config.headers['device_id'] = deviceId;
+                config.headers['device-id'] = deviceId;
+                config.headers['x-device-id'] = deviceId;
+                config.headers['X-Device-Id'] = deviceId;
+              }
+              if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
+                if (!(config.data as any).device_id && !(config.data as any).deviceId) {
+                  (config.data as any).device_id = deviceId;
+                }
               }
             }
           } catch (e) {
@@ -228,7 +235,17 @@ export class ApiClient {
   }
 
   public async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-    return this.request<T>({ method: 'get', url, params });
+    const key = `${url}?${JSON.stringify(params || {})}`;
+    if (this.inFlightGetRequests.has(key)) {
+      return this.inFlightGetRequests.get(key) as Promise<T>;
+    }
+
+    const promise = this.request<T>({ method: 'get', url, params }).finally(() => {
+      this.inFlightGetRequests.delete(key);
+    });
+
+    this.inFlightGetRequests.set(key, promise);
+    return promise;
   }
 
   public async post<T, R = unknown>(url: string, data: R): Promise<T> {
@@ -247,8 +264,6 @@ export class ApiClient {
 export const apiClient = new ApiClient(
   process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? '/api'
-      : 'https://apidev.chotanews.com')
+    'https://apidev.chotanews.com'
 );
 

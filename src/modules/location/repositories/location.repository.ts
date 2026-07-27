@@ -23,16 +23,38 @@ export class LocationRepository {
   }
 
   static async create(dto: CreateStateDto): Promise<StateResponseDto> {
-    const res: any = await apiClient.post<any, CreateStateDto>('/admin/states/create', dto);
-    return res?.data || res;
+    try {
+      const res: any = await apiClient.post<any, CreateStateDto>('/admin/states/create', dto);
+      return res?.data || res;
+    } catch (err) {
+      try {
+        const res: any = await apiClient.post<any, CreateStateDto>('/states/create', dto);
+        return res?.data || res;
+      } catch {
+        throw err;
+      }
+    }
   }
 
   static async update(stateId: number, dto: UpdateStateDto): Promise<StateResponseDto> {
-    const res: any = await apiClient.put<any, UpdateStateDto>(`/admin/states/${stateId}`, dto);
-    return res?.data || res;
+    try {
+      const res: any = await apiClient.put<any, UpdateStateDto>(`/admin/states/${stateId}`, dto);
+      return res?.data || res;
+    } catch (err) {
+      try {
+        const res: any = await apiClient.put<any, UpdateStateDto>(`/states/${stateId}`, dto);
+        return res?.data || res;
+      } catch {
+        throw err;
+      }
+    }
   }
 
   static async delete(stateId: number): Promise<void> {
-    return apiClient.delete<void>(`/admin/states/${stateId}`);
+    try {
+      return await apiClient.delete<void>(`/admin/states/${stateId}`);
+    } catch (err) {
+      return await apiClient.delete<void>(`/states/${stateId}`);
+    }
   }
 }

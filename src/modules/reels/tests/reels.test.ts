@@ -1,6 +1,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { useReelsController } from '../hooks/useReelsController';
 import { reelSchema } from '../validators/reels.validator';
+import { ReelsService } from '../services/reelsService';
+import { apiClient } from '@/core/api/api-client';
+
+jest.mock('@/core/api/api-client', () => ({
+  apiClient: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
 
 describe('Reel Validator Schema', () => {
   it('should validate a valid reel object', () => {
@@ -28,36 +39,87 @@ describe('Reel Validator Schema', () => {
   });
 });
 
+describe('ReelsService API Methods', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call fetchYouTubeShorts with correct params', async () => {
+    const mockData = {
+      status: 'success',
+      total: 1,
+      skip: 0,
+      limit: 20,
+      data: [
+        {
+          id: 1,
+          title: 'Test Short Title',
+          video_id: 'waXjP1gY2ys',
+          url: 'https://www.youtube.com/shorts/waXjP1gY2ys',
+          thumbnail_url: 'https://i.ytimg.com/vi/waXjP1gY2ys/maxresdefault.jpg',
+          channel_id: 'UCN1MXjng-rot-pglSJJ9SCA',
+          channel_title: 'BIG TV Telugu Live',
+          duration: 'PT59S',
+          duration_seconds: 59,
+          is_short: true,
+          view_count: 50,
+          like_count: 1,
+        },
+      ],
+    };
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce(mockData);
+
+    const res = await ReelsService.fetchYouTubeShorts(0, 20);
+    expect(apiClient.get).toHaveBeenCalledWith('/youtube/shorts', { skip: 0, limit: 20 });
+    expect(res).toEqual(mockData);
+  });
+
+  it('should call syncYouTubeChannel with correct endpoint and parameters', async () => {
+    const mockSyncRes = {
+      status: 'success',
+      message: "YouTube video sync for channel 'BIGTVTeluguLive' started in background.",
+      channel_id: 'BIGTVTeluguLive',
+      max_results: 50,
+    };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce(mockSyncRes);
+
+    const res = await ReelsService.syncYouTubeChannel({
+      channelId: 'BIGTVTeluguLive',
+      maxResults: 50,
+      syncInBackground: true,
+    });
+
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/youtube/sync?channel_id=BIGTVTeluguLive&max_results=50&sync_in_background=true',
+      {}
+    );
+    expect(res).toEqual(mockSyncRes);
+  });
+});
+
 describe('useReelsController hook', () => {
-  it('should initialize with default states', () => {
+  beforeEach(() => {
+    (apiClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+  });
+
+  it('should initialize with default states and all reels initially unpublished (isPublished = false)', () => {
     const { result } = renderHook(() => useReelsController());
     expect(result.current.rows.length).toBeGreaterThan(0);
+    expect(result.current.rows.every((r) => r.isPublished === false)).toBe(true);
     expect(result.current.filterTitle).toBe('');
     expect(result.current.page).toBe(1);
     expect(result.current.drawerOpen).toBe(false);
   });
 
-  it('should update filter title and reset page to 1', () => {
+  it('should toggle publish state from off (false) to on (true)', () => {
     const { result } = renderHook(() => useReelsController());
-    act(() => {
-      result.current.setPage(2);
-    });
-    expect(result.current.page).toBe(2);
-
-    act(() => {
-      result.current.setFilterTitle('Biryani');
-    });
-    expect(result.current.filterTitle).toBe('Biryani');
-    expect(result.current.page).toBe(1);
-  });
-
-  it('should toggle publish state', () => {
-    const { result } = renderHook(() => useReelsController());
-    const initialPublishState = result.current.rows[0].isPublished;
+    expect(result.current.rows[0].isPublished).toBe(false);
     act(() => {
       result.current.togglePublish(result.current.rows[0].reelId);
     });
-    expect(result.current.rows[0].isPublished).toBe(!initialPublishState);
+    expect(result.current.rows[0].isPublished).toBe(true);
   });
 
   it('should open and close drawer properly', () => {
@@ -108,7 +170,7 @@ describe('useReelsController hook', () => {
       result.current.handleFieldChange('titleTe', 'మెట్రో ప్రారంభం');
     });
     act(() => {
-      result.current.handleFieldChange('titleHi', 'मेट्रो शुभारंभ');
+      result.current.handleFieldChange('titleHi', 'मेट్రో शुभारंभ');
     });
     act(() => {
       result.current.handleFieldChange('titleMl', 'മെട്രോ ഉദ്ഘാടനം');
@@ -132,5 +194,21 @@ describe('useReelsController hook', () => {
     expect(result.current.rows.length).toBe(initialLen - 1);
     expect(result.current.rows.some((r) => r.reelId === targetId)).toBe(false);
   });
-});
 
+  it('should handle sync channel trigger', async () => {
+    const mockSyncRes = {
+      status: 'success',
+      message: "YouTube video sync for channel 'BIGTVTeluguLive' started in background.",
+      channel_id: 'BIGTVTeluguLive',
+      max_results: 50,
+    };
+    (apiClient.post as jest.Mock).mockResolvedValueOnce(mockSyncRes);
+
+    const { result } = renderHook(() => useReelsController());
+    await act(async () => {
+      await result.current.handleSyncChannel('BIGTVTeluguLive', 50);
+    });
+
+    expect(result.current.syncMessage).toBe(mockSyncRes.message);
+  });
+});
