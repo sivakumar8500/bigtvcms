@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useCategoryController } from '../hooks/useCategoryController';
 import { categorySchema } from '../validators/category.validator';
 import { CategoryRepository } from '../repositories/category.repository';
+import { UploadService } from '@/modules/media/services/upload.service';
 
 jest.mock('../repositories/category.repository', () => ({
   CategoryRepository: {
@@ -9,6 +10,12 @@ jest.mock('../repositories/category.repository', () => ({
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+}));
+
+jest.mock('@/modules/media/services/upload.service', () => ({
+  UploadService: {
+    uploadImage: jest.fn().mockResolvedValue('https://example.com/uploaded_cat.jpg'),
   },
 }));
 
@@ -214,7 +221,6 @@ describe('useCategoryController hook with API integration', () => {
       result.current.handleFieldChange('nameTe', 'ఫ్యాషన్');
       result.current.handleFieldChange('nameHi', 'फैशन');
       result.current.handleFieldChange('nameMl', 'ഫാഷൻ');
-      result.current.handleFieldChange('icon', '👗');
     });
 
     await act(async () => {
@@ -224,6 +230,54 @@ describe('useCategoryController hook with API integration', () => {
     expect(CategoryRepository.create).toHaveBeenCalled();
     expect(result.current.rows).toHaveLength(2);
     expect(result.current.rows[0].categoryId).toBe(297);
+  });
+
+  it('should upload image file and pass image_url payload on category creation', async () => {
+    const newCategoryDto = {
+      categoryId: 298,
+      categoryName: 'Sports',
+      categoryNameTranslations: {
+        en: 'Sports',
+        te: 'క్రీడలు',
+        hi: 'खेल',
+        ml: 'കായികം',
+      },
+      imageUrl: 'https://example.com/uploaded_cat.jpg',
+    };
+    (CategoryRepository.create as jest.Mock).mockResolvedValue({
+      message: 'Category created successfully',
+      data: newCategoryDto,
+    });
+
+    let result: any;
+    await act(async () => {
+      const hook = renderHook(() => useCategoryController());
+      result = hook.result;
+    });
+
+    const file = new File(['fake image content'], 'sports.jpg', { type: 'image/jpeg' });
+
+    act(() => {
+      result.current.handleFieldChange('nameEn', 'Sports');
+      result.current.handleFieldChange('nameTe', 'క్రీడలు');
+      result.current.handleFieldChange('nameMl', 'കായികം');
+      result.current.handleImageUploaded('data:image/jpeg;base64,12345', file);
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(UploadService.uploadImage).toHaveBeenCalledWith(file);
+    expect(CategoryRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        translations: expect.objectContaining({
+          en: 'Sports',
+        }),
+        image_url: 'https://example.com/uploaded_cat.jpg',
+      })
+    );
+    expect(result.current.rows[0].imageUrl).toBe('https://example.com/uploaded_cat.jpg');
   });
 
   it('should call delete API and delete category on deleteCategory', async () => {

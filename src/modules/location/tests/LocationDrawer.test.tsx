@@ -21,17 +21,15 @@ describe('LocationDrawer Component', () => {
     isDark: false,
   };
 
-  it('renders all four language input fields and error messages when all languages are active', () => {
+  it('renders language input fields and error messages', () => {
     render(<LocationDrawer {...mockProps} />);
 
     expect(screen.getByTestId('input-stateEn')).toBeInTheDocument();
     expect(screen.getByTestId('input-stateTe')).toBeInTheDocument();
-    expect(screen.getByTestId('input-stateHi')).toBeInTheDocument();
     expect(screen.getByTestId('input-stateMl')).toBeInTheDocument();
 
     expect(screen.getByText('English state name is required')).toBeInTheDocument();
     expect(screen.getByText('Telugu state name is required')).toBeInTheDocument();
-    expect(screen.getByText('Hindi state name is required')).toBeInTheDocument();
     expect(screen.getByText('Malayalam state name is required')).toBeInTheDocument();
   });
 

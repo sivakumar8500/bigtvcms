@@ -3,17 +3,18 @@ import { CategoryDto, CreateCategoryDto, UpdateCategoryDto } from '../dto/catego
 
 export class CategoryMapper {
   static toDomain(dto: CategoryDto): Category {
+    const tr = dto.translations || dto.categoryNameTranslations;
     return {
       categoryId: dto.categoryId,
       categoryName: dto.categoryName,
       isFollowed: false,
       isActive: dto.is_active ?? true,
-      nameEn: dto.categoryNameTranslations?.en || '',
-      nameTe: dto.categoryNameTranslations?.te || '',
-      nameHi: dto.categoryNameTranslations?.hi || '',
-      nameMl: dto.categoryNameTranslations?.ml || '',
+      nameEn: tr?.en || '',
+      nameTe: tr?.te || '',
+      nameHi: tr?.hi || '',
+      nameMl: tr?.ml || '',
       icon: '',
-      imageUrl: dto.imageUrl,
+      imageUrl: dto.imageUrl || dto.image_url,
     };
   }
 
@@ -21,20 +22,26 @@ export class CategoryMapper {
     return (dtos || []).map((dto) => this.toDomain(dto));
   }
 
-  static toCreateDto(form: { nameEn: string; nameTe: string; nameHi: string; nameMl: string; icon: string; }): CreateCategoryDto {
+  static toCreateDto(form: { nameEn: string; nameTe: string; nameMl: string }, imageUrl?: string): CreateCategoryDto {
     return {
-      name_en: form.nameEn,
-      name_te: form.nameTe,
-      name_ml: form.nameMl,
+      translations: {
+        en: form.nameEn,
+        te: form.nameTe,
+        ml: form.nameMl,
+      },
+      ...(imageUrl ? { image_url: imageUrl } : {}),
     };
   }
 
-  static toUpdateDto(form: { nameEn: string; nameTe: string; nameHi: string; nameMl: string; icon: string; }, isActive: boolean = true): UpdateCategoryDto {
+  static toUpdateDto(form: { nameEn: string; nameTe: string; nameMl: string }, isActive: boolean = true, imageUrl?: string): UpdateCategoryDto {
     return {
-      name_en: form.nameEn,
-      name_te: form.nameTe,
-      name_ml: form.nameMl,
+      translations: {
+        en: form.nameEn,
+        te: form.nameTe,
+        ml: form.nameMl,
+      },
       is_active: isActive,
+      ...(imageUrl ? { image_url: imageUrl } : {}),
     };
   }
 }

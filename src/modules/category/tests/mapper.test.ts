@@ -51,36 +51,38 @@ describe('CategoryMapper', () => {
     expect(list[0].categoryId).toBe(296);
   });
 
-  it('should convert form to Create DTO', () => {
+  it('should convert form to Create DTO with image_url', () => {
     const form = {
       nameEn: 'Beauty',
       nameTe: 'అందం ',
-      nameHi: 'सुंदरता',
       nameMl: 'സൗന്ദര്യം',
-      icon: '💅',
     };
-    const createDto = CategoryMapper.toCreateDto(form);
+    const createDto = CategoryMapper.toCreateDto(form, 'https://example.com/cat.png');
     expect(createDto).toEqual({
-      name_en: 'Beauty',
-      name_te: 'అందం ',
-      name_ml: 'സൗന്ദര്യം',
+      translations: {
+        en: 'Beauty',
+        te: 'అందం ',
+        ml: 'സൗന്ദര്യം',
+      },
+      image_url: 'https://example.com/cat.png',
     });
   });
 
-  it('should convert form to Update DTO', () => {
+  it('should convert form to Update DTO with image_url', () => {
     const form = {
       nameEn: 'Beauty',
       nameTe: 'అందం ',
-      nameHi: '',
       nameMl: 'സൗന്ദര്യം',
-      icon: '💅',
     };
-    const updateDto = CategoryMapper.toUpdateDto(form, false);
+    const updateDto = CategoryMapper.toUpdateDto(form, false, 'https://example.com/cat.png');
     expect(updateDto).toEqual({
-      name_en: 'Beauty',
-      name_te: 'అందం ',
-      name_ml: 'സൗന്ദര്യം',
+      translations: {
+        en: 'Beauty',
+        te: 'అందం ',
+        ml: 'സൗന്ദര്യം',
+      },
       is_active: false,
+      image_url: 'https://example.com/cat.png',
     });
   });
 });

@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/core/storage/language-store';
 import { LocationRepository } from '../repositories/location.repository';
 import { LocationMapper } from '../mapper/location.mapper';
 import { CreateStateDto, UpdateStateDto } from '../dto/location.dto';
+import { UploadService } from '@/modules/media/services/upload.service';
 
 export function useLocationController() {
   const { activeLanguages, setLocations } = useLanguageStore();
@@ -55,6 +56,8 @@ export function useLocationController() {
   };
   const [form, setForm] = useState<LocationFormData>(emptyForm);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -93,6 +96,7 @@ export function useLocationController() {
           te: target.stateTe || '',
           ml: target.stateMl || '',
         },
+        ...(target.imageUrl ? { image_url: target.imageUrl } : {}),
         is_active: newFollow,
       };
       await LocationRepository.update(id, updatePayload);
@@ -115,6 +119,7 @@ export function useLocationController() {
       status: loc.isFollowed,
     });
     setUploadedImage(loc.imageUrl || null);
+    setSelectedFile(null);
     setErrors({});
     setSubmitted(false);
     setDrawerOpen(true);
@@ -139,8 +144,11 @@ export function useLocationController() {
     });
   };
 
-  const handleImageUploaded = (dataUrl: string | null) => {
+  const handleImageUploaded = (dataUrl: string | null, file?: File | null) => {
     setUploadedImage(dataUrl);
+    if (file !== undefined) {
+      setSelectedFile(file);
+    }
   };
 
   const handleCloseDrawer = () => {
@@ -148,8 +156,10 @@ export function useLocationController() {
     setEditingId(null);
     setForm(emptyForm);
     setUploadedImage(null);
+    setSelectedFile(null);
     setErrors({});
     setSubmitted(false);
+    setIsUploading(false);
   };
 
   const handleSubmit = async () => {
@@ -165,7 +175,15 @@ export function useLocationController() {
       return false;
     }
 
+    setErrors({});
+    setIsUploading(true);
+    let finalImageUrl = uploadedImage || '';
+
     try {
+      if (selectedFile) {
+        finalImageUrl = await UploadService.uploadImage(selectedFile);
+      }
+
       if (isEditMode && editingId !== null) {
         const updatePayload: UpdateStateDto = {
           translations: {
@@ -173,11 +191,12 @@ export function useLocationController() {
             te: form.stateTe || '',
             ml: form.stateMl || '',
           },
+          ...(finalImageUrl ? { image_url: finalImageUrl } : {}),
           is_active: form.status !== false,
         };
         const dto = await LocationRepository.update(editingId, updatePayload);
         const updatedItem = LocationMapper.toDomain(dto);
-        setRows((prev) => prev.map((l) => (l.stateId === editingId ? updatedItem : l)));
+        setRows((prev) => prev.map((l) => (l.stateId === editingId ? { ...updatedItem, imageUrl: finalImageUrl || updatedItem.imageUrl } : l)));
       } else {
         const createPayload: CreateStateDto = {
           translations: {
@@ -185,11 +204,12 @@ export function useLocationController() {
             te: form.stateTe || '',
             ml: form.stateMl || '',
           },
+          ...(finalImageUrl ? { image_url: finalImageUrl } : {}),
           is_active: form.status !== false,
         };
         const dto = await LocationRepository.create(createPayload);
         const newItem = LocationMapper.toDomain(dto);
-        setRows((prev) => [newItem, ...prev]);
+        setRows((prev) => [{ ...newItem, imageUrl: finalImageUrl || newItem.imageUrl }, ...prev]);
       }
       handleCloseDrawer();
       return true;
@@ -197,6 +217,8 @@ export function useLocationController() {
       console.error('Failed to save state:', error);
       setErrors({ submit: error?.message || 'Failed to save state' });
       return false;
+    } finally {
+      setIsUploading(false);
     }
   };
 

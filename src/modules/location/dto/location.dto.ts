@@ -13,6 +13,8 @@ export interface StateResponseDto {
   stateNameTranslations?: StateNameTranslations;
   translations?: StateNameTranslations;
   value?: string;
+  imageUrl?: string;
+  image_url?: string;
   isActive?: boolean;
   is_active?: boolean;
   status?: boolean;
@@ -20,10 +22,11 @@ export interface StateResponseDto {
 
 export interface CreateStateDto {
   translations: {
-    en?: string;
-    te?: string;
-    ml?: string;
+    en: string;
+    te: string;
+    ml: string;
   };
+  image_url?: string;
   is_active: boolean;
 }
 
@@ -33,5 +36,6 @@ export interface UpdateStateDto {
     te?: string;
     ml?: string;
   };
+  image_url?: string;
   is_active?: boolean;
 }

@@ -10,9 +10,7 @@ export function createLocationSchema(activeLanguages: string[] = ['en', 'te', 'h
     stateTe: activeSet.has('te')
       ? z.string().trim().min(1, 'Telugu state name is required')
       : z.string().optional(),
-    stateHi: activeSet.has('hi')
-      ? z.string().trim().min(1, 'Hindi state name is required')
-      : z.string().optional(),
+    stateHi: z.string().optional(),
     stateMl: activeSet.has('ml')
       ? z.string().trim().min(1, 'Malayalam state name is required')
       : z.string().optional(),

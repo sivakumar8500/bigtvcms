@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/core/storage/language-store';
 import { CategoryRepository } from '../repositories/category.repository';
 import { CategoryMapper } from '../mapper/category.mapper';
 import { showToast } from '@/shared/utils/toast';
+import { UploadService } from '@/modules/media/services/upload.service';
 
 export function useCategoryController() {
   const { language } = useLanguageStore();
@@ -26,10 +27,11 @@ export function useCategoryController() {
     nameTe: '',
     nameHi: '',
     nameMl: '',
-    icon: '',
   };
   const [form, setForm] = useState(emptyForm);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -95,9 +97,9 @@ export function useCategoryController() {
           nameTe: category.nameTe,
           nameHi: category.nameHi,
           nameMl: category.nameMl,
-          icon: category.icon,
         },
-        !originalFollow
+        !originalFollow,
+        category.imageUrl
       );
       await CategoryRepository.update(id, updateDto);
       showToast(`Category ${!originalFollow ? 'followed' : 'unfollowed'} successfully!`, 'info');
@@ -127,9 +129,9 @@ export function useCategoryController() {
           nameTe: category.nameTe,
           nameHi: category.nameHi,
           nameMl: category.nameMl,
-          icon: category.icon,
         },
-        !originalActive
+        !originalActive,
+        category.imageUrl
       );
       await CategoryRepository.update(id, updateDto);
       showToast(`Category ${!originalActive ? 'activated' : 'deactivated'} successfully!`, 'info');
@@ -150,9 +152,9 @@ export function useCategoryController() {
       nameTe: cat.nameTe,
       nameHi: cat.nameHi,
       nameMl: cat.nameMl,
-      icon: cat.icon || '',
     });
     setUploadedImage(cat.imageUrl || null);
+    setSelectedFile(null);
     setErrors({});
     setSubmitted(false);
     setDrawerOpen(true);
@@ -161,11 +163,6 @@ export function useCategoryController() {
   const handleFieldChange = (field: string, val: string) => {
     setForm((prev) => {
       const updated = { ...prev, [field]: val };
-
-      // Mutual exclusivity between Emoji and Image Uploader
-      if (field === 'icon' && val) {
-        setUploadedImage(null);
-      }
 
       if (submitted) {
         const res = categorySchema.safeParse(updated);
@@ -184,10 +181,10 @@ export function useCategoryController() {
     });
   };
 
-  const handleImageUploaded = (dataUrl: string | null) => {
+  const handleImageUploaded = (dataUrl: string | null, file?: File | null) => {
     setUploadedImage(dataUrl);
-    if (dataUrl) {
-      setForm((prev) => ({ ...prev, icon: '' }));
+    if (file !== undefined) {
+      setSelectedFile(file);
     }
   };
 
@@ -196,15 +193,16 @@ export function useCategoryController() {
     setEditingId(null);
     setForm(emptyForm);
     setUploadedImage(null);
+    setSelectedFile(null);
     setErrors({});
     setSubmitted(false);
+    setIsUploading(false);
   };
 
   const handleSubmit = async () => {
     setSubmitted(true);
     const submitForm = {
       ...form,
-      nameHi: form.nameHi || form.nameEn,
     };
     const validationResult = categorySchema.safeParse(submitForm);
     const errMap: Record<string, string> = {};
@@ -215,49 +213,70 @@ export function useCategoryController() {
       });
     }
 
-    // Custom check: At least emoji or uploaded image is required
-    if (!submitForm.icon && !uploadedImage) {
-      errMap.icon = 'Either an emoji icon or cover image is required';
-    }
-
     if (Object.keys(errMap).length > 0) {
       setErrors(errMap);
       return;
     }
 
-    setLoading(true);
+    setErrors({});
+    setIsUploading(true);
+    let finalCategoryImageUrl = uploadedImage || '';
+
     try {
+      if (selectedFile) {
+        finalCategoryImageUrl = await UploadService.uploadImage(selectedFile);
+      } else if (uploadedImage && uploadedImage.startsWith('data:')) {
+        try {
+          const arr = uploadedImage.split(',');
+          const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+          const ext = mime.split('/')[1] || 'png';
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const generatedFile = new File([u8arr], `category_img.${ext}`, { type: mime });
+          finalCategoryImageUrl = await UploadService.uploadImage(generatedFile);
+        } catch (e) {
+          console.error('Failed to convert base64 to file, fallback to base64 URL', e);
+        }
+      }
+
       if (isEditMode && editingId !== null) {
-        const updateDto = CategoryMapper.toUpdateDto(submitForm);
-        const response = await CategoryRepository.update(editingId, updateDto);
-        const updatedDomain = CategoryMapper.toDomain(response.data);
-        // keep local properties like isFollowed
         const originalCategory = rows.find((c) => c.categoryId === editingId);
+        const isActive = originalCategory ? originalCategory.isActive : true;
+        const updateDto = CategoryMapper.toUpdateDto(submitForm, isActive, finalCategoryImageUrl || undefined);
+        const response = await CategoryRepository.update(editingId, updateDto);
+        const updatedDomain = response.data ? CategoryMapper.toDomain(response.data) : null;
         setRows((prev) =>
           prev.map((c) =>
             c.categoryId === editingId
               ? {
-                  ...updatedDomain,
+                  ...(updatedDomain || c),
                   isFollowed: originalCategory ? originalCategory.isFollowed : false,
-                  icon: submitForm.icon,
-                  imageUrl: uploadedImage || undefined,
+                  imageUrl: finalCategoryImageUrl || updatedDomain?.imageUrl || c.imageUrl,
                 }
               : c
           )
         );
         showToast('Category updated successfully!', 'success');
       } else {
-        const createDto = CategoryMapper.toCreateDto(submitForm);
+        const createDto = CategoryMapper.toCreateDto(submitForm, finalCategoryImageUrl || undefined);
         const response = await CategoryRepository.create(createDto);
-        const newDomain = CategoryMapper.toDomain(response.data);
-        setRows((prev) => [
-          {
-            ...newDomain,
-            icon: submitForm.icon,
-            imageUrl: uploadedImage || undefined,
-          },
-          ...prev,
-        ]);
+        const newDomain = response.data ? CategoryMapper.toDomain(response.data) : null;
+        const newCat: Category = {
+          categoryId: newDomain?.categoryId || Date.now(),
+          categoryName: newDomain?.categoryName || submitForm.nameEn,
+          isFollowed: false,
+          isActive: true,
+          nameEn: submitForm.nameEn,
+          nameTe: submitForm.nameTe,
+          nameHi: submitForm.nameHi,
+          nameMl: submitForm.nameMl,
+          imageUrl: finalCategoryImageUrl || newDomain?.imageUrl,
+        };
+        setRows((prev) => [newCat, ...prev]);
         showToast('Category created successfully!', 'success');
       }
       handleCloseDrawer();
@@ -266,6 +285,7 @@ export function useCategoryController() {
       setError(errMsg);
       showToast(errMsg, 'error');
     } finally {
+      setIsUploading(false);
       setLoading(false);
     }
   };
@@ -304,6 +324,7 @@ export function useCategoryController() {
     isEditMode,
     form,
     uploadedImage,
+    isUploading,
     errors,
     handleFieldChange,
     handleImageUploaded,

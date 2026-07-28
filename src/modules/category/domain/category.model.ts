@@ -7,6 +7,6 @@ export interface Category {
   nameTe: string;
   nameHi: string;
   nameMl: string;
-  icon: string;
+  icon?: string;
   imageUrl?: string;
 }

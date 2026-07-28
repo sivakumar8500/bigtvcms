@@ -16,6 +16,7 @@ export class LocationMapper {
       stateTe: translations.te || (dto as any).state_name_te || stateName || '',
       stateHi: translations.hi || (dto as any).state_name_hi || '',
       stateMl: translations.ml || (dto as any).state_name_ml || '',
+      imageUrl: dto.imageUrl || dto.image_url,
     };
   }
 

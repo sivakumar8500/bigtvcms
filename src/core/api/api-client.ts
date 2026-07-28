@@ -94,9 +94,15 @@ export class ApiClient {
             const isBypassDeviceId =
               config.url?.includes('/generate-upload-url') ||
               config.url?.includes('/creators') ||
+              config.url?.includes('/categories') ||
               config.url?.includes('/aitags') ||
               config.url?.includes('/states') ||
               config.url?.includes('/locations');
+
+            const isCreateOrUpdateMethod =
+              config.method?.toLowerCase() === 'post' ||
+              config.method?.toLowerCase() === 'put' ||
+              config.method?.toLowerCase() === 'patch';
 
             if (isBypassDeviceId) {
               if (config.headers) {
@@ -109,22 +115,17 @@ export class ApiClient {
                 delete config.params.device_id;
                 delete config.params.deviceId;
               }
-              if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
-                delete (config.data as any).device_id;
-                delete (config.data as any).deviceId;
-              }
-            } else {
-              if (config.headers) {
-                config.headers['device_id'] = deviceId;
-                config.headers['device-id'] = deviceId;
-                config.headers['x-device-id'] = deviceId;
-                config.headers['X-Device-Id'] = deviceId;
-              }
-              if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
-                if (!(config.data as any).device_id && !(config.data as any).deviceId) {
-                  (config.data as any).device_id = deviceId;
-                }
-              }
+            } else if (config.headers) {
+              config.headers['device_id'] = deviceId;
+              config.headers['device-id'] = deviceId;
+              config.headers['x-device-id'] = deviceId;
+              config.headers['X-Device-Id'] = deviceId;
+            }
+
+            // Do not send device_id in request body payload during create/update time
+            if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
+              delete (config.data as any).device_id;
+              delete (config.data as any).deviceId;
             }
           } catch (e) {
             console.error('Failed to set device_id header', e);

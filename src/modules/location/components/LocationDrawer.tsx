@@ -26,7 +26,7 @@ interface LocationDrawerProps {
   uploadedImage: string | null;
   errors: Record<string, string>;
   onFieldChange: (field: string, val: string) => void;
-  onImageUploaded: (dataUrl: string | null) => void;
+  onImageUploaded: (dataUrl: string | null, file?: File | null) => void;
   onClose: () => void;
   onSubmit: () => void;
   isDark: boolean;
@@ -55,7 +55,7 @@ export const LocationDrawer: React.FC<LocationDrawerProps> = ({
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      onImageUploaded(e.target?.result as string);
+      onImageUploaded(e.target?.result as string, file);
     };
     reader.readAsDataURL(file);
   };
@@ -70,7 +70,7 @@ export const LocationDrawer: React.FC<LocationDrawerProps> = ({
   const activeLangsSet = new Set(
     activeLanguages && activeLanguages.length > 0
       ? activeLanguages
-      : ['en', 'te', 'hi', 'ml']
+      : ['en', 'te', 'ml']
   );
 
   const allStateFields = [
@@ -87,13 +87,6 @@ export const LocationDrawer: React.FC<LocationDrawerProps> = ({
       label: t?.stateTeLabel || '🇮🇳 State Name (Telugu - తెలుగు)',
       placeholder: t?.stateTePlaceholder || 'ఉదా: తెలంగాణ',
       flag: 'TE',
-    },
-    {
-      code: 'hi',
-      field: 'stateHi',
-      label: t?.stateHiLabel || '🇮🇳 State Name (Hindi - हिंदी)',
-      placeholder: t?.stateHiPlaceholder || 'उदा: तेलंगाना',
-      flag: 'HI',
     },
     {
       code: 'ml',

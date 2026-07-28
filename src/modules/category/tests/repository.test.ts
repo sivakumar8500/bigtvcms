@@ -23,7 +23,7 @@ describe('CategoryRepository', () => {
   });
 
   it('should call apiClient.post on create', async () => {
-    const mockDto = { name_en: 'test', name_te: 'test', name_hi: 'test', name_ml: 'test' };
+    const mockDto = { translations: { en: 'test', te: 'test', ml: 'test' } };
     (apiClient.post as jest.Mock).mockResolvedValue({ message: 'Success' });
     const res = await CategoryRepository.create(mockDto);
     expect(apiClient.post).toHaveBeenCalledWith('/admin/categories/create', mockDto);
@@ -31,7 +31,7 @@ describe('CategoryRepository', () => {
   });
 
   it('should call apiClient.put on update', async () => {
-    const mockDto = { name_en: 'test', name_te: 'test', name_hi: 'test', name_ml: 'test', is_active: true };
+    const mockDto = { translations: { en: 'test', te: 'test', ml: 'test' }, is_active: true };
     (apiClient.put as jest.Mock).mockResolvedValue({ message: 'Success' });
     const res = await CategoryRepository.update(297, mockDto);
     expect(apiClient.put).toHaveBeenCalledWith('/admin/categories/297', mockDto);

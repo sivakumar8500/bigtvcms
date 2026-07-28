@@ -7,15 +7,24 @@ export interface CategoryDto {
     hi?: string;
     ml?: string;
   };
+  translations?: {
+    en?: string;
+    te?: string;
+    hi?: string;
+    ml?: string;
+  };
   imageUrl?: string;
+  image_url?: string;
   is_active?: boolean;
 }
 
 export interface CreateCategoryDto {
-  name_en: string;
-  name_te: string;
-  name_hi?: string;
-  name_ml: string;
+  translations: {
+    en: string;
+    te: string;
+    ml: string;
+  };
+  image_url?: string;
 }
 
 export interface CreateCategoryResponse {
@@ -24,10 +33,12 @@ export interface CreateCategoryResponse {
 }
 
 export interface UpdateCategoryDto {
-  name_en: string;
-  name_te: string;
-  name_hi?: string;
-  name_ml: string;
+  translations?: {
+    en?: string;
+    te?: string;
+    ml?: string;
+  };
+  image_url?: string;
   is_active?: boolean;
 }
 

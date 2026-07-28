@@ -3,6 +3,7 @@ import { useLocationController } from '../hooks/useLocationController';
 import { createLocationSchema, locationSchema } from '../validators/location.validator';
 import { LocationMapper } from '../mapper/location.mapper';
 import { LocationRepository } from '../repositories/location.repository';
+import { UploadService } from '@/modules/media/services/upload.service';
 import { apiClient } from '@/core/api/api-client';
 
 jest.mock('@/core/api/api-client', () => ({
@@ -11,6 +12,12 @@ jest.mock('@/core/api/api-client', () => ({
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
+  },
+}));
+
+jest.mock('@/modules/media/services/upload.service', () => ({
+  UploadService: {
+    uploadImage: jest.fn().mockResolvedValue('https://example.com/uploaded_state.jpg'),
   },
 }));
 
@@ -221,6 +228,37 @@ describe('useLocationController hook', () => {
         ml: 'കേരളം',
       },
       is_active: true,
+    }));
+  });
+
+  it('should upload image file and pass image_url payload on state creation', async () => {
+    const newDto = {
+      state_id: 141,
+      state_name: 'Karnataka',
+      stateNameTranslations: { en: 'Karnataka', te: 'కర్ణాటక', ml: 'കർണാടക' },
+      imageUrl: 'https://example.com/uploaded_state.jpg',
+      isActive: true,
+    };
+    (apiClient.post as jest.Mock).mockResolvedValue(newDto);
+    const { result } = renderHook(() => useLocationController());
+    await act(async () => {});
+
+    const file = new File(['fake content'], 'banner.png', { type: 'image/png' });
+
+    act(() => {
+      result.current.handleFieldChange('stateEn', 'Karnataka');
+      result.current.handleFieldChange('stateTe', 'కర్ణాటక');
+      result.current.handleFieldChange('stateMl', 'കർണാടക');
+      result.current.handleImageUploaded('data:image/png;base64,12345', file);
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(UploadService.uploadImage).toHaveBeenCalledWith(file);
+    expect(apiClient.post).toHaveBeenCalledWith('/admin/states/create', expect.objectContaining({
+      image_url: 'https://example.com/uploaded_state.jpg',
     }));
   });
 

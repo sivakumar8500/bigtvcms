@@ -119,8 +119,10 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                 }}>
                   {cat.imageUrl ? (
                     <Box component="img" src={cat.imageUrl} sx={{ width: '100%', height: '100%', borderRadius: '10px', objectFit: 'cover' }} />
+                  ) : cat.icon ? (
+                    <Typography variant="body2" sx={{ fontSize: '1.2rem', lineHeight: 1 }}>{cat.icon}</Typography>
                   ) : (
-                    <Typography variant="body2" sx={{ fontSize: '1.2rem', lineHeight: 1 }}>{cat.icon || '📁'}</Typography>
+                    <CategoryIcon sx={{ fontSize: '1.2rem', color }} />
                   )}
                 </Box>
                 <Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600, fontSize: '0.95rem' }}>
