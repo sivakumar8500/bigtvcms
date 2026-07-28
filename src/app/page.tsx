@@ -22,7 +22,8 @@ export default function RootPage() {
       router.replace('/dashboard');
     } else {
       setHasToken(false);
-      if (!path || path === '/' || path === '/index.html') {
+      const cleanPath = path.replace(/^\/(en|te|hi|ml)(\/|$)/, '/');
+      if (!cleanPath || cleanPath === '/' || cleanPath === '/index.html' || path.includes('/login')) {
         router.replace('/login');
       }
     }
@@ -37,17 +38,22 @@ export default function RootPage() {
     return null;
   }
 
-  // If no token, render LoginPage on root/login paths
-  if (currentPath.includes('/login') || currentPath === '/' || currentPath === '/index.html' || !currentPath) {
+  // Normalize path by stripping locale prefix if present (e.g. /en/, /te/)
+  const normalizedPath = currentPath.replace(/^\/(en|te|hi|ml)(\/|$)/, '/');
+
+  // If no token, render LoginPage on root, locale root (/en, /en/), or /login paths
+  if (
+    !normalizedPath ||
+    normalizedPath === '/' ||
+    normalizedPath === '/index.html' ||
+    currentPath.includes('/login') ||
+    /^\/(en|te|hi|ml)\/?$/.test(currentPath)
+  ) {
     return <LoginPage />;
   }
 
-  return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1>BigTVCMS Enterprise Portal</h1>
-      <p>Redirecting...</p>
-    </main>
-  );
+  return <LoginPage />;
 }
+
 
 
