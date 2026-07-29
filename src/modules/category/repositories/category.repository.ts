@@ -3,7 +3,7 @@ import { CategoryDto, CreateCategoryDto, CreateCategoryResponse, UpdateCategoryD
 
 export class CategoryRepository {
   static async getAll(lang?: string): Promise<CategoryDto[]> {
-    return apiClient.get<CategoryDto[]>('/admin/categories', lang ? { lang } : undefined);
+    return apiClient.get<CategoryDto[]>('/admin/categories', lang ? { lang } : { skip_lang_param: true });
   }
 
   static async create(dto: CreateCategoryDto): Promise<CreateCategoryResponse> {

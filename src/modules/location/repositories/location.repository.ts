@@ -12,12 +12,17 @@ export class LocationRepository {
       if (Array.isArray(res)) return res;
       if (res && Array.isArray(res.data)) return res.data;
       if (res && Array.isArray(res.states)) return res.states;
+      if (res && Array.isArray(res.locations)) return res.locations;
       if (res && Array.isArray(res.items)) return res.items;
+      if (res && Array.isArray(res.result)) return res.result;
+      if (res && res.data && Array.isArray(res.data.states)) return res.data.states;
+      if (res && res.data && Array.isArray(res.data.locations)) return res.data.locations;
       return [];
     } catch {
       const res: any = await apiClient.get<any>('/locations', params);
       if (Array.isArray(res)) return res;
       if (res && Array.isArray(res.data)) return res.data;
+      if (res && Array.isArray(res.locations)) return res.locations;
       return [];
     }
   }

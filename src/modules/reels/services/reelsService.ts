@@ -7,10 +7,20 @@ import {
 
 export class ReelsService {
   /**
-   * Fetch paginated YouTube Shorts / Reels list
+   * Fetch paginated YouTube Videos / Shorts list
    */
   static async fetchYouTubeShorts(skip: number = 0, limit: number = 20): Promise<YouTubeShortsResponse> {
-    return apiClient.get<YouTubeShortsResponse>('/youtube/shorts', {
+    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', {
+      skip,
+      limit,
+    });
+  }
+
+  /**
+   * Fetch paginated YouTube Videos list
+   */
+  static async fetchYouTubeVideos(skip: number = 0, limit: number = 50): Promise<YouTubeShortsResponse> {
+    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', {
       skip,
       limit,
     });
@@ -22,11 +32,13 @@ export class ReelsService {
   static async syncYouTubeChannel(params?: YouTubeSyncParams): Promise<YouTubeSyncResponse> {
     const channel_id = params?.channelId || 'BIGTVTeluguLive';
     const max_results = params?.maxResults ?? 50;
+    const lang = params?.lang || 'te';
     const sync_in_background = params?.syncInBackground ?? true;
 
     const queryString = new URLSearchParams({
       channel_id,
       max_results: String(max_results),
+      lang,
       sync_in_background: String(sync_in_background),
     }).toString();
 
@@ -34,5 +46,17 @@ export class ReelsService {
       `/youtube/sync?${queryString}`,
       {}
     );
+  }
+
+  /**
+   * Update publish status for YouTube video
+   */
+  static async updatePublishStatus(
+    id: string | number,
+    isPublish: boolean
+  ): Promise<{ status: string; message: string; fetched_from_api?: boolean; data: Record<string, unknown> }> {
+    return apiClient.put(`/youtube/videos/${id}`, {
+      isPublish,
+    });
   }
 }

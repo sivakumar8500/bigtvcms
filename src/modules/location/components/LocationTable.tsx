@@ -79,7 +79,7 @@ export const LocationTable: React.FC<LocationTableProps> = ({
         ];
 
         return (
-          <Box key={loc.stateId}>
+          <Box key={loc.stateId || idx}>
             <Box sx={{
               display: 'flex', alignItems: 'center', px: 2, py: 1.8,
               transition: 'all 0.2s ease',

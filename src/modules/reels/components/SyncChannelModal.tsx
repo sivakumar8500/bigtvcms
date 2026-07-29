@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,13 +10,15 @@ import {
   Button,
   IconButton,
   CircularProgress,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { YouTube, Close, Sync } from '@mui/icons-material';
 
 interface SyncChannelModalProps {
   open: boolean;
   onClose: () => void;
-  onSync: (channelId: string, maxResults: number) => Promise<void>;
+  onSync: (channelId: string, maxResults: number, lang: string) => Promise<void>;
   isDark: boolean;
   language: 'en' | 'te' | 'hi' | 'ml';
 }
@@ -29,6 +31,7 @@ const modalTranslations = {
     channelIdPlaceholder: 'e.g. BIGTVTeluguLive',
     maxResultsLabel: 'Max Results to Sync',
     maxResultsPlaceholder: '50',
+    languageLabel: 'Language',
     syncingText: 'Syncing...',
     syncButton: 'Start Sync',
     cancelButton: 'Cancel',
@@ -40,6 +43,7 @@ const modalTranslations = {
     channelIdPlaceholder: 'ఉదా: BIGTVTeluguLive',
     maxResultsLabel: 'గరిష్ట ఫలితాలు',
     maxResultsPlaceholder: '50',
+    languageLabel: 'భాష',
     syncingText: 'సింక్ అవుతోంది...',
     syncButton: 'సింక్ ప్రారంభించండి',
     cancelButton: 'రద్దు చేయి',
@@ -51,17 +55,19 @@ const modalTranslations = {
     channelIdPlaceholder: 'उदा: BIGTVTeluguLive',
     maxResultsLabel: 'अधिकतम परिणाम',
     maxResultsPlaceholder: '50',
+    languageLabel: 'भाषा',
     syncingText: 'सिंक हो रहा है...',
     syncButton: 'सिंक शुरू करें',
     cancelButton: 'रद्द करें',
   },
   ml: {
-    title: 'യൂട്യൂബ് ചാനൽ സമന്വയിപ്പിക്കുക',
-    subtitle: 'പശ്ചാത്തലത്തിൽ യൂട്യൂബ് ഷോട്ടുകൾ നേടുകയും സമന്വയിപ്പിക്കുകയും ചെയ്യുക',
+    title: 'യൂറ്റ്യൂബ് ചാനൽ സമന്വയിപ്പിക്കുക',
+    subtitle: 'പശ്ചാത്തലത്തിൽ യൂറ്റ്യൂബ് ഷോട്ടുകൾ നേടുകയും സമന്വയിപ്പിക്കുകയും ചെയ്യുക',
     channelIdLabel: 'ചാനൽ ID',
     channelIdPlaceholder: 'ഉദാ: BIGTVTeluguLive',
     maxResultsLabel: 'പരമാവധി ഫലങ്ങൾ',
     maxResultsPlaceholder: '50',
+    languageLabel: 'ഭാഷ',
     syncingText: 'സമന്വയിപ്പിക്കുന്നു...',
     syncButton: 'സമന്വയം ആരംഭിക്കുക',
     cancelButton: 'റദ്ദാക്കുക',
@@ -78,13 +84,20 @@ export const SyncChannelModal: React.FC<SyncChannelModalProps> = ({
   const t = modalTranslations[language] || modalTranslations.en;
   const [channelId, setChannelId] = useState('BIGTVTeluguLive');
   const [maxResults, setMaxResults] = useState<number>(50);
+  const [syncLang, setSyncLang] = useState<string>(language || 'te');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (language) {
+      setSyncLang(language);
+    }
+  }, [language]);
 
   const handleSubmit = async () => {
     if (!channelId.trim()) return;
     setSubmitting(true);
     try {
-      await onSync(channelId.trim(), maxResults || 50);
+      await onSync(channelId.trim(), maxResults || 50, syncLang || 'te');
       onClose();
     } finally {
       setSubmitting(false);
@@ -170,6 +183,53 @@ export const SyncChannelModal: React.FC<SyncChannelModalProps> = ({
               },
             }}
           />
+        </Box>
+
+        <Box>
+          <Typography
+            variant="caption"
+            sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, display: 'block', mb: 0.6 }}
+          >
+            {t.languageLabel} *
+          </Typography>
+          <Select
+            fullWidth
+            size="small"
+            value={syncLang}
+            onChange={(e) => setSyncLang(e.target.value as string)}
+            disabled={submitting}
+            sx={{
+              color: isDark ? '#ffffff' : '#1c1445',
+              borderRadius: '10px',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '& .MuiSelect-icon': {
+                color: isDark ? '#d0caeb' : '#5c548a',
+              },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: isDark ? '#1a1140' : '#ffffff',
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  borderRadius: '12px',
+                },
+              },
+            }}
+          >
+            <MenuItem value="te">🇮🇳 Telugu (తెలుగు)</MenuItem>
+            <MenuItem value="en">🇬🇧 English</MenuItem>
+            <MenuItem value="hi">🇮🇳 Hindi (हिंदी)</MenuItem>
+            <MenuItem value="ml">🇮🇳 Malayalam (മലയാളം)</MenuItem>
+          </Select>
         </Box>
 
         <Box>

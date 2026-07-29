@@ -3,10 +3,15 @@ import { StateResponseDto } from '../dto/location.dto';
 
 export class LocationMapper {
   static toDomain(dto: StateResponseDto): LocationState {
-    const translations = dto.stateNameTranslations || dto.translations || (dto as any).statenameTranslations || {};
-    const stateId = dto.state_id ?? dto.stateId ?? 0;
-    const stateName = dto.state_name || dto.stateName || translations.te || translations.en || 'State';
-    const isFollowed = !(dto.isActive === false || dto.is_active === false || dto.status === false);
+    const translations = dto.locationNameTranslations || dto.stateNameTranslations || dto.translations || (dto as any).statenameTranslations || {};
+    const stateId = dto.locationId ?? dto.location_id ?? dto.state_id ?? dto.stateId ?? 0;
+    const stateName = dto.locationName || dto.location_name || dto.state_name || dto.stateName || translations.te || translations.en || 'State';
+    const isFollowed =
+      dto.isFollowed !== undefined
+        ? dto.isFollowed
+        : dto.is_followed !== undefined
+        ? dto.is_followed
+        : !(dto.isActive === false || dto.is_active === false || dto.status === false);
 
     return {
       stateId,

@@ -134,6 +134,7 @@ export class ApiClient {
           try {
             // Bypass language filter for /post-types, /languages, /admin/states, /states, /locations, and /creators endpoints or when explicitly disabled
             const isBypassLangApi =
+              config.url?.includes('/categories') ||
               config.url?.includes('/post-types') ||
               config.url?.includes('/languages') ||
               config.url?.includes('/states') ||

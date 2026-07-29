@@ -17,9 +17,9 @@ describe('CategoryMapper', () => {
   it('should map DTO to domain model', () => {
     const domain = CategoryMapper.toDomain(mockDto);
     expect(domain.categoryId).toBe(296);
-    expect(domain.categoryName).toBe('అందం ');
+    expect(domain.categoryName).toBe('అందం');
     expect(domain.nameEn).toBe('Beauty');
-    expect(domain.nameTe).toBe('అందం ');
+    expect(domain.nameTe).toBe('అందం');
     expect(domain.nameHi).toBe('सुंदरता');
     expect(domain.nameMl).toBe('സൗന്ദര്യം');
     expect(domain.imageUrl).toBe('https://example.com/image.png');
@@ -30,6 +30,26 @@ describe('CategoryMapper', () => {
   it('should map is_active false from DTO to domain', () => {
     const dtoWithInactive: CategoryDto = { ...mockDto, is_active: false };
     const domain = CategoryMapper.toDomain(dtoWithInactive);
+    expect(domain.isActive).toBe(false);
+  });
+
+  it('should map API response with categoryNameTranslations and trim whitespace correctly', () => {
+    const apiDto: CategoryDto = {
+      categoryId: 312,
+      categoryName: 'sadas',
+      categoryNameTranslations: {
+        en: 'sadas',
+        te: 'sadas',
+        ml: 'asdas',
+      },
+      imageUrl: 'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_6fb1cb88.png',
+      isActive: false,
+    };
+    const domain = CategoryMapper.toDomain(apiDto);
+    expect(domain.categoryId).toBe(312);
+    expect(domain.nameEn).toBe('sadas');
+    expect(domain.nameTe).toBe('sadas');
+    expect(domain.nameMl).toBe('asdas');
     expect(domain.isActive).toBe(false);
   });
 

@@ -77,7 +77,7 @@ describe('useCategoryController hook with API integration', () => {
       result = hook.result;
     });
 
-    expect(CategoryRepository.getAll).toHaveBeenCalledWith('te');
+    expect(CategoryRepository.getAll).toHaveBeenCalledWith();
     expect(result.current.rows).toHaveLength(1);
     expect(result.current.rows[0].categoryId).toBe(296);
     expect(result.current.rows[0].nameEn).toBe('Beauty');
@@ -154,7 +154,7 @@ describe('useCategoryController hook with API integration', () => {
     expect(result.current.drawerOpen).toBe(false);
   });
 
-  it('should handle edit click and fill form', async () => {
+  it('should handle edit click and fill form with existing category data', async () => {
     let result: any;
     await act(async () => {
       const hook = renderHook(() => useCategoryController());
@@ -166,6 +166,80 @@ describe('useCategoryController hook with API integration', () => {
     });
     expect(result.current.isEditMode).toBe(true);
     expect(result.current.form.nameEn).toBe('Beauty');
+    expect(result.current.form.nameTe).toBe('అందం');
+    expect(result.current.form.nameMl).toBe('സൗന്ദര്യം');
+    expect(result.current.uploadedImage).toBe('https://example.com/beauty.png');
+  });
+
+  it('should map English via cat.nameEn, Telugu via cat.nameTe, and Malayalam via cat.nameMl directly during edit', async () => {
+    let result: any;
+    await act(async () => {
+      const hook = renderHook(() => useCategoryController());
+      result = hook.result;
+    });
+
+    const catData = {
+      categoryId: 999,
+      categoryName: 'వార్తలు',
+      isFollowed: false,
+      isActive: true,
+      nameEn: 'News',
+      nameTe: 'వార్తలు',
+      nameHi: '',
+      nameMl: '',
+    };
+
+    act(() => {
+      result.current.handleEditClick(catData);
+    });
+    expect(result.current.form.nameEn).toBe('News');
+    expect(result.current.form.nameTe).toBe('వార్తలు');
+    expect(result.current.form.nameMl).toBe('');
+  });
+
+  it('should call update API and update category on submit in edit mode', async () => {
+    const updatedCategoryDto = {
+      categoryId: 296,
+      categoryName: 'Beauty Updated',
+      categoryNameTranslations: {
+        en: 'Beauty Updated',
+        te: 'అందం నవీకరించబడింది',
+        hi: 'सुंदरता अपडेटेड',
+        ml: 'സൗന്ദര്യം അപ്ഡേറ്റ് ചെയ്തു',
+      },
+      imageUrl: 'https://example.com/beauty.png',
+      is_active: true,
+    };
+    (CategoryRepository.update as jest.Mock).mockResolvedValue({
+      message: 'Category updated successfully',
+      data: updatedCategoryDto,
+    });
+
+    let result: any;
+    await act(async () => {
+      const hook = renderHook(() => useCategoryController());
+      result = hook.result;
+    });
+
+    act(() => {
+      result.current.handleEditClick(result.current.rows[0]);
+      result.current.handleFieldChange('nameEn', 'Beauty Updated');
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(CategoryRepository.update).toHaveBeenCalledWith(
+      296,
+      expect.objectContaining({
+        translations: expect.objectContaining({
+          en: 'Beauty Updated',
+        }),
+      })
+    );
+    expect(result.current.rows[0].nameEn).toBe('Beauty Updated');
+    expect(result.current.isEditMode).toBe(false);
   });
 
   it('should handle form field change', async () => {

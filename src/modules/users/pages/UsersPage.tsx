@@ -25,7 +25,6 @@ import {
   Language as LanguageIcon,
   Input,
   PersonOutline,
-  Notifications,
   AutoAwesome,
   Search,
   Add,
@@ -253,18 +252,6 @@ export const UsersPage: React.FC = () => {
     handleSubmit,
     locationsOptions,
   } = useUserController();
-
-  const menuItems = [
-    { text: t.menuCreate,     icon: <AddCircleOutline />, action: () => router.push('/dashboard') },
-    { text: t.menuReels,      icon: <Movie />,            action: () => router.push('/reels') },
-    { text: t.menuCategories, icon: <CategoryIcon />,     action: () => router.push('/categories') },
-    { text: t.menuLocations,  icon: <LocationOn />,       action: () => router.push('/locations') },
-    { text: t.menuCreators,   icon: <People />,           active: true },
-    { text: t.menuPostTypes,  icon: <Article />,          action: () => router.push('/post-types') },
-    { text: t.menuLanguages,  icon: <LanguageIcon />,     action: () => router.push('/languages') },
-    { text: t.menuAiTags,     icon: <AutoAwesome />,      action: () => router.push('/aitags') },
-    { text: t.menuSettings,   icon: <Settings />,         action: () => router.push('/settings') },
-  ];
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: isDark ? '#110d29' : '#ffffff', transition: 'all 0.3s ease' }}>

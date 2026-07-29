@@ -106,21 +106,25 @@ export function useReelsController() {
             ? `${Math.floor(durSec / 60)}:${(durSec % 60).toString().padStart(2, '0')}`
             : item.duration || '0:30';
 
+          const parsedId = typeof item.id === 'number' ? item.id : parseInt(String(item.id), 10);
+          const reelId = isNaN(parsedId) || parsedId === 0 ? Math.floor(Math.random() * 10000) : parsedId;
+          const titleText = item.title || item.postName || 'Untitled Video';
+
           return {
-            reelId: item.id,
-            reelTitle: item.title,
+            reelId,
+            reelTitle: titleText,
             duration: formattedDuration,
-            views: item.view_count !== undefined ? String(item.view_count) : String(item.totalViews || 0),
-            isPublished: false,
-            titleEn: item.title,
-            titleTe: item.title,
-            titleHi: item.title,
-            titleMl: item.title,
-            imageUrl: item.thumbnail_url || item.image_url,
-            videoId: item.video_id || item.video_url,
-            channelTitle: item.channel_title,
-            url: item.url || item.postUrl,
-            publishedAt: item.published_at || item.created,
+            views: item.likes !== undefined ? String(item.likes) : item.view_count !== undefined ? String(item.view_count) : String(item.totalViews || 0),
+            isPublished: item.isPublish !== undefined ? Boolean(item.isPublish) : false,
+            titleEn: titleText,
+            titleTe: titleText,
+            titleHi: titleText,
+            titleMl: titleText,
+            imageUrl: item.thumbnailUrl || item.thumbnail_url || item.image_url,
+            videoId: item.videoUrl ? item.videoUrl.split('/').pop() : item.video_id || item.video_url,
+            channelTitle: item.publisher || item.channel_title,
+            url: item.videoUrl || item.url || item.postUrl,
+            publishedAt: item.createdAt || item.published_at || item.created,
           };
         });
 
@@ -141,9 +145,13 @@ export function useReelsController() {
   }, [fetchShorts]);
 
   // YouTube Sync Action
-  const handleSyncChannel = async (channelId: string = 'BIGTVTeluguLive', maxResults: number = 50) => {
+  const handleSyncChannel = async (
+    channelId: string = 'BIGTVTeluguLive',
+    maxResults: number = 50,
+    lang: string = 'te'
+  ) => {
     try {
-      const res = await ReelsService.syncYouTubeChannel({ channelId, maxResults, syncInBackground: true });
+      const res = await ReelsService.syncYouTubeChannel({ channelId, maxResults, lang, syncInBackground: true });
       if (res && res.message) {
         setSyncMessage(res.message);
       } else {
@@ -173,12 +181,26 @@ export function useReelsController() {
   const totalPages = Math.max(1, Math.ceil(totalCount / recordsPerPage));
   const paginatedData = filtered.slice(0, recordsPerPage);
 
-  const togglePublish = (id: number) => {
+  const togglePublish = async (id: number) => {
+    const targetReel = rows.find((r) => r.reelId === id);
+    if (!targetReel) return;
+    const newPublishState = !targetReel.isPublished;
+
     setRows((prev) =>
       prev.map((r) =>
-        r.reelId === id ? { ...r, isPublished: !r.isPublished } : r
+        r.reelId === id ? { ...r, isPublished: newPublishState } : r
       )
     );
+
+    try {
+      await ReelsService.updatePublishStatus(id, newPublishState);
+    } catch {
+      setRows((prev) =>
+        prev.map((r) =>
+          r.reelId === id ? { ...r, isPublished: !newPublishState } : r
+        )
+      );
+    }
   };
 
   const handleEditClick = (reel: Reel) => {

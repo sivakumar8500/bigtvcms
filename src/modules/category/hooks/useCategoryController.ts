@@ -38,7 +38,7 @@ export function useCategoryController() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const dtos = await CategoryRepository.getAll(language);
+      const dtos = await CategoryRepository.getAll();
       const domainCategories = CategoryMapper.toDomainList(dtos);
       setRows(domainCategories);
       setError(null);
@@ -53,13 +53,13 @@ export function useCategoryController() {
 
   useEffect(() => {
     fetchCategories();
-  }, [language]);
+  }, []);
 
   useEffect(() => {
     if (typeof useLanguageStore.getState === 'function') {
       const { setCategories } = useLanguageStore.getState();
       if (typeof setCategories === 'function') {
-        setCategories(rows);
+        setCategories(rows.map((r) => ({ ...r, icon: r.icon || '' })));
       }
     }
   }, [rows]);
@@ -147,11 +147,12 @@ export function useCategoryController() {
 
   const handleEditClick = (cat: Category) => {
     setEditingId(cat.categoryId);
+    const catName = cat.categoryName || '';
     setForm({
-      nameEn: cat.nameEn,
-      nameTe: cat.nameTe,
-      nameHi: cat.nameHi,
-      nameMl: cat.nameMl,
+      nameEn: cat.nameEn || (/^[a-zA-Z0-9\s\-_&]+$/.test(catName.trim()) ? catName.trim() : ''),
+      nameTe: cat.nameTe || (/[\u0C00-\u0C7F]/.test(catName) ? catName.trim() : ''),
+      nameHi: cat.nameHi || (/[\u0900-\u097F]/.test(catName) ? catName.trim() : ''),
+      nameMl: cat.nameMl || (/[\u0D00-\u0D7F]/.test(catName) ? catName.trim() : ''),
     });
     setUploadedImage(cat.imageUrl || null);
     setSelectedFile(null);

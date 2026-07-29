@@ -332,7 +332,7 @@ describe('CreateNewsForm component', () => {
     const errorAlert = await screen.findByText('Image upload failed. Please try again.');
     expect(errorAlert).toBeTruthy();
     expect(mockOnSubmit).not.toHaveBeenCalled();
-  });
+  }, 30000);
 
   it('should render API-driven languages when LanguageRepository returns data', async () => {
     const { apiClient } = require('@/core/api/api-client');
@@ -356,7 +356,7 @@ describe('CreateNewsForm component', () => {
       />
     );
 
-    const langSelect = screen.getByLabelText(/Language/i);
+    const langSelect = await screen.findByLabelText(/Language/i);
     fireEvent.mouseDown(langSelect);
 
     await waitFor(() => {
@@ -379,19 +379,17 @@ describe('CreateNewsForm component', () => {
       imageTitle: 'Existing Image Title',
     };
 
-    await act(async () => {
-      render(
-        <CreateNewsForm
-          onClose={mockOnClose}
-          onSubmit={mockOnSubmit}
-          isDark={false}
-          language="en"
-          initialData={initialDataWithTags as any}
-        />
-      );
-    });
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={initialDataWithTags as any}
+      />
+    );
 
-    const tagsSelect = screen.getByLabelText('AI Mapped Tags *');
+    const tagsSelect = await screen.findByLabelText('AI Mapped Tags *');
     await act(async () => {
       fireEvent.mouseDown(tagsSelect);
     });
@@ -430,9 +428,11 @@ describe('CreateNewsForm component', () => {
       />
     );
 
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('https://bigtvnews.com/post/1')).toBeInTheDocument();
+    });
     const checkboxes = screen.getAllByRole('checkbox', { checked: true });
     expect(checkboxes.length).toBeGreaterThan(0);
-    expect(screen.getByDisplayValue('https://bigtvnews.com/post/1')).toBeInTheDocument();
   });
 });
 

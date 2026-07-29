@@ -171,7 +171,7 @@ export const CategoryDrawer: React.FC<CategoryDrawerProps> = ({
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               sx={{
-                border: `2px dashed ${errors.icon && !form.icon ? '#f44336' : dragOver ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)')}`,
+                border: `2px dashed ${errors.imageUrl && !uploadedImage ? '#f44336' : dragOver ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)')}`,
                 borderRadius: '12px', p: 3, textAlign: 'center', cursor: 'pointer',
                 backgroundColor: dragOver
                   ? (isDark ? 'rgba(166,226,245,0.06)' : 'rgba(28,20,69,0.04)')

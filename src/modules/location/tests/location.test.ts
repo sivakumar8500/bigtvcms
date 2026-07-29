@@ -77,6 +77,28 @@ describe('Location Mapper', () => {
     expect(domain.stateTe).toBe('తెలంగాణ');
     expect(domain.isFollowed).toBe(true);
   });
+
+  it('should map locationId, locationName, locationNameTranslations, and isFollowed correctly', () => {
+    const dto = {
+      locationId: 81,
+      locationName: 'Test',
+      locationNameTranslations: {
+        en: 'Test',
+        te: 'Test',
+        ml: 'Test',
+      },
+      imageUrl: 'https://example.com/banner.png',
+      isFollowed: false,
+    };
+    const domain = LocationMapper.toDomain(dto);
+    expect(domain.stateId).toBe(81);
+    expect(domain.stateName).toBe('Test');
+    expect(domain.stateEn).toBe('Test');
+    expect(domain.stateTe).toBe('Test');
+    expect(domain.stateMl).toBe('Test');
+    expect(domain.isFollowed).toBe(false);
+    expect(domain.imageUrl).toBe('https://example.com/banner.png');
+  });
 });
 
 describe('Location Repository', () => {

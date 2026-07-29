@@ -15,6 +15,7 @@ export interface CategoryDto {
   };
   imageUrl?: string;
   image_url?: string;
+  isActive?: boolean;
   is_active?: boolean;
 }
 
@@ -23,6 +24,7 @@ export interface CreateCategoryDto {
     en: string;
     te: string;
     ml: string;
+    hi?: string;
   };
   image_url?: string;
 }
@@ -37,6 +39,7 @@ export interface UpdateCategoryDto {
     en?: string;
     te?: string;
     ml?: string;
+    hi?: string;
   };
   image_url?: string;
   is_active?: boolean;

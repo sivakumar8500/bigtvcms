@@ -187,6 +187,7 @@ const translations = {
     categoryNamesLabel: 'വിഭാഗം പേരുകൾ (എല്ലാ ഭാഷകളും)',
     englishName: 'ഇംഗ്ലീഷ് പേര്',
     teluguName: 'തെലുങ്ക് പേര് (తెలుగు)',
+    hindiName: 'ഹിന്ദി പേര് (हिंदी)',
     malayalamName: 'മലയാളം പേര് (മലയാളം)',
     selectedLabel: 'തിരഞ്ഞെടുത്തു',
     cancelBtn: 'റദ്ദാക്കുക',

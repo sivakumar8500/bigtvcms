@@ -38,6 +38,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useLanguageStore, SupportedLanguage } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
+import { GroqKeyCard } from '@/modules/settings/components/GroqKeyCard';
 
 // Translation dictionary matching localized keys
 const translations = {
@@ -62,7 +63,16 @@ const translations = {
     menuLanguages: "Languages",
     menuAiTags: "AiTags",
     menuReels: "Reels",
-    menuSettings: "Settings"
+    menuSettings: "Settings",
+    groqKeyTitle: "Groq API Key Configuration",
+    groqKeyDescription: "Configure the Groq API key used for AI-powered content generation, tagging, and automated localization.",
+    groqKeyLabel: "Groq API Key",
+    groqKeyPlaceholder: "Enter Groq API Key (gsk_...)",
+    updateKey: "Update Key",
+    savingKey: "Updating...",
+    keySavedSuccess: "Groq API Key updated successfully",
+    keySaveError: "Failed to update Groq API Key",
+    fetchError: "Failed to fetch Groq API key configuration"
   },
   te: {
     title: "సిస్టమ్ సెట్టింగులు (System Settings)",
@@ -85,7 +95,16 @@ const translations = {
     menuLanguages: "భాషలు",
     menuAiTags: "AiTags",
     menuReels: "రీల్స్",
-    menuSettings: "సెట్టింగులు"
+    menuSettings: "సెట్టింగులు",
+    groqKeyTitle: "Groq API కీ కాన్ఫిగరేషన్ (Groq API Key)",
+    groqKeyDescription: "AI-ఆధారిత కంటెంట్ జనరేషన్, ట్యాగింగ్ మరియు స్థానికీకరణ కోసం Groq API కీని కాన్ఫిగర్ చేయండి.",
+    groqKeyLabel: "Groq API కీ",
+    groqKeyPlaceholder: "Groq API కీని నమోదు చేయండి (gsk_...)",
+    updateKey: "కీని అప్‌డేట్ చేయండి",
+    savingKey: "అప్‌డేట్ అవుతోంది...",
+    keySavedSuccess: "Groq API కీ విజయవంతంగా అప్‌డేట్ చేయబడింది",
+    keySaveError: "Groq API కీని అప్‌డేట్ చేయడం విఫలమైంది",
+    fetchError: "Groq API కీ పొందుటలో విఫలమైంది"
   },
   hi: {
     title: "सिस्टम सेटिंग्स (System Settings)",
@@ -108,7 +127,16 @@ const translations = {
     menuLanguages: "भाषाएँ",
     menuAiTags: "AiTags",
     menuReels: "रील्स",
-    menuSettings: "सेटिंग्स"
+    menuSettings: "सेटिंग्स",
+    groqKeyTitle: "Groq API कुंजी कॉन्फ़िगरेशन (Groq API Key)",
+    groqKeyDescription: "AI-संचालित सामग्री निर्माण, टैगिंग और स्थानीयकरण के लिए उपयोग की जाने वाली Groq API कुंजी कॉन्फ़िगर करें।",
+    groqKeyLabel: "Groq API कुंजी",
+    groqKeyPlaceholder: "Groq API कुंजी दर्ज करें (gsk_...)",
+    updateKey: "कुंजी अपडेट करें",
+    savingKey: "अपडेट हो रहा है...",
+    keySavedSuccess: "Groq API कुंजी सफलतापूर्वक अपडेट की गई",
+    keySaveError: "Groq API कुंजी अपडेट करने में विफल",
+    fetchError: "Groq API कुंजी प्राप्त करने में विफल"
   },
   ml: {
     title: "സിസ്റ്റം ക്രമീകരണങ്ങൾ (System Settings)",
@@ -364,6 +392,11 @@ export default function SettingsPage() {
                   </Box>
                 </CardContent>
               </Card>
+            </Grid>
+
+            {/* Groq API Key Configuration Card */}
+            <Grid item xs={12} md={12}>
+              <GroqKeyCard isDark={isDark} translations={t} />
             </Grid>
           </Grid>
         </Box>
