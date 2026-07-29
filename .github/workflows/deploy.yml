@@ -1,4 +1,4 @@
-name: 🚀 Deploy to S3 (bigtv-cms-admin)
+name: Deploy to S3 (bigtv-cms-admin)
 
 on:
   push:
@@ -13,35 +13,35 @@ env:
 
 jobs:
   deploy:
-    name: 🏗️ Build & Deploy to S3
+    name: Build and Deploy to S3
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 📦 Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: 🟢 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: 📥 Install dependencies
+      - name: Install dependencies
         run: pnpm install
 
-      - name: 🏗️ Build Next.js Static Export
+      - name: Build Next.js Static Export
         run: pnpm build
         env:
           NODE_ENV: production
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL || 'https://apidev.chotanews.com' }}
           NEXT_PUBLIC_APP_NAME: BigTV CMS
 
-      - name: ☁️ Sync & Replace S3 Bucket
+      - name: Sync and Replace S3 Bucket
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --follow-symlinks --delete
@@ -52,8 +52,7 @@ jobs:
           AWS_REGION: 'ap-south-1'
           SOURCE_DIR: 'out'
 
-      - name: 🔄 Invalidate CloudFront Cache (Optional)
-        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+      - name: Invalidate CloudFront Cache
         uses: chetan/invalidate-cloudfront-action@v2
         env:
           DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
