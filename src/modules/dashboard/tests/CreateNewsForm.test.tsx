@@ -434,5 +434,35 @@ describe('CreateNewsForm component', () => {
     const checkboxes = screen.getAllByRole('checkbox', { checked: true });
     expect(checkboxes.length).toBeGreaterThan(0);
   });
+
+  it('should not require notificationTitle or imageTitle when post type is Gallery or Image', async () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+      />
+    );
+
+    // Select category, title, body, location, tags
+    fireEvent.click(screen.getByLabelText('Entertainment'));
+    fireEvent.change(screen.getByPlaceholderText(/Enter news headline/i), { target: { value: 'Gallery News' } });
+
+    // Click submit without notificationTitle and imageTitle
+    const submitBtn = screen.getByRole('button', { name: 'Create News' });
+    fireEvent.click(submitBtn);
+
+    // Errors for notificationTitle and imageTitle should not appear when post type is image/gallery and non-empty
+    expect(screen.queryByText('Notification title is required')).toBeTruthy();
+
+    // Select Gallery post type
+    const postTypeSelect = screen.getByLabelText('Post Type');
+    fireEvent.change(postTypeSelect, { target: { value: 'Gallery' } });
+
+    // Verify Notification Title label has no asterisk when Gallery is selected
+    expect(screen.getByLabelText('Notification Title')).toBeInTheDocument();
+    expect(screen.getByLabelText('Image Title')).toBeInTheDocument();
+  });
 });
 

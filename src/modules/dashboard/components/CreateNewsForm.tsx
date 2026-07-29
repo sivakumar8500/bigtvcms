@@ -599,6 +599,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [publishMode, setPublishMode] = useState<'now' | 'draft' | 'schedule'>('now');
   const [scheduleTime, setScheduleTime] = useState<string>('');
 
+  const isImageOrGalleryType =
+    ['image', 'image ad', 'gallery'].includes(type.toLowerCase().trim()) ||
+    type.toLowerCase().includes('image') ||
+    type.toLowerCase().includes('gallery');
+
   const langIdMap: Record<string, number> = { en: 1, te: 2, hi: 3, ml: 4 };
 
   // Sync post language default with workspace language prop (only when NOT editing)
@@ -885,17 +890,17 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       errMap.title = t.errTitleWordLimit;
     }
 
-    // Notification Title
-    if (!notificationTitle.trim()) {
+    // Notification Title (Optional for Image, Image Ad, Gallery post types)
+    if (!isImageOrGalleryType && !notificationTitle.trim()) {
       errMap.notificationTitle = t.errNotificationTitleRequired;
-    } else if (countWords(notificationTitle) > TITLE_WORD_LIMIT) {
+    } else if (notificationTitle.trim() && countWords(notificationTitle) > TITLE_WORD_LIMIT) {
       errMap.notificationTitle = t.errNotificationTitleWordLimit;
     }
 
-    // Image Title
-    if (!imageTitle.trim()) {
+    // Image Title (Optional for Image, Image Ad, Gallery post types)
+    if (!isImageOrGalleryType && !imageTitle.trim()) {
       errMap.imageTitle = t.errImageTitleRequired;
-    } else if (countWords(imageTitle) > TITLE_WORD_LIMIT) {
+    } else if (imageTitle.trim() && countWords(imageTitle) > TITLE_WORD_LIMIT) {
       errMap.imageTitle = t.errImageTitleWordLimit;
     }
 
@@ -2005,7 +2010,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <TextField
                     fullWidth
                     size="small"
-                    label={t.lblNotificationTitle}
+                    label={isImageOrGalleryType ? t.lblNotificationTitle.replace('*', '').trim() : t.lblNotificationTitle}
                     placeholder={t.phNotificationTitle}
                     value={notificationTitle}
                     onChange={(e) => {
@@ -2043,7 +2048,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <TextField
                     fullWidth
                     size="small"
-                    label={t.lblImageTitle}
+                    label={isImageOrGalleryType ? t.lblImageTitle.replace('*', '').trim() : t.lblImageTitle}
                     placeholder={t.phImageTitle}
                     value={imageTitle}
                     onChange={(e) => {
