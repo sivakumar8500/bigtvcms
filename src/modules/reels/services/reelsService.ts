@@ -9,21 +9,23 @@ export class ReelsService {
   /**
    * Fetch paginated YouTube Videos / Shorts list
    */
-  static async fetchYouTubeShorts(skip: number = 0, limit: number = 20): Promise<YouTubeShortsResponse> {
-    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', {
-      skip,
-      limit,
-    });
+  static async fetchYouTubeShorts(skip: number = 0, limit: number = 20, lang?: string): Promise<YouTubeShortsResponse> {
+    const params: Record<string, unknown> = { skip, limit };
+    if (lang) {
+      params.lang = lang;
+    }
+    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', params);
   }
 
   /**
    * Fetch paginated YouTube Videos list
    */
-  static async fetchYouTubeVideos(skip: number = 0, limit: number = 50): Promise<YouTubeShortsResponse> {
-    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', {
-      skip,
-      limit,
-    });
+  static async fetchYouTubeVideos(skip: number = 0, limit: number = 50, lang?: string): Promise<YouTubeShortsResponse> {
+    const params: Record<string, unknown> = { skip, limit };
+    if (lang) {
+      params.lang = lang;
+    }
+    return apiClient.get<YouTubeShortsResponse>('/youtube/videos', params);
   }
 
   /**

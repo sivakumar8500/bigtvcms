@@ -15,6 +15,8 @@ import {
   Avatar,
   Snackbar,
   Alert,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   AddCircleOutline,
@@ -174,6 +176,8 @@ export const ReelsPage: React.FC = () => {
     setFilterTitle,
     filterId,
     setFilterId,
+    filterLang,
+    setFilterLang,
     togglePublish,
     drawerOpen,
     setDrawerOpen,
@@ -270,6 +274,44 @@ export const ReelsPage: React.FC = () => {
                 ) : null,
               }}
             />
+
+            <Select
+              size="small"
+              value={filterLang}
+              onChange={(e) => setFilterLang(e.target.value as string)}
+              sx={{
+                minWidth: '170px',
+                color: isDark ? '#ffffff' : '#1c1445',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                borderRadius: '12px',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? '#a6e2f5' : '#1c1445',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? '#a6e2f5' : '#1c1445',
+                },
+                '& .MuiSelect-icon': {
+                  color: isDark ? '#d0caeb' : '#5c548a',
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: isDark ? '#1a1140' : '#ffffff',
+                    color: isDark ? '#ffffff' : '#1c1445',
+                    borderRadius: '12px',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="te">🇮🇳 Telugu (తెలుగు)</MenuItem>
+              <MenuItem value="en">🇬🇧 English</MenuItem>
+              <MenuItem value="hi">🇮🇳 Hindi (हिंदी)</MenuItem>
+              <MenuItem value="ml">🇮🇳 Malayalam (മലയാളം)</MenuItem>
+            </Select>
 
             <Box sx={{ flex: 1 }} />
 

@@ -70,12 +70,12 @@ describe('ReelsService API Methods', () => {
 
     (apiClient.get as jest.Mock).mockResolvedValueOnce(mockData);
 
-    const res = await ReelsService.fetchYouTubeShorts(0, 20);
-    expect(apiClient.get).toHaveBeenCalledWith('/youtube/videos', { skip: 0, limit: 20 });
+    const res = await ReelsService.fetchYouTubeShorts(0, 20, 'te');
+    expect(apiClient.get).toHaveBeenCalledWith('/youtube/videos', { skip: 0, limit: 20, lang: 'te' });
     expect(res).toEqual(mockData);
   });
 
-  it('should call fetchYouTubeVideos with correct params', async () => {
+  it('should call fetchYouTubeVideos with correct params including lang', async () => {
     const mockData = {
       status: 'success',
       total: 1,
@@ -101,8 +101,8 @@ describe('ReelsService API Methods', () => {
 
     (apiClient.get as jest.Mock).mockResolvedValueOnce(mockData);
 
-    const res = await ReelsService.fetchYouTubeVideos(0, 50);
-    expect(apiClient.get).toHaveBeenCalledWith('/youtube/videos', { skip: 0, limit: 50 });
+    const res = await ReelsService.fetchYouTubeVideos(0, 50, 'te');
+    expect(apiClient.get).toHaveBeenCalledWith('/youtube/videos', { skip: 0, limit: 50, lang: 'te' });
     expect(res).toEqual(mockData);
   });
 

@@ -1316,8 +1316,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 }}
               >
                 {apiLanguages.length > 0 ? (
-                  apiLanguages.map((lang) => (
-                    <MenuItem key={lang.code} value={lang.code}>
+                  apiLanguages.map((lang, idx) => (
+                    <MenuItem key={`${lang.code}-${idx}`} value={lang.code}>
                       {lang.name}
                     </MenuItem>
                   ))
@@ -1396,10 +1396,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 <Checkbox checked={selectedTags.length === dynamicTags.length} size="small" />
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>Select All</Typography>
               </MenuItem>
-              {dynamicTags.map((tag) => {
+              {dynamicTags.map((tag, idx) => {
                 const label = language === 'te' ? tag.labelTe : language === 'hi' ? tag.labelHi : language === 'ml' ? tag.labelMl : tag.labelEn;
                 return (
-                  <MenuItem key={tag.id} value={tag.key}>
+                  <MenuItem key={`tag-${tag.id ?? tag.key}-${idx}`} value={tag.key}>
                     <Checkbox checked={selectedTags.includes(tag.key)} size="small" />
                     {label}
                   </MenuItem>
@@ -1467,10 +1467,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 <Checkbox checked={location.length === dynamicLocations.length} size="small" />
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>Select All</Typography>
               </MenuItem>
-              {dynamicLocations.map((loc) => {
+              {dynamicLocations.map((loc, idx) => {
                 const label = language === 'te' ? loc.labelTe : language === 'hi' ? loc.labelHi : language === 'ml' ? loc.labelMl : loc.labelEn;
                 return (
-                  <MenuItem key={loc.id} value={loc.key}>
+                  <MenuItem key={`loc-${loc.id ?? loc.key}-${idx}`} value={loc.key}>
                     <Checkbox checked={location.includes(loc.key)} size="small" />
                     {label}
                   </MenuItem>
@@ -1502,14 +1502,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 }}
               >
                 {apiPostTypes.length > 0 ? (
-                  apiPostTypes.map((pt) => (
-                    <MenuItem key={pt.id} value={pt.name}>
+                  apiPostTypes.map((pt, idx) => (
+                    <MenuItem key={`pt-${pt.id ?? pt.name}-${idx}`} value={pt.name}>
                       {pt.name}
                     </MenuItem>
                   ))
                 ) : (
                   ['Standard', 'Video', 'Reel', 'Podcast'].map((ptName) => (
-                    <MenuItem key={ptName} value={ptName}>
+                    <MenuItem key={`ptName-${ptName}`} value={ptName}>
                       {ptName} Post
                     </MenuItem>
                   ))
@@ -1590,11 +1590,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     sx={{ mb: 0.5 }}
                   />
                   <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }} />
-                  {dynamicCategories.map((cat) => {
+                  {dynamicCategories.map((cat, idx) => {
                     const label = language === 'te' ? cat.labelTe : language === 'hi' ? cat.labelHi : language === 'ml' ? cat.labelMl : cat.labelEn;
                     return (
                       <FormControlLabel
-                        key={cat.id}
+                        key={`cat-${cat.id ?? cat.key}-${idx}`}
                         control={
                           <Checkbox
                             inputProps={{ 'aria-label': label }}
@@ -2106,7 +2106,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     {/* Gallery Grid */}
                     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 1 }}>
                       {galleryItems.map((item, idx) => (
-                        <Box key={idx} sx={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', aspectRatio: '1' }}>
+                        <Box key={`gallery-item-${idx}`} sx={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', aspectRatio: '1' }}>
                           <Box component="img" src={item.url} alt={`gallery-${idx}`} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           <IconButton
                             size="small"

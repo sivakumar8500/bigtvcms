@@ -67,6 +67,7 @@ export function useReelsController() {
   const [loading, setLoading] = useState(false);
   const [filterTitle, setFilterTitle] = useState('');
   const [filterId, setFilterId] = useState('');
+  const [filterLang, setFilterLang] = useState<string>('te');
   const [page, setPage] = useState(1);
   const recordsPerPage = 10;
 
@@ -98,7 +99,7 @@ export function useReelsController() {
     setLoading(true);
     try {
       const skip = (page - 1) * recordsPerPage;
-      const response = await ReelsService.fetchYouTubeShorts(skip, recordsPerPage);
+      const response = await ReelsService.fetchYouTubeShorts(skip, recordsPerPage, filterLang);
       if (response && response.data && Array.isArray(response.data)) {
         const mappedReels: Reel[] = response.data.map((item) => {
           const durSec = item.duration_seconds;
@@ -138,7 +139,7 @@ export function useReelsController() {
     } finally {
       setLoading(false);
     }
-  }, [page, recordsPerPage]);
+  }, [page, recordsPerPage, filterLang]);
 
   useEffect(() => {
     fetchShorts();
@@ -176,7 +177,7 @@ export function useReelsController() {
 
   useEffect(() => {
     setPage(1);
-  }, [filterTitle, filterId]);
+  }, [filterTitle, filterId, filterLang]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / recordsPerPage));
   const paginatedData = filtered.slice(0, recordsPerPage);
@@ -324,6 +325,8 @@ export function useReelsController() {
     setFilterTitle,
     filterId,
     setFilterId,
+    filterLang,
+    setFilterLang,
     togglePublish,
     drawerOpen,
     setDrawerOpen,
