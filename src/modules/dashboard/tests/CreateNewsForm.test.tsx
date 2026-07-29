@@ -458,7 +458,14 @@ describe('CreateNewsForm component', () => {
 
     // Select Gallery post type
     const postTypeSelect = screen.getByLabelText('Post Type');
-    fireEvent.change(postTypeSelect, { target: { value: 'Gallery' } });
+    await act(async () => {
+      fireEvent.mouseDown(postTypeSelect);
+    });
+
+    const option = await screen.findByRole('option', { name: 'Gallery' });
+    await act(async () => {
+      fireEvent.click(option);
+    });
 
     // Verify Notification Title label has no asterisk when Gallery is selected
     expect(screen.getByLabelText('Notification Title')).toBeInTheDocument();
