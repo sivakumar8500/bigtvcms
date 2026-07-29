@@ -431,16 +431,27 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     LocationRepository.getAll(language)
       .then((data) => {
         if (Array.isArray(data)) {
-          const mapped = data.map((item: any) => ({
-            stateId: item.stateId || item.id,
-            stateName: item.stateName || '',
-            stateEn: item.stateNameTranslations?.en || item.statenameTranslations?.en || item.state_name_en || item.stateEn || (language === 'en' ? item.stateName : ''),
-            stateTe: item.stateNameTranslations?.te || item.statenameTranslations?.te || item.state_name_te || item.stateTe || (language === 'te' ? item.stateName : ''),
-            stateHi: item.stateNameTranslations?.hi || item.statenameTranslations?.hi || item.state_name_hi || item.stateHi || (language === 'hi' ? item.stateName : ''),
-            stateMl: item.stateNameTranslations?.ml || item.statenameTranslations?.ml || item.state_name_ml || item.stateMl || (language === 'ml' ? item.stateName : ''),
-            isFollowed: item.isFollowed || false,
-          }));
-          setLocations(mapped);
+          const mapped = data.map((item: any) => {
+            const rawName = item.stateName || item.state_name || item.locationName || item.location_name || item.name || item.state || '';
+            const trans = item.stateNameTranslations || item.statenameTranslations || item.locationNameTranslations || item.translations || item.nameTranslations || {};
+            const stateEn = trans.en || item.state_name_en || item.stateEn || (typeof rawName === 'string' ? rawName : '');
+            const stateTe = trans.te || item.state_name_te || item.stateTe || stateEn;
+            const stateHi = trans.hi || item.state_name_hi || item.stateHi || stateEn;
+            const stateMl = trans.ml || item.state_name_ml || item.stateMl || stateEn;
+
+            return {
+              stateId: item.stateId || item.state_id || item.locationId || item.location_id || item.id || Math.floor(Math.random() * 10000),
+              stateName: rawName || stateEn,
+              stateEn,
+              stateTe,
+              stateHi,
+              stateMl,
+              isFollowed: item.isFollowed || item.is_followed || false,
+            };
+          }).filter((l) => l.stateEn || l.stateName);
+          if (mapped.length > 0) {
+            setLocations(mapped);
+          }
         }
       })
       .catch((err) => console.error('Failed to fetch locations in form', err));
@@ -492,14 +503,22 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     : tagsList.map((t) => ({ ...t, id: t.key }));
 
   const dynamicLocations = locations && locations.length > 0
-    ? locations.map((l) => ({
-        id: l.stateId,
-        key: l.stateEn || l.stateTe || `loc-${l.stateId}`,
-        labelEn: l.stateEn || l.stateName || '',
-        labelTe: l.stateTe || l.stateEn || l.stateName || '',
-        labelHi: l.stateHi || l.stateEn || l.stateName || '',
-        labelMl: l.stateMl || l.stateEn || l.stateName || '',
-      }))
+    ? locations.map((l, index) => {
+        const fallbackName = l.stateName || l.stateEn || l.stateTe || `Location ${l.stateId || index + 1}`;
+        const labelEn = l.stateEn || fallbackName;
+        const labelTe = l.stateTe || labelEn;
+        const labelHi = l.stateHi || labelEn;
+        const labelMl = l.stateMl || labelEn;
+        const key = labelEn || `loc-${l.stateId || index}`;
+        return {
+          id: l.stateId || index,
+          key,
+          labelEn,
+          labelTe,
+          labelHi,
+          labelMl,
+        };
+      })
     : locationsList.map((l) => ({ ...l, id: l.key }));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -1468,7 +1487,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>Select All</Typography>
               </MenuItem>
               {dynamicLocations.map((loc, idx) => {
-                const label = language === 'te' ? loc.labelTe : language === 'hi' ? loc.labelHi : language === 'ml' ? loc.labelMl : loc.labelEn;
+                const label = (language === 'te' ? loc.labelTe : language === 'hi' ? loc.labelHi : language === 'ml' ? loc.labelMl : loc.labelEn) || loc.labelEn || loc.key || `Location ${idx + 1}`;
                 return (
                   <MenuItem key={`loc-${loc.id ?? loc.key}-${idx}`} value={loc.key}>
                     <Checkbox checked={location.includes(loc.key)} size="small" />
