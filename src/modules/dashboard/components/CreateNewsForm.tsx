@@ -1532,9 +1532,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     </MenuItem>
                   ))
                 ) : (
-                  ['Standard', 'Video', 'Reel', 'Podcast'].map((ptName) => (
+                  ['Standard', 'Image', 'Image Ad', 'Gallery', 'Video', 'Reel', 'Podcast'].map((ptName) => (
                     <MenuItem key={`ptName-${ptName}`} value={ptName}>
-                      {ptName} Post
+                      {ptName}
                     </MenuItem>
                   ))
                 )}
