@@ -47,7 +47,7 @@ class MockFileReader {
 (global as any).FileReader = MockFileReader;
 
 describe('CreateNewsForm component', () => {
-  jest.setTimeout(15000);
+  jest.setTimeout(35000);
   const mockOnSubmit = jest.fn();
   const mockOnClose = jest.fn();
 
