@@ -1,5 +1,6 @@
 import { CreateNewsPostDto, NewsPostDto, UpdateNewsPostDto } from '../dto/news.dto';
 import { NewsPost } from '../domain/news.model';
+import { stripHtml } from '@/shared/utils/html.utils';
 
 export class NewsMapper {
   static toDomain(dto: NewsPostDto): NewsPost {
@@ -50,13 +51,18 @@ export class NewsMapper {
 
   static toCreateDto(domain: Partial<NewsPost>): CreateNewsPostDto {
     const now = new Date().toISOString();
+    const cleanTitle = stripHtml(domain.title || '');
+    const cleanNotificationTitle = stripHtml(domain.notificationtitle || domain.title || '');
+    const cleanImageTitle = stripHtml(domain.imagetitel || domain.title || '');
+    const cleanContent = stripHtml(domain.content || '');
+
     return {
-      title: domain.title || '',
-      notificationtitle: domain.notificationtitle || domain.title || '',
-      imagetitel: domain.imagetitel || domain.title || '',
-      content: domain.content || '',
+      title: cleanTitle,
+      notificationtitle: cleanNotificationTitle,
+      imagetitel: cleanImageTitle,
+      content: cleanContent,
       created: domain.created || now,
-      post_name: domain.postName || (domain.title ? domain.title.toLowerCase().replace(/\s+/g, '-') : 'news-post'),
+      post_name: domain.postName || (cleanTitle ? cleanTitle.toLowerCase().replace(/\s+/g, '-') : 'news-post'),
       totalLikes: domain.totalLikes ?? 0,
       totalViews: domain.totalViews ?? 0,
       totalComments: domain.totalComments ?? 0,
@@ -95,10 +101,10 @@ export class NewsMapper {
 
   static toUpdateDto(domain: Partial<NewsPost>): UpdateNewsPostDto {
     const dto: UpdateNewsPostDto = {};
-    if (domain.title !== undefined) dto.title = domain.title;
-    if (domain.notificationtitle !== undefined) dto.notificationtitle = domain.notificationtitle;
-    if (domain.imagetitel !== undefined) dto.imagetitel = domain.imagetitel;
-    if (domain.content !== undefined) dto.content = domain.content;
+    if (domain.title !== undefined) dto.title = stripHtml(domain.title);
+    if (domain.notificationtitle !== undefined) dto.notificationtitle = stripHtml(domain.notificationtitle);
+    if (domain.imagetitel !== undefined) dto.imagetitel = stripHtml(domain.imagetitel);
+    if (domain.content !== undefined) dto.content = stripHtml(domain.content);
     if (domain.created !== undefined) dto.created = domain.created;
     if (domain.postName !== undefined) dto.post_name = domain.postName;
     if (domain.totalLikes !== undefined) dto.totalLikes = domain.totalLikes;

@@ -18,6 +18,8 @@ import { usePathname } from 'next/navigation';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 
+import { useUserStore } from '@/core/storage/user-store';
+
 const sidebarTranslations = {
   en: {
     menuCreate: 'Create News',
@@ -75,10 +77,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const normalizedPath = currentPath.replace(/\/$/, '') || '/';
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
+  const { user } = useUserStore();
   const isDark = mode === 'dark';
   const t = sidebarTranslations[language] || sidebarTranslations.en;
 
-  const menuItems = [
+  const allMenuItems = [
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuCategories, icon: <CategoryIcon />, href: '/categories' },
@@ -89,6 +92,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
     { text: t.menuSettings, icon: <Settings />, href: '/settings' },
   ];
+
+  const userRole = (user?.role || '').toLowerCase().trim();
+  const isCreator = userRole === 'creator' || userRole === 'creators';
+  const isAdmin = userRole === 'admin' || userRole === 'administrator';
+
+  const creatorHrefs = ['/dashboard', '/reels', '/settings'];
+  const adminHrefs = [
+    '/dashboard',
+    '/reels',
+    '/categories',
+    '/locations',
+    '/creators',
+    '/post-types',
+    '/languages',
+    '/aitags',
+    '/settings',
+  ];
+
+  const menuItems = allMenuItems.filter((item) => {
+    if (isCreator) {
+      return creatorHrefs.includes(item.href);
+    }
+    if (isAdmin) {
+      return adminHrefs.includes(item.href);
+    }
+    return true; // superadmin or unrestricted
+  });
 
   return (
     <Box

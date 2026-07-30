@@ -204,5 +204,26 @@ describe('NewsMapper', () => {
     expect(updateDto.is_web_post).toBe(true);
     expect(updateDto.web_post_url).toBe('http://example.com/web');
   });
+
+  it('should strip HTML tags from title, notificationtitle, imagetitel, and content in toCreateDto and toUpdateDto', () => {
+    const rawPartial = {
+      title: '<h1>Header Title</h1>',
+      notificationtitle: '<b>Notification</b>',
+      imagetitel: '<span>Image Title</span>',
+      content: '<p>Body text with <a href="#">link</a> and &nbsp;space</p>',
+    };
+
+    const createDto = NewsMapper.toCreateDto(rawPartial);
+    expect(createDto.title).toBe('Header Title');
+    expect(createDto.notificationtitle).toBe('Notification');
+    expect(createDto.imagetitel).toBe('Image Title');
+    expect(createDto.content).toBe('Body text with link and  space');
+
+    const updateDto = NewsMapper.toUpdateDto(rawPartial);
+    expect(updateDto.title).toBe('Header Title');
+    expect(updateDto.notificationtitle).toBe('Notification');
+    expect(updateDto.imagetitel).toBe('Image Title');
+    expect(updateDto.content).toBe('Body text with link and  space');
+  });
 });
 

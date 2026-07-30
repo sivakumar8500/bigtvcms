@@ -125,7 +125,11 @@ export function useLoginController() {
           localStorage.setItem('access_token', token);
         }
 
-        useUserStore.getState().loginUser(form.username);
+        const userRole = res.creator?.role || res.role;
+        useUserStore.getState().loginUser(form.username, {
+          role: userRole,
+          name: res.creator?.name || res.creator?.UserName || form.username,
+        });
 
         const defaultSuccess = toastMessages[language]?.success || toastMessages.en.success;
         const successMsg = typeof res.message === 'string' ? res.message :

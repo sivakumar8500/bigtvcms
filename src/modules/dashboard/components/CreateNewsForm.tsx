@@ -35,6 +35,7 @@ import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.
 import { LanguageRepository } from '@/modules/language/repositories/language.repository';
 import { HtmlEditor } from './HtmlEditor';
 import { Loader } from '@/shared/components/Loader';
+import { stripHtml } from '@/shared/utils/html.utils';
 
 // Multilingual lists to support strict translation guidelines
 const categoriesList = [
@@ -83,7 +84,7 @@ const translations = {
     phTitle: 'Enter news headline... (max 10 words)',
     phNotificationTitle: 'Enter notification title... (max 10 words)',
     phImageTitle: 'Enter image/banner title... (max 10 words)',
-    phBody: 'Write news body content here... (max 40 words)',
+    phBody: 'Write news body content here... (max 50 words)',
     errCategoryRequired: 'Select at least one Category',
     errLocationRequired: 'Select at least one Location',
     errTagsRequired: 'Select at least one AI Tag',
@@ -95,7 +96,7 @@ const translations = {
     errTitleWordLimit: 'News title must be 10 words or fewer',
     errNotificationTitleWordLimit: 'Notification title must be 10 words or fewer',
     errImageTitleWordLimit: 'Image title must be 10 words or fewer',
-    errBodyWordLimit: 'Content must be 40 words or fewer',
+    errBodyWordLimit: 'Content must be 50 words or fewer',
     wordCount: (n: number, max: number) => `${n}/${max} words`,
     btnBack: 'Back to Edit',
     btnPublish: 'Confirm & Publish',
@@ -139,7 +140,7 @@ const translations = {
     phTitle: 'వార్త శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
     phNotificationTitle: 'నోటిఫికేషన్ శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
     phImageTitle: 'చిత్ర శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
-    phBody: 'వార్త విషయము రాయండి... (గరిష్టంగా 40 పదాలు)',
+    phBody: 'వార్త విషయము రాయండి... (గరిష్టంగా 50 పదాలు)',
     errCategoryRequired: 'కనీసం ఒక వర్గాన్ని ఎంచుకోండి',
     errLocationRequired: 'కనీసం ఒక ప్రాంతాన్ని ఎంచుకోండి',
     errTagsRequired: 'కనీసం ఒక AI ట్యాగ్‌ని ఎంచుకోండి',
@@ -151,7 +152,7 @@ const translations = {
     errTitleWordLimit: 'వార్త శీర్షిక 10 పదాలకు మించకూడదు',
     errNotificationTitleWordLimit: 'నోటిఫికేషన్ శీర్షిక 10 పదాలకు మించకూడదు',
     errImageTitleWordLimit: 'చిత్ర శీర్షిక 10 పదాలకు మించకూడదు',
-    errBodyWordLimit: 'విషయము 40 పదాలకు మించకూడదు',
+    errBodyWordLimit: 'విషయము 50 పదాలకు మించకూడదు',
     wordCount: (n: number, max: number) => `${n}/${max} పదాలు`,
     btnBack: 'ఎడిట్‌కి తిరిగి వెళ్లండి',
     btnPublish: 'సమీక్షించి ప్రచురించండి',
@@ -195,7 +196,7 @@ const translations = {
     phTitle: 'समाचार शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
     phNotificationTitle: 'सूचना शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
     phImageTitle: 'चित्र शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
-    phBody: 'समाचार सामग्री लिखें... (अधिकतम 40 शब्द)',
+    phBody: 'समाचार सामग्री लिखें... (अधिकतम 50 शब्द)',
     errCategoryRequired: 'कम से कम एक श्रेणी चुनें',
     errLocationRequired: 'कम से कम एक स्थान चुनें',
     errTagsRequired: 'कम से कम एक AI टैग चुनें',
@@ -207,7 +208,7 @@ const translations = {
     errTitleWordLimit: 'समाचार शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
     errNotificationTitleWordLimit: 'सूचना शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
     errImageTitleWordLimit: 'सूचना शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
-    errBodyWordLimit: 'सामग्री 40 शब्दों से अधिक नहीं होनी चाहिए',
+    errBodyWordLimit: 'सामग्री 50 शब्दों से अधिक नहीं होनी चाहिए',
     wordCount: (n: number, max: number) => `${n}/${max} शब्द`,
     btnBack: 'संपादित करने के लिए वापस जाएं',
     btnPublish: 'पुष्टि करें और प्रकाशित करें',
@@ -251,7 +252,7 @@ const translations = {
     phTitle: 'വാർത്താ തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
     phNotificationTitle: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
     phImageTitle: 'ചിത്ര തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
-    phBody: 'വാർത്താ ഉള്ളടക്കം എഴുതുക... (പരമാവധി 40 വാക്കുകൾ)',
+    phBody: 'വാർത്താ ഉള്ളടക്കം എഴുതുക... (പരമാവധി 50 വാക്കുകൾ)',
     errCategoryRequired: 'കുറഞ്ഞത് ഒരു വിഭാഗമെങ്കിലും തിരഞ്ഞെടുക്കുക',
     errLocationRequired: 'കുറഞ്ഞത് ഒരു സ്ഥലമെങ്കിലും തിരഞ്ഞെടുക്കുക',
     errTagsRequired: 'കുറഞ്ഞത് ഒരു AI ടാഗെങ്കിലും തിരഞ്ഞെടുക്കുക',
@@ -259,11 +260,11 @@ const translations = {
     errLanguageRequired: 'ദയവായി ഒരു ഭാഷ തിരഞ്ഞെടുക്കുക',
     errNotificationTitleRequired: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് ആവശ്യമാണ്',
     errImageTitleRequired: 'ചിത്ര തലക്കെട്ട് ആവശ്യമാണ്',
-    errScheduleTimeRequired: 'ദയവായി ഷെഡ്യൂൾ സമയം തിരഞ്ഞെടുക്കുക',
+    errScheduleTimeRequired: 'ദയവായി ഷെഡ్యూൾ സമയം തിരഞ്ഞെടുക്കുക',
     errTitleWordLimit: 'വാർത്താ തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
     errNotificationTitleWordLimit: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
     errImageTitleWordLimit: 'ചിത്ര തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
-    errBodyWordLimit: 'ഉള്ളടക്കം 40 വാക്കുകളിൽ കവിയരുത്',
+    errBodyWordLimit: 'ഉള്ളടക്കം 50 വാക്കുകളിൽ കവിയരുത്',
     wordCount: (n: number, max: number) => `${n}/${max} വാക്കുകൾ`,
     btnBack: 'എഡിറ്റ് ചെയ്യാൻ തിരികെ പോകുക',
     btnPublish: 'സ്ഥിരീകരിച്ച് പ്രസിദ്ധീകരിക്കുക',
@@ -870,7 +871,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const handleSave = () => {
     const errMap: Record<string, string> = {};
     const TITLE_WORD_LIMIT = 10;
-    const BODY_WORD_LIMIT = 40;
+    const BODY_WORD_LIMIT = 50;
 
     // Language
     if (!postLanguage) {
@@ -2160,11 +2161,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 <Typography
                   variant="caption"
                   sx={{
-                    color: countWords(body) > 40 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                    display: 'block', mt: -1.5, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(body) > 40 ? 700 : 400,
+                    color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                    display: 'block', mt: -1.5, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
                   }}
                 >
-                  {t.wordCount(countWords(body), 40)}
+                  {t.wordCount(countWords(body), 50)}
                 </Typography>
               </Box>
 

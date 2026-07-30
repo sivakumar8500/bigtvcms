@@ -52,6 +52,7 @@ import { LocationRepository } from '@/modules/location/repositories/location.rep
 import { TagsRepository } from '@/modules/tags/repositories/tags.repository';
 import { NewsRepository } from '@/modules/news/repositories/news.repository';
 import { Loader } from '@/shared/components/Loader';
+import { stripHtml } from '@/shared/utils/html.utils';
 
 // Dashboard component translations mapped to store state keys
 const translations = {
@@ -706,16 +707,19 @@ export default function DashboardPage() {
 
   const resolvePostFields = (data: CreateNewsFormData) => {
     const mappedCategories = data.categories.map((catKey) => categoryTeluguMap[catKey] || catKey);
-    const resolvedTitle =
+    const rawTitle =
       (language === 'te' && data.titleTe) ||
       (language === 'hi' && data.titleHi) ||
       (language === 'ml' && data.titleMl) ||
       data.titleEn || data.titleTe || data.titleHi || data.titleMl || 'Untitled News';
-    const resolvedContent =
+    const rawContent =
       (language === 'te' && data.bodyTe) ||
       (language === 'hi' && data.bodyHi) ||
       (language === 'ml' && data.bodyMl) ||
       data.bodyEn || data.bodyTe || data.bodyHi || data.bodyMl || '';
+
+    const resolvedTitle = stripHtml(rawTitle);
+    const resolvedContent = stripHtml(rawContent);
     return { mappedCategories, resolvedTitle, resolvedContent };
   };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, renderHook, act as hookAct } from '@testing-library/react';
 import LoginPage from '@/app/login/page';
 import { useLanguageStore } from '@/core/storage/language-store';
+import { useUserStore } from '@/core/storage/user-store';
 import { apiClient, formatApiErrorMessage } from '@/core/api/api-client';
 import { AuthRepository } from '../repositories/auth.repository';
 import { useLoginController } from '../hooks/useLoginController';
@@ -179,6 +180,26 @@ describe('LoginPage and useLoginController integration', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Login successful via API!')).toBeTruthy();
+    });
+  });
+
+  it('should store user role in user-store upon successful login', async () => {
+    (apiClient.post as jest.Mock).mockResolvedValue({
+      access_token: 'mock-token-abc-123',
+      creator: { active: true, role: 'creators' },
+    });
+
+    render(<LoginPage />);
+    const usernameInput = screen.getByPlaceholderText('Enter Username');
+    const passwordInput = screen.getByPlaceholderText('Enter Password');
+    const submitBtn = screen.getByRole('button', { name: 'Log In' });
+
+    fireEvent.change(usernameInput, { target: { value: 'creator_test' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(useUserStore.getState().user.role).toBe('creators');
     });
   });
 

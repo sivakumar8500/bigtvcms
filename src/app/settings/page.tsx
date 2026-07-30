@@ -39,6 +39,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguageStore, SupportedLanguage } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { GroqKeyCard } from '@/modules/settings/components/GroqKeyCard';
+import { AccountSettingsCard } from '@/modules/settings/components/AccountSettingsCard';
 
 // Translation dictionary matching localized keys
 const translations = {
@@ -238,6 +239,11 @@ export default function SettingsPage() {
           </Typography>
 
           <Grid container spacing={3}>
+            {/* Account Credentials & Profile Update Card (All Roles) */}
+            <Grid item xs={12} md={12}>
+              <AccountSettingsCard isDark={isDark} />
+            </Grid>
+
             {/* Language Selection Card */}
             <Grid item xs={12} md={6}>
               <Card sx={{ backgroundColor: isDark ? 'rgba(38, 28, 86, 0.35)' : '#f4f3f8', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '16px' }}>

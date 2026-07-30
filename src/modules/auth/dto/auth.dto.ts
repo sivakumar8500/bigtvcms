@@ -10,7 +10,11 @@ export interface LoginResponseDto {
   token_type?: string;
   message?: string;
   detail?: string;
+  role?: string;
   creator?: {
     active?: boolean;
+    role?: string;
+    name?: string;
+    UserName?: string;
   };
 }
