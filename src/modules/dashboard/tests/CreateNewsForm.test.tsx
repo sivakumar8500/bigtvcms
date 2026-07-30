@@ -435,7 +435,7 @@ describe('CreateNewsForm component', () => {
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 
-  it('should not require notificationTitle or imageTitle when post type is Gallery or Image', async () => {
+  it('should not require notificationTitle when submitting form (notification title is optional)', async () => {
     render(
       <CreateNewsForm
         onClose={mockOnClose}
@@ -445,31 +445,71 @@ describe('CreateNewsForm component', () => {
       />
     );
 
-    // Select category, title, body, location, tags
-    fireEvent.click(screen.getByLabelText('Entertainment'));
-    fireEvent.change(screen.getByPlaceholderText(/Enter news headline/i), { target: { value: 'Gallery News' } });
-
-    // Click submit without notificationTitle and imageTitle
+    // Click submit without notificationTitle
     const submitBtn = screen.getByRole('button', { name: 'Create News' });
     fireEvent.click(submitBtn);
 
-    // Errors for notificationTitle and imageTitle should not appear when post type is image/gallery and non-empty
-    expect(screen.queryByText('Notification title is required')).toBeTruthy();
-
-    // Select Gallery post type
-    const postTypeSelect = screen.getByLabelText('Post Type');
-    await act(async () => {
-      fireEvent.mouseDown(postTypeSelect);
-    });
-
-    const option = await screen.findByRole('option', { name: 'Gallery' });
-    await act(async () => {
-      fireEvent.click(option);
-    });
-
-    // Verify Notification Title label has no asterisk when Gallery is selected
+    // Notification title is not mandatory, so "Notification title is required" should not be shown
+    expect(screen.queryByText('Notification title is required')).toBeNull();
     expect(screen.getByLabelText('Notification Title')).toBeInTheDocument();
-    expect(screen.getByLabelText('Image Title')).toBeInTheDocument();
+  });
+
+  it('should toggle Send Notification switch and disable/enable notification title input', () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+      />
+    );
+
+    const sendNotifSwitch = screen.getByLabelText('Send Notification');
+    expect(sendNotifSwitch).toBeChecked();
+
+    const notifInput = screen.getByPlaceholderText(/Enter notification title/i);
+    expect(notifInput).not.toBeDisabled();
+
+    // Toggle switch off
+    fireEvent.click(sendNotifSwitch);
+    expect(sendNotifSwitch).not.toBeChecked();
+    expect(notifInput).toBeDisabled();
+  });
+
+  it('should not require imageTitle when post type is video', () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          titleEn: 'Video Test Headline',
+          bodyEn: 'Test video post content body',
+          titleTe: '',
+          bodyTe: '',
+          titleHi: '',
+          bodyHi: '',
+          titleMl: '',
+          bodyMl: '',
+          categories: ['General'],
+          tags: ['Trending'],
+          location: ['Telangana'],
+          type: 'Video',
+          imageUrl: 'https://example.com/thumb.jpg',
+          postLanguage: 'en',
+          notificationTitle: '',
+          imageTitle: '',
+          videoSource: 'youtube',
+          videoUrl: 'https://youtube.com/watch?v=123',
+        }}
+      />
+    );
+
+    const submitBtn = screen.getByRole('button', { name: 'Update News' });
+    fireEvent.click(submitBtn);
+
+    expect(screen.queryByText('Image title is required')).toBeNull();
   });
 });
 

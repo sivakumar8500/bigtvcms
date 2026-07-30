@@ -38,35 +38,29 @@ import { Loader } from '@/shared/components/Loader';
 
 // Multilingual lists to support strict translation guidelines
 const categoriesList = [
-  { key: 'Entertainment', labelEn: 'Entertainment', labelTe: 'ఎంటర్టైన్మెంట్', labelHi: 'मनोरंजन', labelMl: 'വിനോദം' },
-  { key: 'General', labelEn: 'General', labelTe: 'సాధారణం', labelHi: 'सामान्य', labelMl: 'പൊതുവായത്' },
-  { key: 'Cinema', labelEn: 'Cinema', labelTe: 'సినిమా', labelHi: 'സിനിമ', labelMl: 'സിനിമ' },
-  { key: 'Sports', labelEn: 'Sports', labelTe: 'స్పోర్ట్స్', labelHi: 'खेल', labelMl: 'കായികം' },
-  { key: 'National', labelEn: 'National', labelTe: 'నేషనల్', labelHi: 'राष्ट्रीय', labelMl: 'ദേശീയം' },
-  { key: 'Andhra Pradesh', labelEn: 'Andhra Pradesh', labelTe: 'ఆంధ్రప్రదేశ్', labelHi: 'ఆంధ్ర प्रदेश', labelMl: 'ఆంధ്രാప్రദേശ്' },
+  { key: 'Entertainment', labelEn: 'Entertainment', labelTe: 'వినోదం', labelHi: 'मनोरंजन', labelMl: 'വിനോദം' },
+  { key: 'General', labelEn: 'General', labelTe: 'సాధారణ', labelHi: 'सामान्य', labelMl: 'പൊതുവായ' },
+  { key: 'Cinema', labelEn: 'Cinema', labelTe: 'సినిమా', labelHi: 'सिनेमा', labelMl: 'സിനിമ' },
+  { key: 'Sports', labelEn: 'Sports', labelTe: 'క్రీడలు', labelHi: 'खेल', labelMl: 'കായികം' },
+  { key: 'National', labelEn: 'National', labelTe: 'జాతీయ', labelHi: 'राष्ट्रीय', labelMl: 'ദേശീയ' },
+  { key: 'Andhra Pradesh', labelEn: 'Andhra Pradesh', labelTe: 'ఆంధ్రప్రదేశ్', labelHi: 'ఆంధ్ర ప్రదేశ్', labelMl: 'ఆంధ్రప్రదేശ്' },
   { key: 'Telangana', labelEn: 'Telangana', labelTe: 'తెలంగాణ', labelHi: 'तेलंगाना', labelMl: 'തെലങ്കാന' },
-  { key: 'Business', labelEn: 'Business', labelTe: 'బిజినెస్', labelHi: 'व्यापार', labelMl: 'బిസിനస్స్' },
+  { key: 'Business', labelEn: 'Business', labelTe: 'వ్యాపారం', labelHi: 'व्यापार', labelMl: 'బిసిനസ്സ്' },
 ];
 
 const tagsList = [
-  { key: 'Trending', labelEn: 'Trending', labelTe: 'ట్రెండింగ్', labelHi: 'ट्रेंडिंग', labelMl: 'ട്രെൻഡിംഗ്' },
-  { key: 'Hyderabad', labelEn: 'Hyderabad', labelTe: 'హైదరాబాద్', labelHi: 'हैदराबाद', labelMl: 'ഹൈദരാബാദ്' },
-  { key: 'Viral', labelEn: 'Viral', labelTe: 'వైరల్', labelHi: 'वायरल', labelMl: 'വൈറൽ' },
-  { key: 'Cinema', labelEn: 'Cinema', labelTe: 'సినిమా', labelHi: 'సినిమా', labelMl: 'സിനിമ' },
-  { key: 'Cricket', labelEn: 'Cricket', labelTe: 'క్రికెట్', labelHi: 'క్రికెట్', labelMl: 'ക്രിക്കറ്റ്' },
-  { key: 'Health', labelEn: 'Health', labelTe: 'ఆరోగ్యం', labelHi: 'स्वास्थ्य', labelMl: 'ఆരോഗ്യം' },
-  { key: 'Devotional', labelEn: 'Devotional', labelTe: 'భక్తి', labelHi: 'भक्ति', labelMl: 'ഭക്തി' },
+  { key: 'Trending', labelEn: 'Trending', labelTe: '鈰颴鈰啤鈰陛鈰賴鈰鉮', labelHi: '鄐颴鄐啤鄐丑鄐賴鄐', labelMl: '鉥颴鉥啤鉞韶插鉥賴鉥鉮' },
+  { key: 'Hyderabad', labelEn: 'Hyderabad', labelTe: '鈰嫩鈰舟偽鈰擒鬲鈰擒隻鈺', labelHi: '鄐嫩鄐舟什鄐擒互鄐擒丹', labelMl: '鉥嫩鉥舟敦鉥擒摒鉥擒揭鉞' },
+  { key: 'Viral', labelEn: 'Viral', labelTe: '鈰菽鈰啤假鈺', labelHi: '鄐菽冗鄐能什鄐', labelMl: '鉥菽鉥晤善' },
+  { key: 'Cinema', labelEn: 'Cinema', labelTe: '鈰詮倏鈰兒倏鈰桌偏', labelHi: '鈰詮倏鈰兒倏鈰桌偏', labelMl: '鉥詮曾鉥兒曾鉥' },
+  { key: 'Cricket', labelEn: 'Cricket', labelTe: '鈰𨫼鈰啤倏鈰𨫼鈰颴', labelHi: '鈰𨫼鈰啤倏鈰𨫼鈰颴', labelMl: '鉥𨫼鉥啤曾鉥𨫼鉥𨫼敢鉞温敢鉞' },
+  { key: 'Health', labelEn: 'Health', labelTe: '鈰偽鈺肀鈺温偺鈰', labelHi: '鄐詮鄐菽冗鄐詮鄐丞鄐', labelMl: '鈰敦鉞肀鉞温敞鉥' },
+  { key: 'Devotional', labelEn: 'Devotional', labelTe: '鈰冢鈺温陘鈰', labelHi: '鄐冢鄍温中鄐', labelMl: '鉥冢鉞温握鉥' },
 ];
 
 const locationsList = [
-  { key: 'Telangana', labelEn: 'Telangana', labelTe: 'తెలంగాణ', labelHi: 'तेलंगाना', labelMl: 'തെലങ്കാന' },
-  { key: 'Andhra Pradesh', labelEn: 'Andhra Pradesh', labelTe: 'ఆంధ్రప్రదేశ్', labelHi: 'ఆంధ్ర प्रदेश', labelMl: 'ఆంధ്രാప్రദേശ്' },
-  { key: 'Kerala', labelEn: 'Kerala', labelTe: 'కేరళ', labelHi: 'केरल', labelMl: 'കേരളം' },
-  { key: 'Karnataka', labelEn: 'Karnataka', labelTe: 'കన్నడ', labelHi: 'കన్నడ', labelMl: 'കന്നഡ' },
-  { key: 'Tamil Nadu', labelEn: 'Tamil Nadu', labelTe: 'తమిళనాడు', labelHi: 'तमिलनाडु', labelMl: 'തമിഴ്നാട്' },
-  { key: 'Delhi', labelEn: 'Delhi', labelTe: 'ఢిల్లీ', labelHi: 'दिल्ली', labelMl: 'ഡൽഹി' },
-  { key: 'West Bengal', labelEn: 'West Bengal', labelTe: 'పశ్చిమ బెంగాల్', labelHi: 'पश्चिम बंगाल', labelMl: 'പശ്ചിമ ബംഗാൾ' },
-  { key: 'Maharashtra', labelEn: 'Maharashtra', labelTe: 'మహారాష్ట్ర', labelHi: 'महाराष्ट्र', labelMl: 'మഹാരാഷ്ട്ര' },
+  { key: 'Telangana', labelEn: 'Telangana', labelTe: 'Telangana', labelHi: 'Telangana', labelMl: 'Telangana' },
+  { key: 'Andhra Pradesh', labelEn: 'Andhra Pradesh', labelTe: 'Andhra Pradesh', labelHi: 'Andhra Pradesh', labelMl: 'Andhra Pradesh' },
 ];
 
 const translations = {
@@ -76,7 +70,8 @@ const translations = {
     tabHi: 'Hindi',
     tabMl: 'Malayalam',
     lblTitle: 'News Title *',
-    lblNotificationTitle: 'Notification Title *',
+    lblNotificationTitle: 'Notification Title',
+    lblSendNotification: 'Send Notification',
     lblImageTitle: 'Image Title *',
     lblBody: 'News Body / Content *',
     lblLocation: 'Publish Location *',
@@ -123,51 +118,52 @@ const translations = {
     lblGalleryImages: 'Gallery Images *',
     errGalleryMin: 'Please upload at least 3 images',
     errGalleryMax: 'Maximum 10 images allowed',
-    hintGallery: 'Min 3 · Max 10 images',
+    hintGallery: 'Min 3 • Max 10 images',
   },
   te: {
     tabEn: 'ఇంగ్లీష్',
     tabTe: 'తెలుగు',
     tabHi: 'హిందీ',
     tabMl: 'మలయాళం',
-    lblTitle: 'వార్తా శీర్షిక *',
-    lblNotificationTitle: 'నోటిఫికేషన్ శీర్షిక *',
-    lblImageTitle: 'చిత్రం శీర్షిక *',
-    lblBody: 'వార్తా కంటెంట్ *',
-    lblLocation: 'ప్రచురణ ప్రాంతం *',
+    lblTitle: 'వార్త శీర్షిక *',
+    lblNotificationTitle: 'నోటిఫికేషన్ శీర్షిక',
+    lblSendNotification: 'నోటిఫికేషన్ పంపు',
+    lblImageTitle: 'చిత్ర శీర్షిక *',
+    lblBody: 'వార్త విషయము *',
+    lblLocation: 'ప్రచురణ ప్రాంతము *',
     lblType: 'పోస్ట్ రకం',
     lblCategories: 'విభాగాలు *',
-    lblTags: 'AI అనుసంధాన ట్యాగ్‌లు *',
+    lblTags: 'AI మ్యాప్ చేసిన ట్యాగ్‌లు *',
     btnCancel: 'రద్దు చేయి',
-    btnSubmit: 'వార్తలను సృష్టించండి',
-    phTitle: 'వార్తా శీర్షికను ఇక్కడ నమోదు చేయండి... (గరిష్టం 10 పదాలు)',
-    phNotificationTitle: 'నోటిఫికేషన్ శీర్షికను నమోదు చేయండి... (గరిష్టం 10 పదాలు)',
-    phImageTitle: 'చిత్రం శీర్షికను నమోదు చేయండి... (గరిష్టం 10 పదాలు)',
-    phBody: 'వార్తా కంటెంట్‌ను ఇక్కడ రాయండి... (గరిష్టం 40 పదాలు)',
-    errCategoryRequired: 'కనీసం ఒక విభాగాన్ని ఎంచుకోండి',
+    btnSubmit: 'వార్తను సృష్టించండి',
+    phTitle: 'వార్త శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
+    phNotificationTitle: 'నోటిఫికేషన్ శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
+    phImageTitle: 'చిత్ర శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
+    phBody: 'వార్త విషయము రాయండి... (గరిష్టంగా 40 పదాలు)',
+    errCategoryRequired: 'కనీసం ఒక వర్గాన్ని ఎంచుకోండి',
     errLocationRequired: 'కనీసం ఒక ప్రాంతాన్ని ఎంచుకోండి',
-    errTagsRequired: 'కనీసం ఒక AI ట్యాగ్‌ను ఎంచుకోండి',
+    errTagsRequired: 'కనీసం ఒక AI ట్యాగ్‌ని ఎంచుకోండి',
     errImageRequired: 'బ్యానర్ చిత్రం అవసరం',
     errLanguageRequired: 'దయచేసి భాషను ఎంచుకోండి',
     errNotificationTitleRequired: 'నోటిఫికేషన్ శీర్షిక అవసరం',
-    errImageTitleRequired: 'చిత్రం శీర్షిక అవసరం',
+    errImageTitleRequired: 'చిత్ర శీర్షిక అవసరం',
     errScheduleTimeRequired: 'దయచేసి షెడ్యూల్ సమయాన్ని ఎంచుకోండి',
-    errTitleWordLimit: 'వార్తా శీర్షిక 10 పదాలకు మించి ఉండకూడదు',
-    errNotificationTitleWordLimit: 'నోటిఫికేషన్ శీర్షిక 10 పదాలకు మించి ఉండకూడదు',
-    errImageTitleWordLimit: 'చిత్రం శీర్షిక 10 పదాలకు మించి ఉండకూడదు',
-    errBodyWordLimit: 'కంటెంట్ 40 పదాలకు మించి ఉండకూడదు',
+    errTitleWordLimit: 'వార్త శీర్షిక 10 పదాలకు మించకూడదు',
+    errNotificationTitleWordLimit: 'నోటిఫికేషన్ శీర్షిక 10 పదాలకు మించకూడదు',
+    errImageTitleWordLimit: 'చిత్ర శీర్షిక 10 పదాలకు మించకూడదు',
+    errBodyWordLimit: 'విషయము 40 పదాలకు మించకూడదు',
     wordCount: (n: number, max: number) => `${n}/${max} పదాలు`,
-    btnBack: 'సవరణకు తిరిగి వెళ్లు',
-    btnPublish: 'ధృవీకరించి ప్రచురించు',
-    previewTitle: 'వార్తా పోస్ట్ ప్రివ్యూ',
+    btnBack: 'ఎడిట్‌కి తిరిగి వెళ్లండి',
+    btnPublish: 'సమీక్షించి ప్రచురించండి',
+    previewTitle: 'వార్త పోస్ట్ ప్రివ్యూ',
     lblSummary: 'ప్రచురణ సారాంశం',
-    uploadingImage: 'బ్యానర్ చిత్రాన్ని అప్‌లోడ్ చేస్తోంది...',
-    uploadFailed: 'చిత్రం అప్‌లోడ్ విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+    uploadingImage: 'బ్యానర్ చిత్రం అప్‌లోడ్ అవుతోంది...',
+    uploadFailed: 'చిత్ర అప్‌లోడ్ విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.',
     lblIsWebPost: 'వెబ్ పోస్ట్',
-    lblIsSticky: 'స్టికీ పోస్ట్',
+    lblIsSticky: 'స్టిక్కీ పోస్ట్',
     lblWebUrl: 'వెబ్ URL',
     phWebUrl: 'https://example.com/article...',
-    errWebUrlInvalid: 'దయచేసి సరైన URL నమోదు చేయండి (http:// లేదా https:// తో మొదలుకావాలి)',
+    errWebUrlInvalid: 'దయచేసి చెల్లుబాటు అయ్యే URL ఎంటర్ చేయండి (http:// లేదా https:// తో ప్రారంభం)',
     lblPostUrl: 'పోస్ట్ URL',
     phPostUrl: 'https://example.com/post-slug...',
     lblVideoSource: 'వీడియో మూలం',
@@ -176,18 +172,19 @@ const translations = {
     errVideoSourceRequired: 'దయచేసి వీడియో మూలాన్ని ఎంచుకోండి',
     errVideoUrlRequired: 'వీడియో URL అవసరం',
     lblGalleryImages: 'గ్యాలరీ చిత్రాలు *',
-    errGalleryMin: 'కనీసం 3 చిత్రాలు అప్లోడ్ చేయండి',
-    errGalleryMax: 'గరిష్ఠం 10 చిత్రాలు అనుమతించబడతాయి',
-    hintGallery: 'కనీసం 3 · గరిష్ఠం 10 చిత్రాలు',
+    errGalleryMin: 'దయచేసి కనీసం 3 చిత్రాలను అప్‌లోడ్ చేయండి',
+    errGalleryMax: 'గరిష్టంగా 10 చిత్రాలు మాత్రమే అనుమతించబడతాయి',
+    hintGallery: 'కనీసం 3 • గరిష్టంగా 10 చిత్రాలు',
   },
   hi: {
     tabEn: 'अंग्रेज़ी',
     tabTe: 'तेलुगु',
-    tabHi: 'हिन्दी',
+    tabHi: 'हिंदी',
     tabMl: 'मलयालम',
     lblTitle: 'समाचार शीर्षक *',
-    lblNotificationTitle: 'अधिसूचना शीर्षक *',
-    lblImageTitle: 'छवि शीर्षक *',
+    lblNotificationTitle: 'सूचना शीर्षक',
+    lblSendNotification: 'सूचना भेजें',
+    lblImageTitle: 'चित्र शीर्षक *',
     lblBody: 'समाचार सामग्री *',
     lblLocation: 'प्रकाशन स्थान *',
     lblType: 'पोस्ट प्रकार',
@@ -196,44 +193,44 @@ const translations = {
     btnCancel: 'रद्द करें',
     btnSubmit: 'समाचार बनाएं',
     phTitle: 'समाचार शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
-    phNotificationTitle: 'अधिसूचना शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
-    phImageTitle: 'छवि शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
-    phBody: 'समाचार मुख्य भाग यहाँ लिखें... (अधिकतम 40 शब्द)',
+    phNotificationTitle: 'सूचना शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
+    phImageTitle: 'चित्र शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
+    phBody: 'समाचार सामग्री लिखें... (अधिकतम 40 शब्द)',
     errCategoryRequired: 'कम से कम एक श्रेणी चुनें',
     errLocationRequired: 'कम से कम एक स्थान चुनें',
     errTagsRequired: 'कम से कम एक AI टैग चुनें',
-    errImageRequired: 'बैनर छवि आवश्यक है',
+    errImageRequired: 'बैनर चित्र आवश्यक है',
     errLanguageRequired: 'कृपया एक भाषा चुनें',
-    errNotificationTitleRequired: 'अधिसूचना शीर्षक आवश्यक है',
-    errImageTitleRequired: 'छवि शीर्षक आवश्यक है',
-    errScheduleTimeRequired: 'कृपया एक शेड्यूल समय चुनें',
+    errNotificationTitleRequired: 'सूचना शीर्षक आवश्यक है',
+    errImageTitleRequired: 'चित्र शीर्षक आवश्यक है',
+    errScheduleTimeRequired: 'कृपया शेड्यूल समय चुनें',
     errTitleWordLimit: 'समाचार शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
-    errNotificationTitleWordLimit: 'अधिसूचना शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
-    errImageTitleWordLimit: 'छवि शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
+    errNotificationTitleWordLimit: 'सूचना शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
+    errImageTitleWordLimit: 'सूचना शीर्षक 10 शब्दों से अधिक नहीं होना चाहिए',
     errBodyWordLimit: 'सामग्री 40 शब्दों से अधिक नहीं होनी चाहिए',
     wordCount: (n: number, max: number) => `${n}/${max} शब्द`,
-    btnBack: 'संपादन पर वापस जाएं',
+    btnBack: 'संपादित करने के लिए वापस जाएं',
     btnPublish: 'पुष्टि करें और प्रकाशित करें',
     previewTitle: 'समाचार पोस्ट पूर्वावलोकन',
     lblSummary: 'प्रकाशन सारांश',
-    uploadingImage: 'बैनर छवि अपलोड की जा रही है...',
-    uploadFailed: 'छवि अपलोड विफल रही। कृपया पुनः प्रयास करें।',
+    uploadingImage: 'बैनर चित्र अपलोड हो रहा है...',
+    uploadFailed: 'चित्र अपलोड विफल रहा। कृपया पुनः प्रयास करें।',
     lblIsWebPost: 'वेब पोस्ट',
     lblIsSticky: 'स्टिकी पोस्ट',
     lblWebUrl: 'वेब URL',
     phWebUrl: 'https://example.com/article...',
-    errWebUrlInvalid: 'कृपया एक वैध URL दर्ज करें (http:// या https:// से शुरू होना चाहिए)',
+    errWebUrlInvalid: 'कृपया एक वैध URL दर्ज करें (http:// या https:// से शुरू)',
     lblPostUrl: 'पोस्ट URL',
     phPostUrl: 'https://example.com/post-slug...',
     lblVideoSource: 'वीडियो स्रोत',
     lblVideoUrl: 'वीडियो URL',
     phVideoUrl: 'https://youtube.com/watch?v=...',
-    errVideoSourceRequired: 'कृपया एक वीडियो स्रोत चुनें',
+    errVideoSourceRequired: 'कृपया वीडियो स्रोत चुनें',
     errVideoUrlRequired: 'वीडियो URL आवश्यक है',
-    lblGalleryImages: 'गैलरी चित्र *',
-    errGalleryMin: 'कृपया कम से कम 3 चित्र अपलोड करें',
-    errGalleryMax: 'अधिकतम 10 चित्र अनुमत हैं',
-    hintGallery: 'न्यूनतम 3 · अधिकतम 10 चित्र',
+    lblGalleryImages: 'गैलरी छवियां *',
+    errGalleryMin: 'कृपया कम से कम 3 छवियां अपलोड करें',
+    errGalleryMax: 'अधिकतम 10 छवियां की अनुमति है',
+    hintGallery: 'न्यूनतम 3 • अधिकतम 10 छवियां',
   },
   ml: {
     tabEn: 'ഇംഗ്ലീഷ്',
@@ -241,8 +238,9 @@ const translations = {
     tabHi: 'ഹിന്ദി',
     tabMl: 'മലയാളം',
     lblTitle: 'വാർത്താ തലക്കെട്ട് *',
-    lblNotificationTitle: 'അറിയിപ്പ് തലക്കെട്ട് *',
-    lblImageTitle: 'ചിത്രം തലക്കെട്ട് *',
+    lblNotificationTitle: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട്',
+    lblSendNotification: 'നോട്ടിഫിക്കേഷൻ അയക്കുക',
+    lblImageTitle: 'ചിത്ര തലക്കെട്ട് *',
     lblBody: 'വാർത്താ ഉള്ളടക്കം *',
     lblLocation: 'പ്രസിദ്ധീകരണ സ്ഥലം *',
     lblType: 'പോസ്റ്റ് തരം',
@@ -251,24 +249,24 @@ const translations = {
     btnCancel: 'റദ്ദാക്കുക',
     btnSubmit: 'വാർത്ത സൃഷ്ടിക്കുക',
     phTitle: 'വാർത്താ തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
-    phNotificationTitle: 'അറിയിപ്പ് തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
-    phImageTitle: 'ചിത്രം തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
-    phBody: 'വാർത്താ ഉള്ളടക്കം ഇവിടെ എഴുതുക... (പരമാവധി 40 വാക്കുകൾ)',
+    phNotificationTitle: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
+    phImageTitle: 'ചിത്ര തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
+    phBody: 'വാർത്താ ഉള്ളടക്കം എഴുതുക... (പരമാവധി 40 വാക്കുകൾ)',
     errCategoryRequired: 'കുറഞ്ഞത് ഒരു വിഭാഗമെങ്കിലും തിരഞ്ഞെടുക്കുക',
     errLocationRequired: 'കുറഞ്ഞത് ഒരു സ്ഥലമെങ്കിലും തിരഞ്ഞെടുക്കുക',
-    errTagsRequired: 'കുറഞ്ഞത് ഒരു AI ടാഗ് എങ്കിലും തിരഞ്ഞെടുക്കുക',
+    errTagsRequired: 'കുറഞ്ഞത് ഒരു AI ടാഗെങ്കിലും തിരഞ്ഞെടുക്കുക',
     errImageRequired: 'ബാനർ ചിത്രം ആവശ്യമാണ്',
     errLanguageRequired: 'ദയവായി ഒരു ഭാഷ തിരഞ്ഞെടുക്കുക',
-    errNotificationTitleRequired: 'അറിയിപ്പ് തലക്കെട്ട് ആവശ്യമാണ്',
-    errImageTitleRequired: 'ചിത്രം തലക്കെട്ട് ആവശ്യമാണ്',
-    errScheduleTimeRequired: 'ദയവായി ഒരു ഷെഡ്യൂൾ സമയം തിരഞ്ഞെടുക്കുക',
-    errTitleWordLimit: 'വാർത്താ തലക്കെട്ട് 10 വാക്കുകൾക്കും കൂടുതല്‍ ആകാന്‍ പാടില്ല',
-    errNotificationTitleWordLimit: 'അറിയിപ്പ് തലക്കെട്ട് 10 വാക്കുകൾക്കും കൂടുതല്‍ ആകാന്‍ പാടില്ല',
-    errImageTitleWordLimit: 'ചിത്രം തലക്കെട്ട് 10 വാക്കുകൾക്കും കൂടുതല്‍ ആകാന്‍ പാടില്ല',
-    errBodyWordLimit: 'ഉള്ളടക്കം 40 വാക്കുകൾക്കും കൂടുതല്‍ ആകാന്‍ പാടില്ല',
+    errNotificationTitleRequired: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് ആവശ്യമാണ്',
+    errImageTitleRequired: 'ചിത്ര തലക്കെട്ട് ആവശ്യമാണ്',
+    errScheduleTimeRequired: 'ദയവായി ഷെഡ്യൂൾ സമയം തിരഞ്ഞെടുക്കുക',
+    errTitleWordLimit: 'വാർത്താ തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
+    errNotificationTitleWordLimit: 'നോട്ടിഫിക്കേഷൻ തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
+    errImageTitleWordLimit: 'ചിത്ര തലക്കെട്ട് 10 വാക്കുകളിൽ കവിയരുത്',
+    errBodyWordLimit: 'ഉള്ളടക്കം 40 വാക്കുകളിൽ കവിയരുത്',
     wordCount: (n: number, max: number) => `${n}/${max} വാക്കുകൾ`,
-    btnBack: 'എഡിറ്റിലേക്ക് മടങ്ങുക',
-    btnPublish: 'സ്ഥിരീകരിച്ച് പ്രസിദ്ധീകരികുക',
+    btnBack: 'എഡിറ്റ് ചെയ്യാൻ തിരികെ പോകുക',
+    btnPublish: 'സ്ഥിരീകരിച്ച് പ്രസിദ്ധീകരിക്കുക',
     previewTitle: 'വാർത്താ പോസ്റ്റ് പ്രിവ്യൂ',
     lblSummary: 'പ്രസിദ്ധീകരണ സംഗ്രഹം',
     uploadingImage: 'ബാനർ ചിത്രം അപ്‌ലോഡ് ചെയ്യുന്നു...',
@@ -277,18 +275,18 @@ const translations = {
     lblIsSticky: 'സ്റ്റിക്കി പോസ്റ്റ്',
     lblWebUrl: 'വെബ് URL',
     phWebUrl: 'https://example.com/article...',
-    errWebUrlInvalid: 'ദയവായി സാധുവായ ഒരു URL നൽകുക (http:// അല്ലെങ്കിൽ https:// കൊണ്ട് തുടങ്ങണം)',
-    lblPostUrl: 'പോസ്റ്റ് URL',
+    errWebUrlInvalid: 'ദയവായി ഒരു സാധുവായ URL നൽകുക (http:// അല്ലെങ്കിൽ https:// യിൽ തുടങ്ങുന്നത്)',
+    lblPostUrl: 'പോస్ట్ URL',
     phPostUrl: 'https://example.com/post-slug...',
     lblVideoSource: 'വീഡിയോ ഉറവിടം',
     lblVideoUrl: 'വീഡിയോ URL',
     phVideoUrl: 'https://youtube.com/watch?v=...',
-    errVideoSourceRequired: 'ദയവായി ഒരു വീഡിയോ ഉറവിടം തിരഞ്ഞെടുക്കുക',
+    errVideoSourceRequired: 'ദയവായി ഒരു వీడియో ഉറവിടം തിരഞ്ഞെടുക്കുക',
     errVideoUrlRequired: 'വീഡിയോ URL ആവശ്യമാണ്',
-    lblGalleryImages: 'ഗ്യാലറി ചിത്രങ്ങൾ *',
-    errGalleryMin: 'ദയവായി കുറഞ്ഞത് 3 ചിത്രങ്ങൾ അപ്ലോഡ് ചെയ്കുക',
-    errGalleryMax: 'പരമാവധി 10 ചിത്രങ്ങൾ മാത്രം അനുവദനീയം',
-    hintGallery: 'കുറഞ്ഞത് 3 · പരമാവധി 10 ചിത്രങ്ങൾ',
+    lblGalleryImages: 'ഗാലറി ചിത്രങ്ങൾ *',
+    errGalleryMin: 'ദയവായി കുറഞ്ഞത് 3 ചിത്രങ്ങളെങ്കിലും അപ്‌ലോడ్ చేయുക',
+    errGalleryMax: 'പരമാവധി 10 ചിത്രങ്ങൾ മാത്രമേ അനുവദിക്കൂ',
+    hintGallery: 'കുറഞ്ഞത് 3 • പരമാവധി 10 ചിത്രങ്ങൾ',
   },
 };
 
@@ -320,6 +318,8 @@ export interface CreateNewsFormData {
   isStickyPost?: boolean;
   isWebPost?: boolean;
   notificationTitle: string;
+  sendNotification?: boolean;
+  isNotification?: boolean;
   imageTitle: string;
   webUrl?: string;
   postUrl?: string;
@@ -539,14 +539,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
 
   // Reverse-map Telugu category names back to English keys for checkbox preselection
   const teluguToEnglishCategoryMap: Record<string, string> = {
-    'ఎంటర టైన మెంట ': 'Entertainment',
-    'సాధారణం': 'General',
-    'సినిమా': 'Cinema',
-    'స పోర ట స ': 'Sports',
-    'నేషనల ': 'National',
-    'ఆంధ రప రదేశ ': 'Andhra Pradesh',
-    'తెలంగాణ': 'Telangana',
-    'బిజినిస ': 'Business',
+    '鈰脚�鈰颴偽 鈰颴�鈰� 鈰桌�鈰�� ': 'Entertainment',
+    '鈰詮偏鈰抉偏鈰啤除鈰�': 'General',
+    '鈰詮倏鈰兒倏鈰桌偏': 'Cinema',
+    '鈰� 鈰芹�鈰� 鈰� 鈰� ': 'Sports',
+    '鈰兒�鈰獅馬鈰� ': 'National',
+    '鈰��鈰� 鈰啤高 鈰啤隻鈺�偉 ': 'Andhra Pradesh',
+    '鈰戈�鈰耜�鈰鉮偏鈰�': 'Telangana',
+    '鈰眇倏鈰厢倏鈰兒倏鈰� ': 'Business',
   };
   const mapCategoryToKey = (cat: string) => teluguToEnglishCategoryMap[cat] || cat;
 
@@ -587,6 +587,18 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
 
   const [videoSource, setVideoSource] = useState<string>((initialData as any)?.videoSource || (initialData as any)?.video_platform || '');
   const [videoUrl, setVideoUrl] = useState<string>((initialData as any)?.videoUrl || (initialData as any)?.video_url || '');
+  const [sendNotification, setSendNotification] = useState<boolean>(() => {
+    if (initialData && (initialData as any).sendNotification !== undefined) {
+      return Boolean((initialData as any).sendNotification);
+    }
+    if (initialData && (initialData as any).isNotification !== undefined) {
+      return Boolean((initialData as any).isNotification);
+    }
+    if (initialData && (initialData as any).send_notification !== undefined) {
+      return Boolean((initialData as any).send_notification);
+    }
+    return true;
+  });
   const [notificationTitle, setNotificationTitle] = useState<string>((initialData as any)?.notificationTitle || (initialData as any)?.notificationtitle || '');
   const [imageTitle, setImageTitle] = useState<string>((initialData as any)?.imageTitle || (initialData as any)?.imagetitel || '');
 
@@ -600,9 +612,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [scheduleTime, setScheduleTime] = useState<string>('');
 
   const isImageOrGalleryType =
-    ['image', 'image ad', 'gallery'].includes(type.toLowerCase().trim()) ||
-    type.toLowerCase().includes('image') ||
-    type.toLowerCase().includes('gallery');
+  ['image', 'image ad', 'gallery', 'video'].includes(type.toLowerCase().trim()) ||
+  type.toLowerCase().includes('image') ||
+  type.toLowerCase().includes('gallery') ||
+  type.toLowerCase().includes('video');
 
   const langIdMap: Record<string, number> = { en: 1, te: 2, hi: 3, ml: 4 };
 
@@ -786,6 +799,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     setPostUrl('');
     setVideoSource('');
     setVideoUrl('');
+    setSendNotification(true);
     setNotificationTitle('');
     setImageTitle('');
     setErrors({});
@@ -878,7 +892,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       errMap.categories = t.errCategoryRequired;
     }
 
-    // Publish Mode — if schedule is selected, time must be picked
+    // Publish Mode �� if schedule is selected, time must be picked
     if (publishMode === 'schedule' && !scheduleTime) {
       errMap.scheduleTime = t.errScheduleTimeRequired;
     }
@@ -890,10 +904,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       errMap.title = t.errTitleWordLimit;
     }
 
-    // Notification Title (Optional for Image, Image Ad, Gallery post types)
-    if (!isImageOrGalleryType && !notificationTitle.trim()) {
-      errMap.notificationTitle = t.errNotificationTitleRequired;
-    } else if (notificationTitle.trim() && countWords(notificationTitle) > TITLE_WORD_LIMIT) {
+    // Notification Title (Optional)
+    if (sendNotification && notificationTitle.trim() && countWords(notificationTitle) > TITLE_WORD_LIMIT) {
       errMap.notificationTitle = t.errNotificationTitleWordLimit;
     }
 
@@ -911,7 +923,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       errMap.body = t.errBodyWordLimit;
     }
 
-    // Image — skip for gallery type (gallery has its own validation)
+    // Image �� skip for gallery type (gallery has its own validation)
     if (!type.toLowerCase().includes('gallery') && !imageUrl) {
       errMap.image = t.errImageRequired;
     }
@@ -1066,7 +1078,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       videoUrl,
       video_platform: videoSource,
       video_url: videoUrl,
-      notificationTitle,
+      notificationTitle: sendNotification ? notificationTitle : '',
+      sendNotification,
+      isNotification: sendNotification,
       imageTitle,
     });
     setIsUploading(false);
@@ -1227,7 +1241,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <Box sx={{ height: '2.5px', backgroundColor: '#e53935' }} />
                   <Box sx={{ p: 1.2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0.8 }}>
-                      <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.78rem', lineHeight: 1.3, flexGrow: 1 }} dangerouslySetInnerHTML={{ __html: title || 'శీర్షిక లేదు' }} />
+                      <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.78rem', lineHeight: 1.3, flexGrow: 1 }} dangerouslySetInnerHTML={{ __html: title || '鈰嗣�鈰啤�鈰獅倏鈰� 鈰耜�鈰舟�' }} />
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, border: '1px solid #e53935', borderRadius: '16px', px: 0.7, py: 0.15, flexShrink: 0, backgroundColor: '#ffffff' }}>
                         <ThumbUpOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
                         <ChatBubbleOutline sx={{ fontSize: '0.62rem', color: '#e53935' }} />
@@ -1235,7 +1249,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         <SyncOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
                       </Box>
                     </Box>
-                    <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.68rem', lineHeight: 1.6, display: 'block' }} dangerouslySetInnerHTML={{ __html: body || 'కంటెంట్ లేదు' }} />
+                    <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.68rem', lineHeight: 1.6, display: 'block' }} dangerouslySetInnerHTML={{ __html: body || '鈰𨫼�鈰颴�鈰��鈺� 鈰耜�鈰舟�' }} />
                     <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.58rem', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
                       =R {publishMode === 'schedule' && scheduleTime ? `Scheduled ${scheduleTime}` : 'Just now'}
                     </Typography>
@@ -1284,9 +1298,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
             }}
           >
             {publishMode === 'draft'
-              ? '=ݝ Save as Draft'
+              ? '=� Save as Draft'
               : publishMode === 'schedule'
-                ? (scheduleTime ? `=P� Schedule for ${scheduleTime}` : '=P� Select a time first')
+                ? (scheduleTime ? `=P嚙� Schedule for ${scheduleTime}` : '=P嚙� Select a time first')
                 : (isEditMode ? 'Save Changes' : t.btnPublish)}
           </Button>
           </Box>
@@ -1651,7 +1665,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
                   {(['now', 'draft', 'schedule'] as const).map((mode) => {
-                    const labels = { now: '=� Publish Now', draft: '=� Save as Draft', schedule: '=P Schedule' };
+                    const labels = { now: '=嚙� Publish Now', draft: '=嚙� Save as Draft', schedule: '=P Schedule' };
                     const isSelected = publishMode === mode;
                     return (
                       <Box
@@ -1690,7 +1704,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 {publishMode === 'schedule' && (
                   <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '10px', backgroundColor: isDark ? 'rgba(166,226,245,0.05)' : 'rgba(28,20,69,0.03)', border: isDark ? '1px solid rgba(166,226,245,0.15)' : '1px solid rgba(28,20,69,0.1)' }}>
                     <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.8, fontSize: '0.74rem' }}>
-                      Today only � {todayDate}
+                      Today only 嚙� {todayDate}
                     </Typography>
                     <Box
                       component="input"
@@ -1713,7 +1727,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       }}
                     />
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.6, fontSize: '0.7rem', color: scheduleTime ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? '#d0caeb' : '#5c548a') }}>
-                      {scheduleTime ? ` Will publish at ${scheduleTime}` : `� Pick a time: ${minScheduleTime} � 23:59`}
+                      {scheduleTime ? ` Will publish at ${scheduleTime}` : `嚙� Pick a time: ${minScheduleTime} 嚙� 23:59`}
                     </Typography>
                   </Box>
                 )}
@@ -1740,7 +1754,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 600, color: isDark ? '#d0caeb' : '#1c1445' }}>
-                      📌 {t.lblIsSticky}
+                      �� {t.lblIsSticky}
                     </Typography>
                   </Box>
                   <Switch
@@ -1780,7 +1794,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 600, color: isDark ? '#d0caeb' : '#1c1445' }}>
-                      🌐 {t.lblIsWebPost}
+                      �� {t.lblIsWebPost}
                     </Typography>
                   </Box>
                   <Switch
@@ -1799,7 +1813,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Box>
               </Box>
 
-              {/* Web URL — shown only when Web Post is ON */}
+              {/* Web URL �� shown only when Web Post is ON */}
               {isWebPost && (
                 <Box sx={{ mt: 1.5 }}>
                   <TextField
@@ -1816,7 +1830,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     helperText={errors.webUrl || ''}
                     InputProps={{
                       startAdornment: (
-                        <Box component="span" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mr: 0.5, fontSize: '0.9rem' }}>🔗</Box>
+                        <Box component="span" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mr: 0.5, fontSize: '0.9rem' }}>��</Box>
                       ),
                     }}
                     sx={{
@@ -1835,12 +1849,12 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Box>
               )}
 
-              {/* Video Source + Video URL — shown only for video post types */}
+              {/* Video Source + Video URL �� shown only for video post types */}
               {type.toLowerCase().includes('video') && (
                 <Box sx={{ mt: 2 }}>
                   <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
                   <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, mb: 1.2, fontSize: '0.82rem' }}>
-                    🎬 {t.lblVideoSource}
+                    �𤁗 {t.lblVideoSource}
                   </Typography>
 
                   {/* Source Tiles */}
@@ -1865,7 +1879,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         label: 'X',
                         logo: (
                           <Box sx={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: isDark ? '#ffffff' : '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Typography sx={{ color: isDark ? '#000000' : '#ffffff', fontSize: '0.65rem', fontWeight: 900, lineHeight: 1, fontFamily: 'Arial Black, sans-serif' }}>𝕏</Typography>
+                            <Typography sx={{ color: isDark ? '#000000' : '#ffffff', fontSize: '0.65rem', fontWeight: 900, lineHeight: 1, fontFamily: 'Arial Black, sans-serif' }}>��</Typography>
                           </Box>
                         ),
                         selectedBg: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.07)',
@@ -1931,7 +1945,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     helperText={errors.videoUrl || ''}
                     InputProps={{
                       startAdornment: (
-                        <Box component="span" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mr: 0.5, fontSize: '0.9rem' }}>🎬</Box>
+                        <Box component="span" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mr: 0.5, fontSize: '0.9rem' }}>�𤁗</Box>
                       ),
                     }}
                     sx={{
@@ -1967,7 +1981,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {/* News Title — plain TextField */}
+                {/* News Title �� plain TextField */}
                 <Box>
                   <TextField
                     fullWidth
@@ -2005,42 +2019,91 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   </Typography>
                 </Box>
 
-                {/* Notification Title */}
-                <Box>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={isImageOrGalleryType ? t.lblNotificationTitle.replace('*', '').trim() : t.lblNotificationTitle}
-                    placeholder={t.phNotificationTitle}
-                    value={notificationTitle}
-                    onChange={(e) => {
-                      setNotificationTitle(e.target.value);
-                      if (errors.notificationTitle) setErrors((prev) => { const n = { ...prev }; delete n.notificationTitle; return n; });
-                    }}
-                    error={!!errors.notificationTitle}
-                    helperText={errors.notificationTitle || ''}
+                {/* Notification Title with Send Notification Switch beside it */}
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 2 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      disabled={!sendNotification}
+                      label={t.lblNotificationTitle}
+                      placeholder={t.phNotificationTitle}
+                      value={notificationTitle}
+                      onChange={(e) => {
+                        setNotificationTitle(e.target.value);
+                        if (errors.notificationTitle) setErrors((prev) => { const n = { ...prev }; delete n.notificationTitle; return n; });
+                      }}
+                      error={!!errors.notificationTitle}
+                      helperText={errors.notificationTitle || ''}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                          borderRadius: '10px',
+                          '& fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                          '&.Mui-focused fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                        },
+                        '& .MuiInputLabel-root': { color: errors.notificationTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
+                        '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: countWords(notificationTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                        display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(notificationTitle) > 10 ? 700 : 400,
+                      }}
+                    >
+                      {t.wordCount(countWords(notificationTitle), 10)}
+                    </Typography>
+                  </Box>
+
+                  <Box
                     sx={{
-                      '& .MuiOutlinedInput-root': {
-                        color: isDark ? '#ffffff' : '#1c1445',
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
-                        borderRadius: '10px',
-                        '& fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
-                        '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
-                        '&.Mui-focused fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
-                      },
-                      '& .MuiInputLabel-root': { color: errors.notificationTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
-                      '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: countWords(notificationTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                      display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(notificationTitle) > 10 ? 700 : 400,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1,
+                      px: 1.5,
+                      py: 0.6,
+                      height: '40px',
+                      borderRadius: '10px',
+                      border: sendNotification
+                        ? (isDark ? '1px solid rgba(166,226,245,0.25)' : '1px solid rgba(28,20,69,0.2)')
+                        : (isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.15)'),
+                      backgroundColor: sendNotification
+                        ? (isDark ? 'rgba(166,226,245,0.08)' : 'rgba(28,20,69,0.04)')
+                        : (isDark ? 'rgba(255,255,255,0.04)' : '#ffffff'),
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
                     }}
                   >
-                    {t.wordCount(countWords(notificationTitle), 10)}
-                  </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        color: sendNotification ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? '#d0caeb' : '#5c548a'),
+                      }}
+                    >
+                      🔔 {t.lblSendNotification}
+                    </Typography>
+                    <Switch
+                      checked={sendNotification}
+                      onChange={(e) => setSendNotification(e.target.checked)}
+                      size="small"
+                      inputProps={{ 'aria-label': t.lblSendNotification }}
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: isDark ? '#a6e2f5' : '#1c1445',
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                        },
+                      }}
+                    />
+                  </Box>
                 </Box>
 
                 {/* Image Title */}
@@ -2105,7 +2168,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Typography>
               </Box>
 
-              {/* Image Uploader — single for regular types, gallery grid for Gallery type */}
+              {/* Image Uploader �� single for regular types, gallery grid for Gallery type */}
               <Box>
                 <input
                   ref={fileInputRef}
@@ -2120,7 +2183,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: errors.galleryImages ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445'), fontSize: '0.82rem' }}>
-                        🖼️ {t.lblGalleryImages}
+                        �䲰儭� {t.lblGalleryImages}
                       </Typography>
                       <Typography variant="caption" sx={{ color: galleryItems.length < 3 ? '#f44336' : galleryItems.length >= 10 ? '#ff9800' : (isDark ? '#a6e2f5' : '#1c1445'), fontWeight: 600, fontSize: '0.72rem' }}>
                         {galleryItems.length}/10 &bull; {t.hintGallery}
@@ -2147,7 +2210,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         </Box>
                       ))}
 
-                      {/* Add button — shown until max 10 */}
+                      {/* Add button �� shown until max 10 */}
                       {galleryItems.length < 10 && (
                         <Box
                           onClick={() => {
@@ -2207,7 +2270,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2,
                     }}>
                       <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>
-                        ✓ Banner Uploaded
+                        �� Banner Uploaded
                       </Typography>
                       <IconButton
                         size="small"
