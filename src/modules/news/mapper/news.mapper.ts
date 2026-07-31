@@ -1,6 +1,8 @@
 import { CreateNewsPostDto, NewsPostDto, UpdateNewsPostDto } from '../dto/news.dto';
 import { NewsPost } from '../domain/news.model';
 import { stripHtml } from '@/shared/utils/html.utils';
+import { extractBulletPoints } from '@/shared/utils/bullet.utils';
+import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
 
 export class NewsMapper {
   static toDomain(dto: NewsPostDto): NewsPost {
@@ -54,7 +56,54 @@ export class NewsMapper {
     const cleanTitle = stripHtml(domain.title || '');
     const cleanNotificationTitle = stripHtml(domain.notificationtitle || domain.title || '');
     const cleanImageTitle = stripHtml(domain.imagetitel || domain.title || '');
-    const cleanContent = stripHtml(domain.content || '');
+    let cleanContent = (domain.content || '').trim();
+    const isWebPostVal = Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost);
+    let rawType = domain.type || (domain as any).post_type || domain.postType || 'Standed';
+    let subTypeVal = domain.subType || '';
+
+    if (rawType.toLowerCase() === 'bulletpost' || rawType.toLowerCase() === 'bullet post') {
+      rawType = 'Standed';
+      subTypeVal = 'BulletPost';
+    } else if (rawType.toLowerCase() === 'standardlink' || rawType.toLowerCase() === 'standard link') {
+      rawType = 'Standed';
+      subTypeVal = 'StandardLink';
+    } else if (
+      rawType.toLowerCase() === 'bigblackstanded' ||
+      rawType.toLowerCase() === 'bigblack standed' ||
+      rawType.toLowerCase() === 'big black standed'
+    ) {
+      rawType = 'Standed';
+      subTypeVal = 'BigBlackStanded';
+    } else if (rawType.toLowerCase() === 'video') {
+      rawType = 'Video';
+      subTypeVal = '';
+    }
+
+    const isStickyVal = domain.isStickyPost ?? (domain as any).is_sticky ?? domain.isSticky ?? false;
+    const webUrlVal = (domain as any).web_post_url || (domain as any).webPostUrl || (domain as any).webUrl || domain.postUrl || '';
+
+    let bulletsVal: string[] = [];
+    if (subTypeVal === 'BulletPost') {
+      if (Array.isArray(domain.bulletPoints) && domain.bulletPoints.length > 0) {
+        bulletsVal = domain.bulletPoints.map((pt) => String(pt).replace(/[\[\]]/g, '').trim()).filter(Boolean);
+      } else {
+        bulletsVal = extractBulletPoints(domain.content || '');
+      }
+    } else if (Array.isArray(domain.bulletPoints) && subTypeVal !== 'StandardLink' && subTypeVal !== 'BigBlackStanded' && rawType !== 'Video') {
+      bulletsVal = domain.bulletPoints.map((pt) => String(pt).replace(/[\[\]]/g, '').trim()).filter(Boolean);
+    }
+
+    let linksVal: any = domain.links || [];
+    if (subTypeVal === 'StandardLink' || (Array.isArray(domain.links) && domain.links.length > 0) || (typeof domain.links === 'string' && domain.links.trim())) {
+      const formatted = formatLinksAndContent(domain.links, cleanContent);
+      linksVal = formatted.links;
+      cleanContent = formatted.content;
+    }
+
+    let rawVideoPlatform = domain.videoPlatform || (domain as any).video_platform || '';
+    if (rawVideoPlatform.toLowerCase() === 'x' || rawVideoPlatform.toLowerCase() === 'twitter') {
+      rawVideoPlatform = 'Twitter';
+    }
 
     return {
       title: cleanTitle,
@@ -62,25 +111,25 @@ export class NewsMapper {
       imagetitel: cleanImageTitle,
       content: cleanContent,
       created: domain.created || now,
-      post_name: domain.postName || (cleanTitle ? cleanTitle.toLowerCase().replace(/\s+/g, '-') : 'news-post'),
       totalLikes: domain.totalLikes ?? 0,
       totalViews: domain.totalViews ?? 0,
       totalComments: domain.totalComments ?? 0,
-      image_url: domain.imageUrl || '',
-      video_url: domain.videoUrl || '',
-      video_platform: domain.videoPlatform || '',
+      image_url: domain.imageUrl || (domain as any).image_url || '',
+      video_url: domain.videoUrl || (domain as any).video_url || '',
+      video_platform: rawVideoPlatform,
       gallery: domain.gallery || [],
-      type: domain.type || 'Standard',
+      type: rawType,
       totalShares: domain.totalShares ?? 0,
       isReporter: domain.isReporter ?? false,
       reportedBy: domain.reportedBy || '',
       categoryName: domain.categoryName || [],
-      postUrl: domain.postUrl || '',
-      subType: domain.subType || '',
-      isStickyPost: domain.isStickyPost ?? false,
+      postUrl: domain.postUrl || webUrlVal,
+      subType: subTypeVal,
+      isStickyPost: isStickyVal,
       linkURLAndroid: domain.linkURLAndroid || '',
       linkURLIos: domain.linkURLIos || '',
-      links: domain.links || '',
+      links: linksVal,
+      bulletPoints: bulletsVal,
       isBookmarked: domain.isBookmarked || [],
       postOrder: domain.postOrder ?? 0,
       draft: domain.draft ?? false,
@@ -91,11 +140,7 @@ export class NewsMapper {
       category_ids: (domain.categoryIds ?? (domain as any).category_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       location_ids: (domain.locationIds ?? (domain as any).location_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (domain.aitagIds ?? (domain as any).aitag_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
-      post_type: domain.postType ?? (domain as any).post_type ?? domain.type ?? 'Standard',
-      is_sticky: domain.isSticky ?? (domain as any).is_sticky ?? domain.isStickyPost ?? false,
-      isWebPost: Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost),
-      is_web_post: Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost),
-      web_post_url: (domain as any).web_post_url || (domain as any).webPostUrl || (domain as any).webUrl || domain.postUrl || '',
+      isWebPost: isWebPostVal,
     };
   }
 

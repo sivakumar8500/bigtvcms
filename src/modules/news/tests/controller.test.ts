@@ -65,7 +65,19 @@ describe('useNewsController', () => {
   });
 
   it('should create post successfully', async () => {
-    const createData = { title: 'New Post', content: 'New Content' };
+    const createData = {
+      title: 'New Post',
+      notificationtitle: 'New Notification',
+      imagetitel: 'Image Title',
+      content: 'New Content',
+      imageUrl: 'https://example.com/img.jpg',
+      categoryName: ['General'],
+      languageId: 1,
+      language_code: 'en',
+      categoryIds: [1],
+      postType: 'Standed',
+      subType: '',
+    };
     const resDto = { id: 10, title: 'New Post', content: 'New Content' };
     (NewsRepository.create as jest.Mock).mockResolvedValue(resDto);
 
@@ -77,6 +89,16 @@ describe('useNewsController', () => {
 
     expect(NewsRepository.create).toHaveBeenCalled();
     expect(result.current.posts[0].id).toBe(10);
+  });
+
+  it('should handle validation error on create post', async () => {
+    const { result } = renderHook(() => useNewsController());
+
+    await act(async () => {
+      await expect(result.current.createPost({ title: '' })).rejects.toThrow();
+    });
+
+    expect(result.current.error).toBe('Title is required');
   });
 
   it('should update post successfully', async () => {

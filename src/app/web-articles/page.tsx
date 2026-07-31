@@ -381,9 +381,8 @@ export default function WebArticlesPage() {
     try {
       await NewsRepository.createNews({
         ...data,
-        is_web_post: true,
         isWebPost: true,
-        web_post_url: data.webUrl || data.postUrl || '',
+        postUrl: data.webUrl || data.postUrl || '',
       } as any);
       showToast(t.createSuccess, 'success');
       setCreateDrawerOpen(false);

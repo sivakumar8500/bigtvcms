@@ -79,7 +79,10 @@ describe('NewsRepository', () => {
 
     const result = await NewsRepository.create(createDto);
 
-    expect(apiClient.post).toHaveBeenCalledWith('/news-posts', createDto);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/news-posts',
+      expect.not.objectContaining({ post_name: expect.anything(), post_type: expect.anything() })
+    );
     expect(result).toEqual(createdResponse);
   });
 

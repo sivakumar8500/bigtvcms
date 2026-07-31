@@ -97,16 +97,17 @@ describe('NewsMapper', () => {
     expect(createDto.content).toBe('Created Content');
     expect(createDto.categoryName).toEqual(['National']);
     expect(createDto.image_url).toBe('http://example.com/img.png');
-    expect(createDto.post_name).toBe('created-title');
     expect(createDto.draft).toBe(true);
     expect(createDto.language_id).toBe(2);
     expect(createDto.category_ids).toEqual([101]);
     expect(createDto.location_ids).toEqual([201]);
-    expect(createDto.post_type).toBe('Standard');
-    expect(createDto.is_sticky).toBe(true);
+    expect(createDto.type).toBe('Standard');
+    expect(createDto.isStickyPost).toBe(true);
+    expect(createDto.post_name).toBeUndefined();
+    expect(createDto.post_type).toBeUndefined();
   });
 
-  it('should preserve isWebPost when set to true in CreateNewsPostDto and UpdateNewsPostDto', () => {
+  it('should preserve isWebPost and postUrl when set to true in CreateNewsPostDto and UpdateNewsPostDto', () => {
     const domainPartial = {
       title: 'Web Post Title',
       isWebPost: true,
@@ -115,8 +116,9 @@ describe('NewsMapper', () => {
 
     const createDto = NewsMapper.toCreateDto(domainPartial as any);
     expect(createDto.isWebPost).toBe(true);
-    expect(createDto.is_web_post).toBe(true);
-    expect(createDto.web_post_url).toBe('https://example.com/news/1');
+    expect(createDto.postUrl).toBe('https://example.com/news/1');
+    expect(createDto.is_web_post).toBeUndefined();
+    expect(createDto.web_post_url).toBeUndefined();
 
     const updateDto = NewsMapper.toUpdateDto(domainPartial as any);
     expect(updateDto.isWebPost).toBe(true);
@@ -217,7 +219,7 @@ describe('NewsMapper', () => {
     expect(createDto.title).toBe('Header Title');
     expect(createDto.notificationtitle).toBe('Notification');
     expect(createDto.imagetitel).toBe('Image Title');
-    expect(createDto.content).toBe('Body text with link and  space');
+    expect(createDto.content).toBe('<p>Body text with <a href="#">link</a> and &nbsp;space</p>');
 
     const updateDto = NewsMapper.toUpdateDto(rawPartial);
     expect(updateDto.title).toBe('Header Title');

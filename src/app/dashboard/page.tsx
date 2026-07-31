@@ -53,6 +53,8 @@ import { TagsRepository } from '@/modules/tags/repositories/tags.repository';
 import { NewsRepository } from '@/modules/news/repositories/news.repository';
 import { Loader } from '@/shared/components/Loader';
 import { stripHtml } from '@/shared/utils/html.utils';
+import { extractBulletPoints } from '@/shared/utils/bullet.utils';
+import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
 
 // Dashboard component translations mapped to store state keys
 const translations = {
@@ -719,7 +721,7 @@ export default function DashboardPage() {
       data.bodyEn || data.bodyTe || data.bodyHi || data.bodyMl || '';
 
     const resolvedTitle = stripHtml(rawTitle);
-    const resolvedContent = stripHtml(rawContent);
+    const resolvedContent = rawContent ? rawContent.trim() : '';
     return { mappedCategories, resolvedTitle, resolvedContent };
   };
 
@@ -749,31 +751,65 @@ export default function DashboardPage() {
   const handleCreatePost = async (data: CreateNewsFormData) => {
     const { mappedCategories, resolvedTitle, resolvedContent } = resolvePostFields(data);
     const todayISO = new Date().toISOString();
+    let resolvedType = data.type || 'Standed';
+    let resolvedSubType = (data as any).subType || '';
+    if (resolvedType.toLowerCase() === 'bulletpost' || resolvedType.toLowerCase() === 'bullet post') {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BulletPost';
+    } else if (resolvedType.toLowerCase() === 'standardlink' || resolvedType.toLowerCase() === 'standard link') {
+      resolvedType = 'Standed';
+      resolvedSubType = 'StandardLink';
+    } else if (
+      resolvedType.toLowerCase() === 'bigblackstanded' ||
+      resolvedType.toLowerCase() === 'bigblack standed' ||
+      resolvedType.toLowerCase() === 'big black standed'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BigBlackStanded';
+    } else if (resolvedType.toLowerCase() === 'video') {
+      resolvedType = 'Video';
+      resolvedSubType = '';
+    }
+
+    const extractedBullets = resolvedSubType === 'BulletPost'
+      ? (Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
+          ? (data as any).bulletPoints
+          : extractBulletPoints(resolvedContent))
+      : [];
+
+    let finalContent = resolvedContent;
+    let formattedLinks: any[] = [];
+    if (resolvedSubType === 'StandardLink' || (data as any).links) {
+      const formattedRes = formatLinksAndContent((data as any).links || (data as any).linkUrl || (data as any).webUrl, resolvedContent);
+      formattedLinks = formattedRes.links;
+      finalContent = formattedRes.content;
+    }
+
+    let rawVideoPlatform = data.videoSource || data.video_platform || '';
+    if (rawVideoPlatform.toLowerCase() === 'x' || rawVideoPlatform.toLowerCase() === 'twitter') {
+      rawVideoPlatform = 'Twitter';
+    }
+
     const createDto = {
       title: resolvedTitle,
       notificationtitle: resolvedTitle,
       imagetitel: resolvedTitle,
-      content: resolvedContent,
+      content: finalContent,
       created: todayISO,
-      post_name: resolvedTitle.toLowerCase().replace(/\s+/g, '-'),
       totalLikes: 0,
       totalViews: 0,
       totalComments: 0,
       image_url: data.imageUrl || '',
       video_url: data.videoUrl || data.video_url || '',
-      video_platform: data.videoSource || data.video_platform || '',
+      video_platform: rawVideoPlatform,
       gallery: data.galleryImages || [],
-      type: data.type || 'Standard',
-      totalShares: 0,
-      isReporter: false,
-      reportedBy: '',
-      categoryName: mappedCategories,
-      postUrl: data.webUrl || data.postUrl || '',
-      subType: '',
+      type: resolvedType,
+      subType: resolvedSubType,
+      bulletPoints: extractedBullets,
       isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
       linkURLAndroid: '',
       linkURLIos: '',
-      links: '',
+      links: formattedLinks,
       isBookmarked: [],
       postOrder: 0,
       draft: data.publishMode === 'draft',
@@ -784,10 +820,7 @@ export default function DashboardPage() {
       category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
-      post_type: data.postType || data.type || 'Standard',
       isWebPost: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
-      is_web_post: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
-      web_post_url: data.webUrl || data.postUrl || '',
     };
 
     let createdId = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 820700;

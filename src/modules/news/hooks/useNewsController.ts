@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { NewsPost } from '../domain/news.model';
 import { NewsRepository } from '../repositories/news.repository';
 import { NewsMapper } from '../mapper/news.mapper';
+import { validateCreateNewsPost } from '../validators/news.validator';
 
 export function useNewsController() {
   const [posts, setPosts] = useState<NewsPost[]>([]);
@@ -46,12 +47,13 @@ export function useNewsController() {
     setError(null);
     try {
       const dto = NewsMapper.toCreateDto(data);
+      validateCreateNewsPost(dto);
       const resDto = await NewsRepository.create(dto);
       const createdPost = NewsMapper.toDomain(resDto);
       setPosts((prev) => [createdPost, ...prev]);
       return createdPost;
     } catch (err: any) {
-      const errMsg = err?.message || 'Failed to create news post';
+      const errMsg = err?.errors?.[0]?.message || err?.message || 'Failed to create news post';
       setError(errMsg);
       throw err;
     } finally {

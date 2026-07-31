@@ -632,6 +632,15 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     }
   }, [language]);
 
+  // Reset isWebPost to false when post type is BulletPost, StandardLink, or BigBlackStanded
+  useEffect(() => {
+    const tLower = type.toLowerCase();
+    if (tLower.includes('bullet') || tLower.includes('link') || tLower.includes('standardlink') || tLower.includes('bigblack')) {
+      setIsWebPost(false);
+      setWebUrl('');
+    }
+  }, [type]);
+
   // Map initial tags/aitagIds to dynamicTags keys so already selected tags are pre-selected in edit mode
   useEffect(() => {
     if (initialData) {
@@ -1671,7 +1680,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
                   {(['now', 'draft', 'schedule'] as const).map((mode) => {
-                    const labels = { now: '=嚙� Publish Now', draft: '=嚙� Save as Draft', schedule: '=P Schedule' };
+                    const labels = { now: '🚀 Publish Now', draft: '💾 Save as Draft', schedule: '🕒 Schedule' };
                     const isSelected = publishMode === mode;
                     return (
                       <Box
@@ -1710,7 +1719,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 {publishMode === 'schedule' && (
                   <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '10px', backgroundColor: isDark ? 'rgba(166,226,245,0.05)' : 'rgba(28,20,69,0.03)', border: isDark ? '1px solid rgba(166,226,245,0.15)' : '1px solid rgba(28,20,69,0.1)' }}>
                     <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.8, fontSize: '0.74rem' }}>
-                      Today only 嚙� {todayDate}
+                      Today only 📅 {todayDate}
                     </Typography>
                     <Box
                       component="input"
@@ -1779,8 +1788,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Box>
               </Box>
 
-              {/* Is Web Post Toggle */}
-              <Box sx={{ mt: 2 }}>
+              {/* Is Web Post Toggle - Hidden for BulletPost, StandardLink, and BigBlackStanded */}
+              {!type.toLowerCase().includes('bullet') && !type.toLowerCase().includes('link') && !type.toLowerCase().includes('bigblack') && (
+                <>
+                  <Box sx={{ mt: 2 }}>
                 <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
                 <Box
                   sx={{
@@ -1853,6 +1864,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     }}
                   />
                 </Box>
+              )}
+                </>
               )}
 
               {/* Video Source + Video URL �� shown only for video post types */}

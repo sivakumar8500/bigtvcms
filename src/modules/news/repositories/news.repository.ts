@@ -1,6 +1,16 @@
 import { apiClient } from '@/core/api/api-client';
 import { CreateNewsPostDto, NewsPostDto, UpdateNewsPostDto } from '../dto/news.dto';
 
+function cleanPayload<T extends Record<string, any>>(dto: T): T {
+  if (!dto || typeof dto !== 'object') return dto;
+  const clean = { ...dto };
+  delete (clean as any).post_name;
+  delete (clean as any).post_type;
+  delete (clean as any).is_web_post;
+  delete (clean as any).web_post_url;
+  return clean;
+}
+
 export class NewsRepository {
   static async getAll(skip: number = 0, limit: number = 100): Promise<NewsPostDto[]> {
     return apiClient.get<NewsPostDto[]>('/news-posts', { skip, limit });
@@ -15,7 +25,8 @@ export class NewsRepository {
   }
 
   static async create(dto: CreateNewsPostDto): Promise<NewsPostDto> {
-    return apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', dto);
+    const cleaned = cleanPayload(dto);
+    return apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', cleaned);
   }
 
   static async createNews(dto: CreateNewsPostDto): Promise<NewsPostDto> {

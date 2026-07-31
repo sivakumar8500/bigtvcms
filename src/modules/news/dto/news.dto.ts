@@ -23,7 +23,8 @@ export interface NewsPostDto {
   isStickyPost?: boolean;
   linkURLAndroid?: string;
   linkURLIos?: string;
-  links?: string;
+  links?: string | string[] | Array<{ id: string; value: string }>;
+  bulletPoints?: string[];
   isBookmarked?: string[];
   postOrder?: number;
   draft?: boolean;
@@ -49,7 +50,7 @@ export interface CreateNewsPostDto {
   imagetitel: string;
   content: string;
   created: string;
-  post_name: string;
+  post_name?: string;
   totalLikes: number;
   totalViews: number;
   totalComments: number;
@@ -67,7 +68,8 @@ export interface CreateNewsPostDto {
   isStickyPost: boolean;
   linkURLAndroid: string;
   linkURLIos: string;
-  links: string;
+  links: string | string[] | Array<{ id: string; value: string }>;
+  bulletPoints?: string[];
   isBookmarked: string[];
   postOrder: number;
   draft: boolean;
@@ -77,7 +79,7 @@ export interface CreateNewsPostDto {
   language_code?: string;
   category_ids: number[];
   location_ids: number[];
-  post_type: string;
+  post_type?: string;
   is_sticky?: boolean;
   isWebPost?: boolean;
   is_web_post?: boolean;
@@ -111,7 +113,8 @@ export interface UpdateNewsPostDto {
   isStickyPost?: boolean;
   linkURLAndroid?: string;
   linkURLIos?: string;
-  links?: string;
+  links?: string | string[];
+  bulletPoints?: string[];
   isBookmarked?: string[];
   postOrder?: number;
   draft?: boolean;

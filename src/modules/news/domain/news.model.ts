@@ -23,7 +23,8 @@ export interface NewsPost {
   isStickyPost: boolean;
   linkURLAndroid: string;
   linkURLIos: string;
-  links: string;
+  links: string | string[];
+  bulletPoints?: string[];
   isBookmarked: string[];
   postOrder: number;
   draft: boolean;
