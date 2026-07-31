@@ -18,11 +18,23 @@ export class NewsRepository {
     return apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', dto);
   }
 
+  static async createNews(dto: CreateNewsPostDto): Promise<NewsPostDto> {
+    return this.create(dto);
+  }
+
   static async update(id: number, dto: UpdateNewsPostDto): Promise<NewsPostDto> {
     return apiClient.put<NewsPostDto, UpdateNewsPostDto>(`/news-posts/${id}`, dto);
   }
 
+  static async updateNews(id: number, dto: UpdateNewsPostDto): Promise<NewsPostDto> {
+    return this.update(id, dto);
+  }
+
   static async delete(id: number): Promise<{ message?: string } | void> {
     return apiClient.delete<{ message?: string } | void>(`/news-posts/${id}`);
+  }
+
+  static async deleteNews(id: number): Promise<{ message?: string } | void> {
+    return this.delete(id);
   }
 }
