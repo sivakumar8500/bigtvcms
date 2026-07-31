@@ -6,6 +6,10 @@ export class CategoryRepository {
     return apiClient.get<CategoryDto[]>('/admin/categories', lang ? { lang } : { skip_lang_param: true });
   }
 
+  static async getCategories(lang?: string): Promise<CategoryDto[]> {
+    return this.getAll(lang);
+  }
+
   static async create(dto: CreateCategoryDto): Promise<CreateCategoryResponse> {
     return apiClient.post<CreateCategoryResponse, CreateCategoryDto>('/admin/categories/create', dto);
   }

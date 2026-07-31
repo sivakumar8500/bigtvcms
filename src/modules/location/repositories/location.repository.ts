@@ -27,6 +27,10 @@ export class LocationRepository {
     }
   }
 
+  static async getLocations(skipOrLang: number | string = 0, limit: number = 100): Promise<StateResponseDto[]> {
+    return this.getAll(skipOrLang, limit);
+  }
+
   static async create(dto: CreateStateDto): Promise<StateResponseDto> {
     try {
       const res: any = await apiClient.post<any, CreateStateDto>('/admin/states/create', dto);

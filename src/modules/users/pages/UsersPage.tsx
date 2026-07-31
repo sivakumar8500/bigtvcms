@@ -217,7 +217,6 @@ const translations = {
 };
 
 export const UsersPage: React.FC = () => {
-  const router = useRouter();
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
   const isDark = mode === 'dark';

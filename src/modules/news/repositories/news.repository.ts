@@ -6,6 +6,10 @@ export class NewsRepository {
     return apiClient.get<NewsPostDto[]>('/news-posts', { skip, limit });
   }
 
+  static async getAllNews(skip: number = 0, limit: number = 100): Promise<NewsPostDto[]> {
+    return this.getAll(skip, limit);
+  }
+
   static async getById(id: number): Promise<NewsPostDto> {
     return apiClient.get<NewsPostDto>(`/news-posts/${id}`);
   }

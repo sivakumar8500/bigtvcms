@@ -6,6 +6,10 @@ export class PostTypeRepository {
     return apiClient.get<PostTypeResponseDto[]>('/post-types', { skip, limit });
   }
 
+  static async getPostTypes(skip: number = 0, limit: number = 100): Promise<PostTypeResponseDto[]> {
+    return this.getAll(skip, limit);
+  }
+
   static async create(dto: CreatePostTypeDto): Promise<PostTypeResponseDto> {
     return apiClient.post<PostTypeResponseDto, CreatePostTypeDto>('/post-types', dto);
   }

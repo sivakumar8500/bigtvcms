@@ -6,6 +6,10 @@ export class TagsRepository {
     return apiClient.get<AiTagDto[]>('/aitags', lang ? { lang } : undefined);
   }
 
+  static async getTags(lang?: string): Promise<AiTagDto[]> {
+    return this.getAll(lang);
+  }
+
   static async create(dto: CreateAiTagDto): Promise<CreateAiTagResponse> {
     return apiClient.post<CreateAiTagResponse, CreateAiTagDto>('/aitags/create', dto);
   }
