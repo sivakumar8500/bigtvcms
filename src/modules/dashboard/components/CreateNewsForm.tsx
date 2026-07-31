@@ -336,7 +336,7 @@ interface CreateNewsFormProps {
   onSubmit: (data: CreateNewsFormData) => void;
   isDark: boolean;
   language: 'en' | 'te' | 'hi' | 'ml';
-  initialData?: CreateNewsFormData;
+  initialData?: Partial<CreateNewsFormData>;
 }
 
 export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
@@ -525,18 +525,22 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [dragOver, setDragOver] = useState(false);
 
   // Form states  seeded from initialData when editing
-  const [title, setTitle] = useState(initialData
-    ? (initialData.postLanguage === 'te' ? initialData.titleTe
-      : initialData.postLanguage === 'hi' ? initialData.titleHi
-      : initialData.postLanguage === 'ml' ? initialData.titleMl
-      : initialData.titleEn)
-    : '');
-  const [body, setBody] = useState(initialData
-    ? (initialData.postLanguage === 'te' ? initialData.bodyTe
-      : initialData.postLanguage === 'hi' ? initialData.bodyHi
-      : initialData.postLanguage === 'ml' ? initialData.bodyMl
-      : initialData.bodyEn)
-    : '');
+  const [title, setTitle] = useState<string>(
+    (initialData
+      ? (initialData.postLanguage === 'te' ? initialData.titleTe
+        : initialData.postLanguage === 'hi' ? initialData.titleHi
+        : initialData.postLanguage === 'ml' ? initialData.titleMl
+        : initialData.titleEn)
+      : '') || ''
+  );
+  const [body, setBody] = useState<string>(
+    (initialData
+      ? (initialData.postLanguage === 'te' ? initialData.bodyTe
+        : initialData.postLanguage === 'hi' ? initialData.bodyHi
+        : initialData.postLanguage === 'ml' ? initialData.bodyMl
+        : initialData.bodyEn)
+      : '') || ''
+  );
 
   // Reverse-map Telugu category names back to English keys for checkbox preselection
   const teluguToEnglishCategoryMap: Record<string, string> = {
@@ -552,7 +556,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const mapCategoryToKey = (cat: string) => teluguToEnglishCategoryMap[cat] || cat;
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    initialData ? initialData.categories.map(mapCategoryToKey) : []
+    initialData?.categories ? initialData.categories.map(mapCategoryToKey) : []
   );
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
     if (!initialData) return [];
@@ -566,13 +570,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [location, setLocation] = useState<string[]>(initialData?.location || []);
   const [type, setType] = useState(() => {
     const validTypes = ['Standard', 'Video', 'Reel', 'Podcast'];
-    if (initialData?.type) {
-      const found = validTypes.find(t => t.toLowerCase() === initialData.type.toLowerCase());
+    const initType = initialData?.type;
+    if (initType) {
+      const found = validTypes.find((t) => t.toLowerCase() === initType.toLowerCase());
       if (found) return found;
-      if (initialData.type === 'sivakumar' || initialData.type === 'string') {
+      if (initType === 'sivakumar' || initType === 'string') {
         return 'Standard';
       }
-      return initialData.type;
+      return initType;
     }
     return 'Standard';
   });
