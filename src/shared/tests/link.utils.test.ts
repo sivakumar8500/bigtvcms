@@ -1,4 +1,5 @@
 import { formatLinks, formatLinksAndContent } from '../utils/link.utils';
+import { stripAllTagsExceptLinkTags } from '../utils/html.utils';
 
 describe('formatLinksAndContent', () => {
   it('should format string array into objects with id and value', () => {
@@ -45,6 +46,12 @@ describe('formatLinksAndContent', () => {
         value: 'https://google.com',
       },
     ]);
+  });
+
+  it('should strip <span> tags with styles from content in all post formats', () => {
+    const spanContent = '<span style="color: rgb(31, 41, 55); font-family: Ramabhadra;">విజయనగరం జిల్లా భోగాపురంలో...</span>';
+    const cleaned = stripAllTagsExceptLinkTags(spanContent);
+    expect(cleaned).toBe('విజయనగరం జిల్లా భోగాపురంలో...');
   });
 
   it('should extract URLs from content string if links array is empty', () => {

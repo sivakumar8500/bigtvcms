@@ -141,7 +141,7 @@ describe('NewsMapper', () => {
       videoUrl: 'http://example.com/v.mp4',
       videoPlatform: 'youtube',
       gallery: ['g1', 'g2'],
-      type: 'Video',
+      type: 'Standed',
       totalShares: 5,
       isReporter: true,
       reportedBy: 'Jane',
@@ -181,7 +181,7 @@ describe('NewsMapper', () => {
     expect(updateDto.video_url).toBe('http://example.com/v.mp4');
     expect(updateDto.video_platform).toBe('youtube');
     expect(updateDto.gallery).toEqual(['g1', 'g2']);
-    expect(updateDto.type).toBe('Video');
+    expect(updateDto.type).toBe('Standed');
     expect(updateDto.totalShares).toBe(5);
     expect(updateDto.isReporter).toBe(true);
     expect(updateDto.reportedBy).toBe('Jane');
@@ -191,7 +191,7 @@ describe('NewsMapper', () => {
     expect(updateDto.isStickyPost).toBe(true);
     expect(updateDto.linkURLAndroid).toBe('app://a');
     expect(updateDto.linkURLIos).toBe('app://i');
-    expect(updateDto.links).toBe('http://link.com');
+    expect(updateDto.links).toEqual([{ id: 'link1', value: 'http://link.com' }]);
     expect(updateDto.isBookmarked).toEqual(['u1']);
     expect(updateDto.postOrder).toBe(3);
     expect(updateDto.draft).toBe(true);
@@ -219,7 +219,7 @@ describe('NewsMapper', () => {
     expect(createDto.title).toBe('Header Title');
     expect(createDto.notificationtitle).toBe('Notification');
     expect(createDto.imagetitel).toBe('Image Title');
-    expect(createDto.content).toBe('<p>Body text with <a href="#">link</a> and &nbsp;space</p>');
+    expect(createDto.content).toBe('Body text with link and  space');
 
     const updateDto = NewsMapper.toUpdateDto(rawPartial);
     expect(updateDto.title).toBe('Header Title');

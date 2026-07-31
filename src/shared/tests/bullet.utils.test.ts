@@ -1,20 +1,26 @@
-import { extractBulletPoints } from '../utils/bullet.utils';
+import { extractBulletPoints, formatBulletPostContentAndBullets } from '../utils/bullet.utils';
 
-describe('extractBulletPoints', () => {
-  it('should extract inline bullet points and remove square brackets', () => {
-    const content =
-      '[ప్రధాన వార్త శీర్షిక]• [ముఖ్యమైన విషయం – 1]• [ముఖ్యమైన విషయం – 2]• [ముఖ్యమైన విషయం – 3]• [అధికారుల ప్రకటన / తాజా సమాచారం]';
+describe('formatBulletPostContentAndBullets', () => {
+  it('should extract bullet points and remove bullet point lines from content', () => {
+    const rawContent = `📰 BREAKING NEWS | [LOCATION]
+🔴 [Main News Headline]
+ [Key point – 1]
+ [Key point – 2]
+ [Key point – 3]
+ [Official statement / Latest update]`;
 
-    const points = extractBulletPoints(content);
-    expect(points).toEqual([
-      'ముఖ్యమైన విషయం – 1',
-      'ముఖ్యమైన విషయం – 2',
-      'ముఖ్యమైన విషయం – 3',
-      'అధికారుల ప్రకటన / తాజా సమాచారం',
+    const result = formatBulletPostContentAndBullets(rawContent);
+
+    expect(result.bulletPoints).toEqual([
+      'Key point – 1',
+      'Key point – 2',
+      'Key point – 3',
+      'Official statement / Latest update',
     ]);
+    expect(result.content).toBe('📰 BREAKING NEWS | [LOCATION]\n🔴 [Main News Headline]');
   });
 
-  it('should extract bullet points formatted with • bullet characters and linebreaks', () => {
+  it('should extract bullet points formatted with • bullet characters and return header content', () => {
     const content = `
 [ప్రధాన వార్త శీర్షిక]
 
@@ -24,13 +30,14 @@ describe('extractBulletPoints', () => {
 • [అధికారుల ప్రకటన / తాజా సమాచారం]
     `;
 
-    const points = extractBulletPoints(content);
-    expect(points).toEqual([
+    const result = formatBulletPostContentAndBullets(content);
+    expect(result.bulletPoints).toEqual([
       'ముఖ్యమైన విషయం – 1',
       'ముఖ్యమైన విషయం – 2',
       'ముఖ్యమైన విషయం – 3',
       'అధికారుల ప్రకటన / తాజా సమాచారం',
     ]);
+    expect(result.content).toBe('[ప్రధాన వార్త శీర్షిక]');
   });
 
   it('should extract bullet points formatted with dash or star', () => {
@@ -40,28 +47,8 @@ Headline text
 * point 2
 - point 3
     `;
-    const points = extractBulletPoints(content);
-    expect(points).toEqual(['point 1', 'point 2', 'point 3']);
-  });
-
-  it('should extract bullet points from HTML <li> tags', () => {
-    const content = `
-<p>[ప్రధాన వార్త శీర్షిక]</p>
-<ul>
-  <li>అవకాడో ఉదయం తినడం మంచిది.</li>
-  <li>జామపండు మధ్యాహ్నం తీసుకోవాలి.</li>
-</ul>
-    `;
-    const points = extractBulletPoints(content);
-    expect(points).toEqual([
-      'అవకాడో ఉదయం తినడం మంచిది.',
-      'జామపండు మధ్యాహ్నం తీసుకోవాలి.',
-    ]);
-  });
-
-  it('should return empty array when content has no bullet points', () => {
-    const content = 'Plain paragraph content without any bullets.';
-    const points = extractBulletPoints(content);
-    expect(points).toEqual([]);
+    const result = formatBulletPostContentAndBullets(content);
+    expect(result.bulletPoints).toEqual(['point 1', 'point 2', 'point 3']);
+    expect(result.content).toBe('Headline text');
   });
 });

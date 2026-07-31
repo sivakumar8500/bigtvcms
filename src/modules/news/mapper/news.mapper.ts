@@ -1,7 +1,7 @@
 import { CreateNewsPostDto, NewsPostDto, UpdateNewsPostDto } from '../dto/news.dto';
 import { NewsPost } from '../domain/news.model';
-import { stripHtml } from '@/shared/utils/html.utils';
-import { extractBulletPoints } from '@/shared/utils/bullet.utils';
+import { stripAllTagsExceptLinkTags, stripHtml } from '@/shared/utils/html.utils';
+import { extractBulletPoints, formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
 import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
 
 export class NewsMapper {
@@ -57,7 +57,6 @@ export class NewsMapper {
     const cleanNotificationTitle = stripHtml(domain.notificationtitle || domain.title || '');
     const cleanImageTitle = stripHtml(domain.imagetitel || domain.title || '');
     let cleanContent = (domain.content || '').trim();
-    const isWebPostVal = Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost);
     let rawType = domain.type || (domain as any).post_type || domain.postType || 'Standed';
     let subTypeVal = domain.subType || '';
 
@@ -68,15 +67,29 @@ export class NewsMapper {
       rawType = 'Standed';
       subTypeVal = 'StandardLink';
     } else if (
+      rawType.toLowerCase() === 'bigblackstandard' ||
       rawType.toLowerCase() === 'bigblackstanded' ||
-      rawType.toLowerCase() === 'bigblack standed' ||
-      rawType.toLowerCase() === 'big black standed'
+      rawType.toLowerCase() === 'bigblack standard' ||
+      rawType.toLowerCase() === 'big black standard' ||
+      subTypeVal.toLowerCase() === 'bigblackstandard' ||
+      subTypeVal.toLowerCase() === 'bigblackstanded'
     ) {
       rawType = 'Standed';
-      subTypeVal = 'BigBlackStanded';
+      subTypeVal = 'BigBlackStandard';
     } else if (rawType.toLowerCase() === 'video') {
       rawType = 'Video';
       subTypeVal = '';
+    } else if (
+      rawType.toLowerCase() === 'imagead' ||
+      rawType.toLowerCase() === 'image ad' ||
+      subTypeVal.toLowerCase() === 'imagead' ||
+      subTypeVal.toLowerCase() === 'image ad'
+    ) {
+      rawType = 'Image';
+      subTypeVal = 'ImageAd';
+    } else if (rawType.toLowerCase() === 'image') {
+      rawType = 'Image';
+      subTypeVal = subTypeVal || 'Image';
     }
 
     const isStickyVal = domain.isStickyPost ?? (domain as any).is_sticky ?? domain.isSticky ?? false;
@@ -84,12 +97,17 @@ export class NewsMapper {
 
     let bulletsVal: string[] = [];
     if (subTypeVal === 'BulletPost') {
-      if (Array.isArray(domain.bulletPoints) && domain.bulletPoints.length > 0) {
-        bulletsVal = domain.bulletPoints.map((pt) => String(pt).replace(/[\[\]]/g, '').trim()).filter(Boolean);
-      } else {
-        bulletsVal = extractBulletPoints(domain.content || '');
-      }
-    } else if (Array.isArray(domain.bulletPoints) && subTypeVal !== 'StandardLink' && subTypeVal !== 'BigBlackStanded' && rawType !== 'Video') {
+      const formatted = formatBulletPostContentAndBullets(domain.content || '', domain.bulletPoints);
+      bulletsVal = formatted.bulletPoints;
+      cleanContent = formatted.content;
+    } else if (
+      Array.isArray(domain.bulletPoints) &&
+      subTypeVal !== 'StandardLink' &&
+      subTypeVal !== 'BigBlackStandard' &&
+      subTypeVal !== 'BigBlackStanded' &&
+      rawType !== 'Video' &&
+      rawType !== 'Image'
+    ) {
       bulletsVal = domain.bulletPoints.map((pt) => String(pt).replace(/[\[\]]/g, '').trim()).filter(Boolean);
     }
 
@@ -104,6 +122,24 @@ export class NewsMapper {
     if (rawVideoPlatform.toLowerCase() === 'x' || rawVideoPlatform.toLowerCase() === 'twitter') {
       rawVideoPlatform = 'Twitter';
     }
+
+    if (rawType === 'Video' || rawType === 'Image') {
+      bulletsVal = [];
+      linksVal = [];
+    }
+
+    cleanContent = stripAllTagsExceptLinkTags(cleanContent);
+
+    const isWebPostVal = (
+      subTypeVal === 'BulletPost' ||
+      subTypeVal === 'StandardLink' ||
+      subTypeVal === 'BigBlackStandard' ||
+      subTypeVal === 'BigBlackStanded' ||
+      rawType === 'Video' ||
+      rawType === 'Image'
+    )
+      ? false
+      : Boolean((domain as any).isWebPost || (domain as any).is_web_post || (domain as any).isWebpost);
 
     return {
       title: cleanTitle,
@@ -145,69 +181,31 @@ export class NewsMapper {
   }
 
   static toUpdateDto(domain: Partial<NewsPost>): UpdateNewsPostDto {
-    const dto: UpdateNewsPostDto = {};
-    if (domain.title !== undefined) dto.title = stripHtml(domain.title);
-    if (domain.notificationtitle !== undefined) dto.notificationtitle = stripHtml(domain.notificationtitle);
-    if (domain.imagetitel !== undefined) dto.imagetitel = stripHtml(domain.imagetitel);
-    if (domain.content !== undefined) dto.content = stripHtml(domain.content);
-    if (domain.created !== undefined) dto.created = domain.created;
-    if (domain.postName !== undefined) dto.post_name = domain.postName;
-    if (domain.totalLikes !== undefined) dto.totalLikes = domain.totalLikes;
-    if (domain.totalViews !== undefined) dto.totalViews = domain.totalViews;
-    if (domain.totalComments !== undefined) dto.totalComments = domain.totalComments;
-    if (domain.imageUrl !== undefined) dto.image_url = domain.imageUrl;
-    if (domain.videoUrl !== undefined) dto.video_url = domain.videoUrl;
-    if (domain.videoPlatform !== undefined) dto.video_platform = domain.videoPlatform;
-    if (domain.gallery !== undefined) dto.gallery = domain.gallery;
-    if (domain.type !== undefined) dto.type = domain.type;
-    if (domain.totalShares !== undefined) dto.totalShares = domain.totalShares;
-    if (domain.isReporter !== undefined) dto.isReporter = domain.isReporter;
-    if (domain.reportedBy !== undefined) dto.reportedBy = domain.reportedBy;
-    if (domain.categoryName !== undefined) dto.categoryName = domain.categoryName;
-    if (domain.postUrl !== undefined) dto.postUrl = domain.postUrl;
-    if (domain.subType !== undefined) dto.subType = domain.subType;
-    if (domain.isStickyPost !== undefined) dto.isStickyPost = domain.isStickyPost;
-    if (domain.linkURLAndroid !== undefined) dto.linkURLAndroid = domain.linkURLAndroid;
-    if (domain.linkURLIos !== undefined) dto.linkURLIos = domain.linkURLIos;
-    if (domain.links !== undefined) dto.links = domain.links;
-    if (domain.isBookmarked !== undefined) dto.isBookmarked = domain.isBookmarked;
-    if (domain.postOrder !== undefined) dto.postOrder = domain.postOrder;
-    if (domain.draft !== undefined) dto.draft = domain.draft;
-    if (domain.trash !== undefined) dto.trash = domain.trash;
-    if (domain.schedule !== undefined) dto.schedule = domain.schedule;
+    const fullDto = NewsMapper.toCreateDto(domain as NewsPost);
+    const dto: UpdateNewsPostDto = { ...fullDto };
 
     const rawDomain = domain as any;
-    if (rawDomain.language_code !== undefined || rawDomain.languageCode !== undefined || rawDomain.postLanguage !== undefined) {
-      dto.language_code = rawDomain.language_code ?? rawDomain.languageCode ?? rawDomain.postLanguage;
+    if (rawDomain.postName !== undefined || rawDomain.post_name !== undefined) {
+      dto.post_name = rawDomain.postName ?? rawDomain.post_name;
     }
-    if (domain.languageId !== undefined || rawDomain.language_id !== undefined) {
-      dto.language_id = domain.languageId ?? rawDomain.language_id;
+    if (rawDomain.post_type !== undefined || rawDomain.postType !== undefined) {
+      dto.post_type = rawDomain.post_type ?? rawDomain.postType ?? fullDto.type;
     }
-    if (domain.categoryIds !== undefined || rawDomain.category_ids !== undefined) {
-      const raw = domain.categoryIds ?? rawDomain.category_ids ?? [];
-      dto.category_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
+    if (rawDomain.is_web_post !== undefined || rawDomain.isWebPost !== undefined) {
+      dto.is_web_post = rawDomain.is_web_post ?? rawDomain.isWebPost ?? fullDto.isWebPost;
     }
-    if (domain.locationIds !== undefined || rawDomain.location_ids !== undefined) {
-      const raw = domain.locationIds ?? rawDomain.location_ids ?? [];
-      dto.location_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
+    if (rawDomain.web_post_url !== undefined || rawDomain.webPostUrl !== undefined) {
+      dto.web_post_url = rawDomain.web_post_url ?? rawDomain.webPostUrl ?? fullDto.postUrl;
     }
-    if (domain.aitagIds !== undefined || rawDomain.aitag_ids !== undefined) {
-      const raw = domain.aitagIds ?? rawDomain.aitag_ids ?? [];
-      dto.aitag_ids = Array.isArray(raw) ? raw.filter((id: number) => typeof id === 'number' && id > 0) : [];
+    if (rawDomain.is_sticky !== undefined || rawDomain.isSticky !== undefined) {
+      dto.is_sticky = rawDomain.is_sticky ?? rawDomain.isSticky ?? fullDto.isStickyPost;
     }
-    if (domain.postType !== undefined || rawDomain.post_type !== undefined) {
-      dto.post_type = domain.postType ?? rawDomain.post_type;
+    if (domain.content !== undefined && !domain.subType && !rawDomain.sub_type && !domain.type && !rawDomain.post_type) {
+      dto.content = stripHtml(domain.content);
     }
-    if (domain.isSticky !== undefined || rawDomain.is_sticky !== undefined) {
-      dto.is_sticky = domain.isSticky ?? rawDomain.is_sticky;
-    }
-    if (rawDomain.isWebPost !== undefined || rawDomain.is_web_post !== undefined || rawDomain.isWebpost !== undefined) {
-      const webVal = Boolean(rawDomain.isWebPost || rawDomain.is_web_post || rawDomain.isWebpost);
-      dto.isWebPost = webVal;
-      dto.is_web_post = webVal;
-    }
-    if (rawDomain.web_post_url !== undefined || rawDomain.webPostUrl !== undefined || rawDomain.webUrl !== undefined) {
-      dto.web_post_url = rawDomain.web_post_url || rawDomain.webPostUrl || rawDomain.webUrl;
+
+    if (domain.subType !== undefined) {
+      dto.subType = domain.subType;
     }
 
     return dto;

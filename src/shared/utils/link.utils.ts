@@ -1,3 +1,5 @@
+import { stripAllTagsExceptLinkTags } from './html.utils';
+
 export interface FormattedLinksResult {
   links: Array<{ id: string; value: string }>;
   content: string;
@@ -76,10 +78,7 @@ export function formatLinksAndContent(linksInput: any, content?: string): Format
 
   // 4. Strip all other HTML tags EXCEPT <linkX> and </linkX> tags from content
   if (updatedContent && typeof updatedContent === 'string') {
-    updatedContent = updatedContent
-      .replace(/<(?!\/?link\d+[\s>])[^>]+>/gi, '')
-      .replace(/&nbsp;/g, ' ')
-      .trim();
+    updatedContent = stripAllTagsExceptLinkTags(updatedContent);
   }
 
   return {

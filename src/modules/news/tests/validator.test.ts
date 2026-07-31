@@ -137,7 +137,7 @@ describe('News Validator - Create Post Validation', () => {
     it('should throw error when subType is invalid (neither empty nor BulletPost)', () => {
       expect(() =>
         validateCreateNewsPost({ ...validStandardPostBody, subType: 'invalidType' })
-      ).toThrow(/subType must be empty, 'BulletPost', 'StandardLink', or 'BigBlackStanded' for Standard post/);
+      ).toThrow(/subType must be empty, 'BulletPost', 'StandardLink', or 'BigBlackStandard' for Standard post/);
     });
 
     it('should successfully validate BulletPost with explicit bulletPoints', () => {
@@ -157,6 +157,20 @@ describe('News Validator - Create Post Validation', () => {
         'అవకాడో ఉదయం తినడం మంచిది.',
         'జామపండు మధ్యాహ్నం తీసుకోవాలి.',
       ]);
+    });
+
+    it('should strip HTML tags from content when subType is BulletPost', () => {
+      const htmlBulletPayload = {
+        ...validStandardPostBody,
+        type: 'Standed',
+        subType: 'BulletPost',
+        content: '<p>📰 <strong>BREAKING NEWS</strong></p><p>• Point 1<br>• Point 2</p>',
+        bulletPoints: ['Point 1', 'Point 2'],
+      };
+      const validated = validateCreateNewsPost(htmlBulletPayload);
+      expect(validated.content).not.toContain('<p>');
+      expect(validated.content).not.toContain('<strong>');
+      expect(validated.content).toContain('BREAKING NEWS');
     });
 
     it('should auto-extract bulletPoints from content when subType is BulletPost', () => {
@@ -224,29 +238,28 @@ describe('News Validator - Create Post Validation', () => {
       ]);
     });
 
-    it('should successfully validate BigBlackStanded post type', () => {
+    it('should successfully validate BigBlackStandard post type', () => {
       const bigBlackPayload = {
         ...validStandardPostBody,
-        type: 'BigBlackStanded',
+        type: 'BigBlackStandard',
       };
       const validated = validateCreateNewsPost(bigBlackPayload);
       expect(validated.type).toBe('Standed');
-      expect(validated.subType).toBe('BigBlackStanded');
+      expect(validated.subType).toBe('BigBlackStandard');
       expect(validated.bulletPoints).toEqual([]);
     });
 
-    it('should successfully validate Video post type with video_platform and video_url', () => {
-      const videoPayload = {
+    it('should successfully validate ImageAd post type with type Image and subType ImageAd', () => {
+      const imageAdPayload = {
         ...validStandardPostBody,
-        type: 'Video',
-        subType: '',
-        video_platform: 'Twitter',
-        video_url: 'https://video.twimg.com/amplify_video/sample.mp4',
+        type: 'ImageAd',
       };
-      const validated = validateCreateNewsPost(videoPayload);
-      expect(validated.type).toBe('Video');
-      expect(validated.subType).toBe('');
-      expect(validated.video_url).toBe('https://video.twimg.com/amplify_video/sample.mp4');
+      const validated = validateCreateNewsPost(imageAdPayload);
+      expect(validated.type).toBe('Image');
+      expect(validated.subType).toBe('ImageAd');
+      expect(validated.bulletPoints).toEqual([]);
+      expect(validated.links).toEqual([]);
+      expect(validated.isWebPost).toBe(false);
     });
 
     it('should successfully validate Video post type with Youtube platform and URL', () => {

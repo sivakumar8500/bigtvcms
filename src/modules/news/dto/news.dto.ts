@@ -113,7 +113,7 @@ export interface UpdateNewsPostDto {
   isStickyPost?: boolean;
   linkURLAndroid?: string;
   linkURLIos?: string;
-  links?: string | string[];
+  links?: string | string[] | Array<{ id: string; value: string }>;
   bulletPoints?: string[];
   isBookmarked?: string[];
   postOrder?: number;

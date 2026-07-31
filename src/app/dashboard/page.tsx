@@ -51,9 +51,10 @@ import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.
 import { LocationRepository } from '@/modules/location/repositories/location.repository';
 import { TagsRepository } from '@/modules/tags/repositories/tags.repository';
 import { NewsRepository } from '@/modules/news/repositories/news.repository';
+import { CreateNewsPostDto } from '@/modules/news/dto/news.dto';
 import { Loader } from '@/shared/components/Loader';
-import { stripHtml } from '@/shared/utils/html.utils';
-import { extractBulletPoints } from '@/shared/utils/bullet.utils';
+import { stripAllTagsExceptLinkTags, stripHtml } from '@/shared/utils/html.utils';
+import { extractBulletPoints, formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
 import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
 
 // Dashboard component translations mapped to store state keys
@@ -760,24 +761,42 @@ export default function DashboardPage() {
       resolvedType = 'Standed';
       resolvedSubType = 'StandardLink';
     } else if (
+      resolvedType === 'BigBlackStandard' ||
+      resolvedType === 'BigBlackStanded' ||
+      resolvedType.toLowerCase() === 'bigblackstandard' ||
       resolvedType.toLowerCase() === 'bigblackstanded' ||
-      resolvedType.toLowerCase() === 'bigblack standed' ||
-      resolvedType.toLowerCase() === 'big black standed'
+      resolvedType.toLowerCase() === 'bigblack standard' ||
+      resolvedType.toLowerCase() === 'big black standard' ||
+      resolvedSubType === 'BigBlackStandard' ||
+      resolvedSubType === 'BigBlackStanded'
     ) {
       resolvedType = 'Standed';
-      resolvedSubType = 'BigBlackStanded';
+      resolvedSubType = 'BigBlackStandard';
     } else if (resolvedType.toLowerCase() === 'video') {
       resolvedType = 'Video';
       resolvedSubType = '';
+    } else if (
+      resolvedType.toLowerCase() === 'imagead' ||
+      resolvedType.toLowerCase() === 'image ad' ||
+      resolvedSubType.toLowerCase() === 'imagead' ||
+      resolvedSubType.toLowerCase() === 'image ad'
+    ) {
+      resolvedType = 'Image';
+      resolvedSubType = 'ImageAd';
+    } else if (resolvedType.toLowerCase() === 'image') {
+      resolvedType = 'Image';
+      resolvedSubType = resolvedSubType || 'Image';
     }
 
-    const extractedBullets = resolvedSubType === 'BulletPost'
-      ? (Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
-          ? (data as any).bulletPoints
-          : extractBulletPoints(resolvedContent))
-      : [];
-
+    let extractedBullets: string[] = [];
     let finalContent = resolvedContent;
+
+    if (resolvedSubType === 'BulletPost') {
+      const formatted = formatBulletPostContentAndBullets(resolvedContent, (data as any).bulletPoints);
+      extractedBullets = formatted.bulletPoints;
+      finalContent = formatted.content;
+    }
+
     let formattedLinks: any[] = [];
     if (resolvedSubType === 'StandardLink' || (data as any).links) {
       const formattedRes = formatLinksAndContent((data as any).links || (data as any).linkUrl || (data as any).webUrl, resolvedContent);
@@ -790,7 +809,13 @@ export default function DashboardPage() {
       rawVideoPlatform = 'Twitter';
     }
 
-    const createDto = {
+    const isWebPostVal = (resolvedSubType === 'BulletPost' || resolvedSubType === 'StandardLink' || resolvedSubType === 'BigBlackStandard' || resolvedSubType === 'BigBlackStanded' || resolvedType === 'Video' || resolvedType === 'Image')
+      ? false
+      : Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost);
+
+    const postUrlVal = isWebPostVal ? (data.webUrl || data.postUrl || '') : '';
+
+    const createDto: CreateNewsPostDto = {
       title: resolvedTitle,
       notificationtitle: resolvedTitle,
       imagetitel: resolvedTitle,
@@ -804,6 +829,11 @@ export default function DashboardPage() {
       video_platform: rawVideoPlatform,
       gallery: data.galleryImages || [],
       type: resolvedType,
+      totalShares: 0,
+      isReporter: false,
+      reportedBy: '',
+      categoryName: [],
+      postUrl: postUrlVal,
       subType: resolvedSubType,
       bulletPoints: extractedBullets,
       isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
@@ -820,7 +850,7 @@ export default function DashboardPage() {
       category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
-      isWebPost: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
+      isWebPost: isWebPostVal,
     };
 
     let createdId = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 820700;
@@ -852,30 +882,123 @@ export default function DashboardPage() {
     if (!editingPost) return;
     const { mappedCategories, resolvedTitle, resolvedContent } = resolvePostFields(data);
     const todayISO = new Date().toISOString();
+
+    let resolvedType = data.type || (data as any).post_type || 'Standed';
+    let resolvedSubType = (data as any).subType || (data as any).sub_type || '';
+
+    if (
+      resolvedType === 'BulletPost' ||
+      resolvedType.toLowerCase() === 'bulletpost' ||
+      resolvedType.toLowerCase() === 'bullet post'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BulletPost';
+    } else if (
+      resolvedType === 'StandardLink' ||
+      resolvedType.toLowerCase() === 'standardlink' ||
+      resolvedType.toLowerCase() === 'standard link'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'StandardLink';
+    } else if (
+      resolvedType === 'BigBlackStandard' ||
+      resolvedType === 'BigBlackStanded' ||
+      resolvedType.toLowerCase() === 'bigblackstandard' ||
+      resolvedType.toLowerCase() === 'bigblackstanded' ||
+      resolvedType.toLowerCase() === 'bigblack standard' ||
+      resolvedType.toLowerCase() === 'big black standard' ||
+      resolvedSubType === 'BigBlackStandard' ||
+      resolvedSubType === 'BigBlackStanded'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BigBlackStandard';
+    } else if (resolvedType.toLowerCase() === 'video') {
+      resolvedType = 'Video';
+      resolvedSubType = '';
+    } else if (
+      resolvedType.toLowerCase() === 'imagead' ||
+      resolvedType.toLowerCase() === 'image ad' ||
+      resolvedSubType.toLowerCase() === 'imagead' ||
+      resolvedSubType.toLowerCase() === 'image ad'
+    ) {
+      resolvedType = 'Image';
+      resolvedSubType = 'ImageAd';
+    } else if (resolvedType.toLowerCase() === 'image') {
+      resolvedType = 'Image';
+      resolvedSubType = resolvedSubType || 'Image';
+    }
+
+    let extractedBullets: string[] = [];
+    let finalContent = resolvedContent;
+
+    if (resolvedSubType === 'BulletPost') {
+      const formatted = formatBulletPostContentAndBullets(resolvedContent, (data as any).bulletPoints);
+      extractedBullets = formatted.bulletPoints;
+      finalContent = formatted.content;
+    }
+
+    let formattedLinks: any[] = [];
+    if (resolvedSubType === 'StandardLink' || (data as any).links) {
+      const formattedRes = formatLinksAndContent((data as any).links || (data as any).linkUrl || (data as any).webUrl, resolvedContent);
+      formattedLinks = formattedRes.links;
+      finalContent = formattedRes.content;
+    }
+
+    let rawVideoPlatform = data.videoSource || data.video_platform || '';
+    if (rawVideoPlatform.toLowerCase() === 'x' || rawVideoPlatform.toLowerCase() === 'twitter') {
+      rawVideoPlatform = 'Twitter';
+    }
+
+    finalContent = stripAllTagsExceptLinkTags(finalContent);
+
+    const isWebPostVal = (
+      resolvedSubType === 'BulletPost' ||
+      resolvedSubType === 'StandardLink' ||
+      resolvedSubType === 'BigBlackStandard' ||
+      resolvedSubType === 'BigBlackStanded' ||
+      resolvedType === 'Video' ||
+      resolvedType === 'Image'
+    )
+      ? false
+      : Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost);
+
+    const postUrlVal = isWebPostVal ? (data.webUrl || data.postUrl || '') : '';
+
     const updateDto = {
       title: resolvedTitle,
       notificationtitle: resolvedTitle,
       imagetitel: resolvedTitle,
-      content: resolvedContent,
-      type: data.type,
-      image_url: data.imageUrl || editingPost.image,
-      video_url: data.videoUrl || data.video_url || '',
-      video_platform: data.videoSource || data.video_platform || '',
+      content: finalContent,
+      created: todayISO,
+      totalLikes: editingPost.likes ?? 0,
+      totalViews: editingPost.views ?? 0,
+      totalComments: 0,
+      image_url: data.imageUrl || editingPost.image || '',
+      video_url: resolvedType === 'Video' ? (data.videoUrl || data.video_url || '') : '',
+      video_platform: rawVideoPlatform,
       gallery: data.galleryImages || [],
-      categoryName: mappedCategories,
-      postUrl: data.webUrl || data.postUrl || '',
+      type: resolvedType,
+      subType: resolvedSubType,
+      bulletPoints: extractedBullets,
+      links: formattedLinks,
+      isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
+      linkURLAndroid: '',
+      linkURLIos: '',
+      isBookmarked: [],
+      postOrder: 0,
       draft: data.publishMode === 'draft',
+      trash: false,
       schedule: formatScheduleToISO(data.publishMode, data.scheduleTime),
       language_id: data.languageId ?? 0,
       language_code: data.language_code || data.postLanguage || 'en',
       category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
-      post_type: data.postType || data.type || 'Standard',
-      isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
-      isWebPost: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
-      is_web_post: Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost),
-      web_post_url: data.webUrl || data.postUrl || '',
+      post_type: resolvedType,
+      isWebPost: isWebPostVal,
+      is_web_post: isWebPostVal,
+      postUrl: postUrlVal,
+      web_post_url: postUrlVal,
     };
 
     try {

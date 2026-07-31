@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { extractBulletPoints } from '@/shared/utils/bullet.utils';
+import { extractBulletPoints, formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
 import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
+import { stripAllTagsExceptLinkTags, stripHtml } from '@/shared/utils/html.utils';
 
 export const commonNewsPostSchema = z.object({
   title: z.string({ required_error: 'Title is required' }).trim().min(1, 'Title is required'),
@@ -77,24 +78,36 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
     input.post_type = 'Standed';
     input.subType = 'StandardLink';
   } else if (
+    input.type === 'BigBlackStandard' ||
+    input.post_type === 'BigBlackStandard' ||
     input.type === 'BigBlackStanded' ||
     input.post_type === 'BigBlackStanded' ||
-    input.type === 'BigBlack Standed' ||
-    input.type === 'Big Black Standed'
+    input.type === 'BigBlack Standard' ||
+    input.type === 'Big Black Standard' ||
+    input.subType === 'BigBlackStandard' ||
+    input.subType === 'BigBlackStanded'
   ) {
     input.type = 'Standed';
     input.post_type = 'Standed';
-    input.subType = 'BigBlackStanded';
+    input.subType = 'BigBlackStandard';
   } else if (input.type === 'Video' || input.post_type === 'Video') {
     input.type = 'Video';
     input.post_type = 'Video';
     input.subType = '';
+  } else if (input.type === 'ImageAd' || input.post_type === 'ImageAd' || input.subType === 'ImageAd') {
+    input.type = 'Image';
+    input.post_type = 'Image';
+    input.subType = 'ImageAd';
+  } else if (input.type === 'Image' || input.post_type === 'Image') {
+    input.type = 'Image';
+    input.post_type = 'Image';
+    input.subType = input.subType || 'Image';
   }
 
   if ((input.type === 'Standed' || input.post_type === 'Standed') && input.subType === 'BulletPost') {
-    if ((!input.bulletPoints || input.bulletPoints.length === 0) && input.content) {
-      input.bulletPoints = extractBulletPoints(input.content);
-    }
+    const formatted = formatBulletPostContentAndBullets(input.content || '', input.bulletPoints);
+    input.bulletPoints = formatted.bulletPoints;
+    input.content = formatted.content;
   }
 
   if ((input.type === 'Standed' || input.post_type === 'Standed') && input.subType === 'StandardLink') {
@@ -103,15 +116,25 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
     input.content = formatted.content;
   }
 
+  if (input.content) {
+    input.content = stripAllTagsExceptLinkTags(input.content);
+  }
+
   return input;
 }, commonNewsPostSchema.superRefine((data, ctx) => {
   const postType = data.type || (data as any).post_type;
   if (postType === 'Standed') {
-    if (data.subType !== '' && data.subType !== 'BulletPost' && data.subType !== 'StandardLink' && data.subType !== 'BigBlackStanded') {
+    if (
+      data.subType !== '' &&
+      data.subType !== 'BulletPost' &&
+      data.subType !== 'StandardLink' &&
+      data.subType !== 'BigBlackStandard' &&
+      data.subType !== 'BigBlackStanded'
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['subType'],
-        message: "subType must be empty, 'BulletPost', 'StandardLink', or 'BigBlackStanded' for Standard post",
+        message: "subType must be empty, 'BulletPost', 'StandardLink', or 'BigBlackStandard' for Standard post",
       });
     }
 
@@ -243,6 +266,44 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
         code: z.ZodIssueCode.custom,
         path: ['links'],
         message: 'links must be empty for Video post',
+      });
+    }
+  }
+  if (postType === 'Image') {
+    if (data.subType !== 'Image' && data.subType !== 'ImageAd') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['subType'],
+        message: "subType must be 'Image' or 'ImageAd' for Image post",
+      });
+    }
+    if (data.isWebPost !== false) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['isWebPost'],
+        message: 'isWebPost must be false for Image post',
+      });
+    }
+    if (data.postUrl !== '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['postUrl'],
+        message: 'postUrl must be empty for Image post',
+      });
+    }
+    if (Array.isArray(data.bulletPoints) && data.bulletPoints.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['bulletPoints'],
+        message: 'bulletPoints must be empty for Image post',
+      });
+    }
+    const linksEmpty = Array.isArray(data.links) ? data.links.length === 0 : data.links === '';
+    if (!linksEmpty) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['links'],
+        message: 'links must be empty for Image post',
       });
     }
   }
