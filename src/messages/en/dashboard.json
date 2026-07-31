@@ -12,6 +12,8 @@
   "noRecords": "No matching news records found.",
   "menuCreate": "Create News",
   "menuCategories": "Categories",
+  "menuWebArticles": "Web Articles",
+  "menuEpapers": "Epapers",
   "menuLocations": "Locations",
   "menuCreators": "Creators",
   "menuPostTypes": "Post Types",

@@ -12,6 +12,8 @@ import {
   Language as LanguageIcon,
   AutoAwesome,
   Article,
+  Web as WebIcon,
+  Newspaper as NewspaperIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -24,6 +26,8 @@ const sidebarTranslations = {
   en: {
     menuCreate: 'Create News',
     menuCategories: 'Categories',
+    menuWebArticles: 'Web Articles',
+    menuEpapers: 'Epapers',
     menuLocations: 'Locations',
     menuCreators: 'Creators',
     menuPostTypes: 'Post Types',
@@ -35,6 +39,8 @@ const sidebarTranslations = {
   te: {
     menuCreate: 'వార్తలను సృష్టించండి',
     menuCategories: 'విభాగాలు',
+    menuWebArticles: 'వెబ్ వ్యాసాలు',
+    menuEpapers: 'ఈ-పేపర్లు',
     menuLocations: 'ప్రాంతాలు',
     menuCreators: 'సృష్టికర్తలు',
     menuPostTypes: 'పోస్ట్ రకాలు',
@@ -46,6 +52,8 @@ const sidebarTranslations = {
   hi: {
     menuCreate: 'समाचार बनाएं',
     menuCategories: 'श्रेणियां',
+    menuWebArticles: 'वेब लेख',
+    menuEpapers: 'ई-पेपर',
     menuLocations: 'स्थान',
     menuCreators: 'निर्माता',
     menuPostTypes: 'पोस्ट के प्रकार',
@@ -57,6 +65,8 @@ const sidebarTranslations = {
   ml: {
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
     menuCategories: 'വിഭാഗങ്ങൾ',
+    menuWebArticles: 'വെബ് ലേഖനങ്ങൾ',
+    menuEpapers: 'ഇ-പേപ്പറുകൾ',
     menuLocations: 'സ്ഥലങ്ങൾ',
     menuCreators: 'സ്രഷ്‌ടാക്കൾ',
     menuPostTypes: 'പോസ്റ്റ് തരങ്ങൾ',
@@ -84,12 +94,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const allMenuItems = [
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
+    { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
+    { text: t.menuEpapers, icon: <NewspaperIcon />, href: '/epapers' },
+    { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
     { text: t.menuCategories, icon: <CategoryIcon />, href: '/categories' },
     { text: t.menuLocations, icon: <LocationOn />, href: '/locations' },
-    { text: t.menuCreators, icon: <People />, href: '/creators' },
     { text: t.menuPostTypes, icon: <Article />, href: '/post-types' },
+    { text: t.menuCreators, icon: <People />, href: '/creators' },
     { text: t.menuLanguages, icon: <LanguageIcon />, href: '/languages' },
-    { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
     { text: t.menuSettings, icon: <Settings />, href: '/settings' },
   ];
 
@@ -101,12 +113,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const adminHrefs = [
     '/dashboard',
     '/reels',
+    '/web-articles',
+    '/epapers',
+    '/aitags',
     '/categories',
     '/locations',
-    '/creators',
     '/post-types',
+    '/creators',
     '/languages',
-    '/aitags',
     '/settings',
   ];
 
