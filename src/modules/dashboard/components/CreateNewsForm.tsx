@@ -882,28 +882,40 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     return plain.trim() === '' ? 0 : plain.trim().split(/\s+/).length;
   };
 
+  const isOptionalForPostType = (postTypeStr: string) => {
+    const tLower = (postTypeStr || '').toLowerCase().trim();
+    return (
+      tLower === 'image' ||
+      tLower === 'imagead' ||
+      tLower === 'image ad' ||
+      tLower === 'video' ||
+      tLower === 'gallery'
+    );
+  };
+
   const handleSave = () => {
     const errMap: Record<string, string> = {};
     const TITLE_WORD_LIMIT = 10;
     const BODY_WORD_LIMIT = 50;
+    const isOptionalType = isOptionalForPostType(type);
 
     // Language
     if (!postLanguage) {
       errMap.language = t.errLanguageRequired;
     }
 
-    // AI Tags
-    if (selectedTags.length === 0) {
+    // AI Tags (Optional for Image, ImageAd, Video)
+    if (!isOptionalType && selectedTags.length === 0) {
       errMap.tags = t.errTagsRequired;
     }
 
-    // Location
-    if (location.length === 0) {
+    // Location (Optional for Image, ImageAd, Video)
+    if (!isOptionalType && location.length === 0) {
       errMap.location = t.errLocationRequired;
     }
 
-    // Categories
-    if (selectedCategories.length === 0) {
+    // Categories (Optional for Image, ImageAd, Video)
+    if (!isOptionalType && selectedCategories.length === 0) {
       errMap.categories = t.errCategoryRequired;
     }
 
@@ -1396,7 +1408,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
               select
               fullWidth
               size="small"
-              label={t.lblTags}
+              label={isOptionalForPostType(type) ? (typeof t.lblTags === 'string' ? t.lblTags.replace(/\s*\*$/, '') : t.lblTags) : t.lblTags}
               SelectProps={{
                 multiple: true,
                 value: selectedTags,
@@ -1467,7 +1479,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
               select
               fullWidth
               size="small"
-              label={t.lblLocation}
+              label={isOptionalForPostType(type) ? (typeof t.lblLocation === 'string' ? t.lblLocation.replace(/\s*\*$/, '') : t.lblLocation) : t.lblLocation}
               SelectProps={{
                 multiple: true,
                 value: location,
@@ -1603,7 +1615,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
               }}
             >
               <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CategoryIcon sx={{ fontSize: '1.1rem' }} /> {t.lblCategories}
+                <CategoryIcon sx={{ fontSize: '1.1rem' }} /> {isOptionalForPostType(type) ? (typeof t.lblCategories === 'string' ? t.lblCategories.replace(/\s*\*$/, '') : t.lblCategories) : t.lblCategories}
               </Typography>
               <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }} />
               

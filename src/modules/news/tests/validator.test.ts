@@ -322,4 +322,78 @@ describe('News Validator - Create Post Validation', () => {
       ).toThrow(/bulletPoints must be empty for regular Standard post/);
     });
   });
+
+  describe('Optional Fields for Image, ImageAd, and Video Post Types', () => {
+    it('should successfully validate Image post type without categories, location_ids, or aitag_ids', () => {
+      const payload = {
+        ...validStandardPostBody,
+        type: 'Image',
+        categoryName: [],
+        category_ids: [],
+        location_ids: [],
+        aitag_ids: [],
+      };
+      const validated = validateCreateNewsPost(payload);
+      expect(validated.type).toBe('Image');
+      expect(validated.categoryName).toEqual([]);
+      expect(validated.category_ids).toEqual([]);
+      expect(validated.location_ids).toEqual([]);
+      expect(validated.aitag_ids).toEqual([]);
+    });
+
+    it('should successfully validate ImageAd post type without categories, location_ids, or aitag_ids', () => {
+      const payload = {
+        ...validStandardPostBody,
+        type: 'ImageAd',
+        categoryName: [],
+        category_ids: [],
+        location_ids: [],
+        aitag_ids: [],
+      };
+      const validated = validateCreateNewsPost(payload);
+      expect(validated.type).toBe('Image');
+      expect(validated.subType).toBe('ImageAd');
+      expect(validated.categoryName).toEqual([]);
+      expect(validated.category_ids).toEqual([]);
+      expect(validated.location_ids).toEqual([]);
+      expect(validated.aitag_ids).toEqual([]);
+    });
+
+    it('should successfully validate Video post type without categories, location_ids, or aitag_ids', () => {
+      const payload = {
+        ...validStandardPostBody,
+        type: 'Video',
+        subType: '',
+        video_platform: 'Youtube',
+        video_url: 'https://www.youtube.com/watch?v=abcdefghijk',
+        categoryName: [],
+        category_ids: [],
+        location_ids: [],
+        aitag_ids: [],
+      };
+      const validated = validateCreateNewsPost(payload);
+      expect(validated.type).toBe('Video');
+      expect(validated.categoryName).toEqual([]);
+      expect(validated.category_ids).toEqual([]);
+      expect(validated.location_ids).toEqual([]);
+      expect(validated.aitag_ids).toEqual([]);
+    });
+
+    it('should successfully validate Gallery post type without categories, location_ids, or aitag_ids', () => {
+      const payload = {
+        ...validStandardPostBody,
+        type: 'Gallery',
+        categoryName: [],
+        category_ids: [],
+        location_ids: [],
+        aitag_ids: [],
+      };
+      const validated = validateCreateNewsPost(payload);
+      expect(validated.type).toBe('Gallery');
+      expect(validated.categoryName).toEqual([]);
+      expect(validated.category_ids).toEqual([]);
+      expect(validated.location_ids).toEqual([]);
+      expect(validated.aitag_ids).toEqual([]);
+    });
+  });
 });

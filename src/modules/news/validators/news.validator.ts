@@ -9,16 +9,12 @@ export const commonNewsPostSchema = z.object({
   imagetitel: z.string({ required_error: 'Image title is required' }).trim().min(1, 'Image title is required'),
   content: z.string({ required_error: 'Content is required' }).trim().min(1, 'Content is required'),
   image_url: z.string({ required_error: 'Image URL is required' }).trim().min(1, 'Image URL is required'),
-  categoryName: z
-    .array(z.string().trim().min(1), { required_error: 'Category name is required' })
-    .min(1, 'At least one category name is required'),
+  categoryName: z.array(z.string().trim()).optional().default([]),
   language_id: z
     .number({ required_error: 'Language ID is required', invalid_type_error: 'Language ID must be a number' })
     .positive('Language ID must be a positive integer'),
   language_code: z.string({ required_error: 'Language code is required' }).trim().min(1, 'Language code is required'),
-  category_ids: z
-    .array(z.number().positive(), { required_error: 'Category IDs are required' })
-    .min(1, 'At least one category ID is required'),
+  category_ids: z.array(z.number().positive()).optional().default([]),
   type: z.string({ required_error: 'Type is required' }).trim().min(1, 'Type is required'),
   subType: z.string().default(''),
 
@@ -124,6 +120,21 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
 }, commonNewsPostSchema.superRefine((data, ctx) => {
   const postType = data.type || (data as any).post_type;
   if (postType === 'Standed') {
+    if (!data.categoryName || data.categoryName.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['categoryName'],
+        message: 'At least one category name is required',
+      });
+    }
+    if (!data.category_ids || data.category_ids.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['category_ids'],
+        message: 'At least one category ID is required',
+      });
+    }
+
     if (
       data.subType !== '' &&
       data.subType !== 'BulletPost' &&
