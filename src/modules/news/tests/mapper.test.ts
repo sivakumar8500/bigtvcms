@@ -227,5 +227,18 @@ describe('NewsMapper', () => {
     expect(updateDto.imagetitel).toBe('Image Title');
     expect(updateDto.content).toBe('Body text with link and  space');
   });
+
+  it('should support distinct imageTitle and notificationTitle without overwriting them with main title', () => {
+    const rawPartial = {
+      title: 'Main Article Title',
+      notificationTitle: 'Distinct Notification Title',
+      imageTitle: 'Distinct Image Title',
+    };
+
+    const createDto = NewsMapper.toCreateDto(rawPartial as any);
+    expect(createDto.title).toBe('Main Article Title');
+    expect(createDto.notificationtitle).toBe('Distinct Notification Title');
+    expect(createDto.imagetitel).toBe('Distinct Image Title');
+  });
 });
 

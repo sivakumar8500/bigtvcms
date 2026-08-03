@@ -54,8 +54,10 @@ export class NewsMapper {
   static toCreateDto(domain: Partial<NewsPost>): CreateNewsPostDto {
     const now = new Date().toISOString();
     const cleanTitle = stripHtml(domain.title || '');
-    const cleanNotificationTitle = stripHtml(domain.notificationtitle || domain.title || '');
-    const cleanImageTitle = stripHtml(domain.imagetitel || domain.title || '');
+    const rawNotif = domain.notificationtitle || (domain as any).notificationTitle || '';
+    const cleanNotificationTitle = rawNotif.trim() ? stripHtml(rawNotif) : cleanTitle;
+    const rawImgTitle = domain.imagetitel || (domain as any).imageTitle || '';
+    const cleanImageTitle = rawImgTitle.trim() ? stripHtml(rawImgTitle) : cleanTitle;
     let cleanContent = (domain.content || '').trim();
     let rawType = domain.type || (domain as any).post_type || domain.postType || 'Standed';
     let subTypeVal = domain.subType || '';
@@ -128,7 +130,11 @@ export class NewsMapper {
       linksVal = [];
     }
 
-    cleanContent = stripAllTagsExceptLinkTags(cleanContent);
+    if (subTypeVal === 'StandardLink') {
+      cleanContent = stripAllTagsExceptLinkTags(cleanContent);
+    } else {
+      cleanContent = stripHtml(cleanContent);
+    }
 
     const isWebPostVal = (
       subTypeVal === 'BulletPost' ||

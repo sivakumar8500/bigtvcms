@@ -7,7 +7,11 @@ export function stripHtml(input?: string | null): string {
   if (!input) return '';
   return input
     .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
     .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n')
     .replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/\n\s*\n/g, '\n')

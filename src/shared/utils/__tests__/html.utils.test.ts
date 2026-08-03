@@ -1,4 +1,4 @@
-import { stripHtml } from '../html.utils';
+import { stripHtml, stripAllTagsExceptLinkTags } from '../html.utils';
 
 describe('stripHtml utility', () => {
   it('returns empty string for null, undefined or empty input', () => {
@@ -20,5 +20,17 @@ describe('stripHtml utility', () => {
 
   it('replaces &nbsp; with space and trims padding', () => {
     expect(stripHtml(' <p>&nbsp;Hello&nbsp;World&nbsp;</p> ')).toBe('Hello World');
+  });
+});
+
+describe('stripAllTagsExceptLinkTags utility', () => {
+  it('strips inline styled span tags and html attributes while leaving plain text', () => {
+    const raw = '<span style="color: rgb(31, 41, 55); font-family: Ramabhadra, &quot;Noto Sans Telugu&quot;, sans-serif; font-size: 20.8px; background-color: rgb(255, 255, 255);">ప్రేమకథా చిత్రాలు&nbsp;</span>';
+    expect(stripAllTagsExceptLinkTags(raw)).toBe('ప్రేమకథా చిత్రాలు');
+  });
+
+  it('preserves custom link tags like <link1>value</link1>', () => {
+    const input = '<p>Check <link1>Google</link1> for details</p>';
+    expect(stripAllTagsExceptLinkTags(input)).toBe('Check <link1>Google</link1> for details');
   });
 });
