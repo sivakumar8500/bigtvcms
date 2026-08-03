@@ -295,7 +295,7 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
         message: 'isWebPost must be false for Image post',
       });
     }
-    if (data.postUrl !== '') {
+    if (data.subType !== 'ImageAd' && data.postUrl !== '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['postUrl'],

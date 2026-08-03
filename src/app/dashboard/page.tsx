@@ -54,7 +54,7 @@ import { NewsRepository } from '@/modules/news/repositories/news.repository';
 import { CreateNewsPostDto } from '@/modules/news/dto/news.dto';
 import { Loader } from '@/shared/components/Loader';
 import { stripAllTagsExceptLinkTags, stripHtml } from '@/shared/utils/html.utils';
-import { extractBulletPoints, formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
+import { extractBulletPoints, formatBulletPostContentAndBullets, formatDisplayContent } from '@/shared/utils/bullet.utils';
 import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
 
 // Dashboard component translations mapped to store state keys
@@ -298,23 +298,38 @@ export default function DashboardPage() {
   const [editingPost, setEditingPost] = React.useState<null | any>(null);
   const [viewingPost, setViewingPost] = React.useState<null | any>(null);
 
-  // Fetch full post detail on edit to ensure aitag_ids and all fields are loaded
+  // Fetch full post detail on edit to ensure aitag_ids, category_ids, location_ids, language_id and all fields are loaded
   React.useEffect(() => {
     if (editingPost && editingPost.id) {
       NewsRepository.getById(editingPost.id)
         .then((dto: any) => {
           if (dto && dto.id === editingPost.id) {
             const fetchedAitagIds = dto.aitag_ids || dto.aitagIds || [];
-            const fetchedCategories = dto.categoryName || dto.categories || dto.category_id || [];
+            const fetchedCategoryIds = dto.category_ids || dto.categoryIds || dto.category_id || [];
+            const fetchedLocationIds = dto.location_ids || dto.locationIds || dto.location_id || [];
+            const fetchedCategories = dto.categoryName || dto.categories || fetchedCategoryIds;
+            const fetchedLocation = dto.location || dto.state_name || fetchedLocationIds;
+
             setEditingPost((prev: any) => {
               if (!prev || prev.id !== dto.id) return prev;
+              const fetchedLangId = dto.language_id ?? dto.languageId ?? prev?.language_id ?? 1;
+              const fetchedLangCode = dto.language_code || (fetchedLangId === 2 ? 'te' : fetchedLangId === 3 ? 'hi' : fetchedLangId === 4 ? 'ml' : 'en');
               return {
                 ...prev,
+                ...dto,
+                category_ids: fetchedCategoryIds,
+                categoryIds: fetchedCategoryIds,
+                location_ids: fetchedLocationIds,
+                locationIds: fetchedLocationIds,
                 aitag_ids: fetchedAitagIds,
                 aitagIds: fetchedAitagIds,
                 aiTags: fetchedAitagIds,
                 tags: prev.tags?.length ? prev.tags : fetchedAitagIds,
-                categories: Array.isArray(fetchedCategories) && fetchedCategories.length > 0 ? fetchedCategories : prev.categories,
+                categories: Array.isArray(fetchedCategories) && fetchedCategories.length > 0 ? fetchedCategories : (fetchedCategoryIds.length > 0 ? fetchedCategoryIds : prev.categories),
+                location: fetchedLocation || prev.location,
+                language_id: fetchedLangId,
+                language_code: fetchedLangCode,
+                languageId: fetchedLangId,
                 notificationTitle: dto.notificationtitle || dto.notificationTitle || prev.notificationTitle,
                 imageTitle: dto.imagetitel || dto.imageTitle || prev.imageTitle,
                 is_web_post: Boolean((dto as any).is_web_post || (dto as any).isWebPost || (dto as any).isWebpost || prev?.is_web_post || prev?.isWebPost),
@@ -323,8 +338,11 @@ export default function DashboardPage() {
                 webUrl: (dto as any).web_post_url || (dto as any).webPostUrl || (dto as any).web_url || (dto as any).webUrl || (dto as any).postUrl || (dto as any).post_url || prev?.web_post_url || prev?.webPostUrl || prev?.postUrl || '',
                 postUrl: (dto as any).web_post_url || (dto as any).webPostUrl || (dto as any).web_url || (dto as any).webUrl || (dto as any).postUrl || (dto as any).post_url || prev?.web_post_url || prev?.webPostUrl || prev?.postUrl || '',
                 is_sticky: dto.is_sticky ?? dto.isSticky ?? prev.is_sticky ?? prev.isSticky,
-                location: dto.state_name || dto.location || prev.location,
                 type: dto.typename || dto.type || prev.type,
+                subType: dto.subType || dto.sub_type || prev.subType || prev.sub_type || '',
+                sub_type: dto.subType || dto.sub_type || prev.subType || prev.sub_type || '',
+                bulletPoints: dto.bulletPoints || dto.bullet_points || dto.bullets || prev.bulletPoints || prev.bullet_points || prev.bullets || [],
+                bullet_points: dto.bulletPoints || dto.bullet_points || dto.bullets || prev.bulletPoints || prev.bullet_points || prev.bullets || [],
                 video_url: dto.video_url || dto.videoUrl || prev.video_url || prev.videoUrl,
                 video_platform: dto.video_platform || dto.videoSource || prev.video_platform || prev.videoSource,
               };
@@ -813,12 +831,25 @@ export default function DashboardPage() {
       ? false
       : Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost);
 
-    const postUrlVal = isWebPostVal ? (data.webUrl || data.postUrl || '') : '';
+    const postUrlVal = resolvedSubType === 'ImageAd'
+      ? ((data as any).imageAdUrl || data.postUrl || data.webUrl || '')
+      : (isWebPostVal ? (data.webUrl || data.postUrl || '') : '');
+
+    if (resolvedSubType === 'StandardLink') {
+      finalContent = stripAllTagsExceptLinkTags(finalContent);
+    } else {
+      finalContent = stripHtml(finalContent);
+    }
+
+    const rawNotifTitle = (data.notificationTitle || (data as any).notificationtitle || '').trim();
+    const rawImgTitle = (data.imageTitle || (data as any).imagetitel || '').trim();
+    const resolvedNotificationTitle = rawNotifTitle ? stripHtml(rawNotifTitle) : resolvedTitle;
+    const resolvedImageTitle = rawImgTitle ? stripHtml(rawImgTitle) : resolvedTitle;
 
     const createDto: CreateNewsPostDto = {
       title: resolvedTitle,
-      notificationtitle: resolvedTitle,
-      imagetitel: resolvedTitle,
+      notificationtitle: resolvedNotificationTitle,
+      imagetitel: resolvedImageTitle,
       content: finalContent,
       created: todayISO,
       totalLikes: 0,
@@ -847,9 +878,9 @@ export default function DashboardPage() {
       schedule: formatScheduleToISO(data.publishMode, data.scheduleTime),
       language_id: data.languageId ?? 0,
       language_code: data.language_code || data.postLanguage || 'en',
-      category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
-      location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
-      aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
+      category_ids: Array.from(new Set((data.categoryIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      location_ids: Array.from(new Set((data.locationIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      aitag_ids: Array.from(new Set((data.aitagIds || data.aitag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       isWebPost: isWebPostVal,
     };
 
@@ -862,6 +893,10 @@ export default function DashboardPage() {
     const newPost = {
       id: createdId,
       title: resolvedTitle,
+      notificationTitle: resolvedNotificationTitle,
+      notificationtitle: resolvedNotificationTitle,
+      imageTitle: resolvedImageTitle,
+      imagetitel: resolvedImageTitle,
       content: resolvedContent,
       categories: mappedCategories,
       language: data.postLanguage === 'te' ? 'Telugu' : data.postLanguage === 'hi' ? 'Hindi' : data.postLanguage === 'ml' ? 'Malayalam' : 'English',
@@ -949,7 +984,11 @@ export default function DashboardPage() {
       rawVideoPlatform = 'Twitter';
     }
 
-    finalContent = stripAllTagsExceptLinkTags(finalContent);
+    if (resolvedSubType === 'StandardLink') {
+      finalContent = stripAllTagsExceptLinkTags(finalContent);
+    } else {
+      finalContent = stripHtml(finalContent);
+    }
 
     const isWebPostVal = (
       resolvedSubType === 'BulletPost' ||
@@ -962,12 +1001,19 @@ export default function DashboardPage() {
       ? false
       : Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost);
 
-    const postUrlVal = isWebPostVal ? (data.webUrl || data.postUrl || '') : '';
+    const postUrlVal = resolvedSubType === 'ImageAd'
+      ? ((data as any).imageAdUrl || data.postUrl || data.webUrl || '')
+      : (isWebPostVal ? (data.webUrl || data.postUrl || '') : '');
+
+    const rawNotifTitle = (data.notificationTitle || (data as any).notificationtitle || '').trim();
+    const rawImgTitle = (data.imageTitle || (data as any).imagetitel || '').trim();
+    const resolvedNotificationTitle = rawNotifTitle ? stripHtml(rawNotifTitle) : resolvedTitle;
+    const resolvedImageTitle = rawImgTitle ? stripHtml(rawImgTitle) : resolvedTitle;
 
     const updateDto = {
       title: resolvedTitle,
-      notificationtitle: resolvedTitle,
-      imagetitel: resolvedTitle,
+      notificationtitle: resolvedNotificationTitle,
+      imagetitel: resolvedImageTitle,
       content: finalContent,
       created: todayISO,
       totalLikes: editingPost.likes ?? 0,
@@ -991,9 +1037,9 @@ export default function DashboardPage() {
       schedule: formatScheduleToISO(data.publishMode, data.scheduleTime),
       language_id: data.languageId ?? 0,
       language_code: data.language_code || data.postLanguage || 'en',
-      category_ids: (data.categoryIds || []).filter((id: number) => typeof id === 'number' && id > 0),
-      location_ids: (data.locationIds || []).filter((id: number) => typeof id === 'number' && id > 0),
-      aitag_ids: (data.aitagIds || data.aitag_ids || []).filter((id: number) => typeof id === 'number' && id > 0),
+      category_ids: Array.from(new Set((data.categoryIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      location_ids: Array.from(new Set((data.locationIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      aitag_ids: Array.from(new Set((data.aitagIds || data.aitag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       post_type: resolvedType,
       isWebPost: isWebPostVal,
       is_web_post: isWebPostVal,
@@ -1016,10 +1062,10 @@ export default function DashboardPage() {
       date: todayISO.slice(0, 10),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       location: data.location ? data.location.join(', ') : '',
-      notificationTitle: data.notificationTitle,
-      notificationtitle: data.notificationTitle,
-      imageTitle: data.imageTitle,
-      imagetitel: data.imageTitle,
+      notificationTitle: resolvedNotificationTitle,
+      notificationtitle: resolvedNotificationTitle,
+      imageTitle: resolvedImageTitle,
+      imagetitel: resolvedImageTitle,
     };
     setPosts((prev) => prev.map((p) => (p.id === editingPost.id ? updatedPost : p)));
     setSnackbar({ open: true, message: (t as any).updateSuccess || 'News post updated successfully.', severity: 'success' });
@@ -1060,30 +1106,40 @@ export default function DashboardPage() {
               isDark={isDark}
               language={language as any}
               initialData={{
-                titleEn: editingPost.language === 'English' ? editingPost.title : '',
-                bodyEn: editingPost.language === 'English' ? editingPost.content : '',
-                titleTe: editingPost.language === 'Telugu' ? editingPost.title : '',
-                bodyTe: editingPost.language === 'Telugu' ? editingPost.content : '',
-                titleHi: editingPost.language === 'Hindi' ? editingPost.title : '',
-                bodyHi: editingPost.language === 'Hindi' ? editingPost.content : '',
-                titleMl: editingPost.language === 'Malayalam' ? editingPost.title : '',
-                bodyMl: editingPost.language === 'Malayalam' ? editingPost.content : '',
-                categories: Array.isArray(editingPost.categories) && editingPost.categories.length > 0 ? editingPost.categories : ((editingPost as any).categoryName || (editingPost as any).category_id || []),
+                titleEn: editingPost.language === 'English' || (editingPost as any).language_id === 1 || (editingPost as any).language_code === 'en' ? editingPost.title : '',
+                bodyEn: editingPost.language === 'English' || (editingPost as any).language_id === 1 || (editingPost as any).language_code === 'en' ? editingPost.content : '',
+                titleTe: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' ? editingPost.title : '',
+                bodyTe: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' ? editingPost.content : '',
+                titleHi: editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' ? editingPost.title : '',
+                bodyHi: editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' ? editingPost.content : '',
+                titleMl: editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' ? editingPost.title : '',
+                bodyMl: editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' ? editingPost.content : '',
+                categories: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || (Array.isArray(editingPost.categories) && editingPost.categories.length > 0 ? editingPost.categories : ((editingPost as any).categoryName || (editingPost as any).category_id || [])),
+                category_ids: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || [],
+                categoryIds: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || [],
                 tags: (editingPost as any).tags && (editingPost as any).tags.length > 0 ? (editingPost as any).tags : ((editingPost as any).aiTags || (editingPost as any).aitag_ids || (editingPost as any).aitagIds || []),
                 aitagIds: (editingPost as any).aitagIds || (editingPost as any).aitag_ids || (editingPost as any).aiTags || [],
                 aitag_ids: (editingPost as any).aitag_ids || (editingPost as any).aitagIds || (editingPost as any).aiTags || [],
-                location: (editingPost as any).location ? (Array.isArray((editingPost as any).location) ? (editingPost as any).location : ((editingPost as any).location as string).split(', ').filter(Boolean)) : (editingPost as any).state_name ? [(editingPost as any).state_name] : [],
-                type: editingPost.type || (editingPost as any).typename || 'Standard',
-                imageUrl: editingPost.image || (editingPost as any).imageUrl,
-                postLanguage: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 ? 'te' : editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 ? 'hi' : editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 ? 'ml' : 'en',
+                location: (editingPost as any).location_ids || (editingPost as any).locationIds || editingPost.locationIds || ((editingPost as any).location ? (Array.isArray((editingPost as any).location) ? (editingPost as any).location : ((editingPost as any).location as string).split(', ').filter(Boolean)) : (editingPost as any).state_name ? [(editingPost as any).state_name] : []),
+                location_ids: (editingPost as any).location_ids || (editingPost as any).locationIds || editingPost.locationIds || [],
+                locationIds: (editingPost as any).location_ids || (editingPost as any).locationIds || editingPost.locationIds || [],
+                type: (editingPost as any).subType || (editingPost as any).sub_type || editingPost.type || (editingPost as any).typename || (editingPost as any).post_type || (editingPost as any).postType || 'Standard',
+                imageUrl: editingPost.image || (editingPost as any).imageUrl || (editingPost as any).image_url,
+                postLanguage: (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' || editingPost.language === 'Telugu' ? 'te' : (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' || editingPost.language === 'Hindi' ? 'hi' : (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' || editingPost.language === 'Malayalam' ? 'ml' : 'en',
+                languageId: (editingPost as any).language_id || ((editingPost as any).language_code === 'te' ? 2 : (editingPost as any).language_code === 'hi' ? 3 : (editingPost as any).language_code === 'ml' ? 4 : 1),
+                language_code: (editingPost as any).language_code || ((editingPost as any).language_id === 2 ? 'te' : (editingPost as any).language_id === 3 ? 'hi' : (editingPost as any).language_id === 4 ? 'ml' : 'en'),
                 notificationTitle: (editingPost as any).notificationTitle || (editingPost as any).notificationtitle || editingPost.title || '',
                 imageTitle: (editingPost as any).imageTitle || (editingPost as any).imagetitel || editingPost.title || '',
                 isWebPost: Boolean((editingPost as any).is_web_post || (editingPost as any).isWebPost || (editingPost as any).isWebpost),
                 webUrl: (editingPost as any).web_post_url || (editingPost as any).webPostUrl || (editingPost as any).web_url || (editingPost as any).webUrl || (editingPost as any).postUrl || (editingPost as any).post_url || '',
                 postUrl: (editingPost as any).web_post_url || (editingPost as any).webPostUrl || (editingPost as any).web_url || (editingPost as any).webUrl || (editingPost as any).postUrl || (editingPost as any).post_url || '',
+                imageAdUrl: (editingPost as any).imageAdUrl || (editingPost as any).image_ad_url || (editingPost as any).web_post_url || (editingPost as any).webPostUrl || (editingPost as any).postUrl || (editingPost as any).post_url || '',
                 isSticky: Boolean((editingPost as any).is_sticky || (editingPost as any).isStickyPost || (editingPost as any).isSticky),
-                videoSource: (editingPost as any).video_platform || (editingPost as any).videoSource || '',
-                videoUrl: (editingPost as any).video_url || (editingPost as any).videoUrl || '',
+                videoSource: (editingPost as any).videoSource || (editingPost as any).video_platform || (editingPost as any).video_source || '',
+                videoUrl: (editingPost as any).videoUrl || (editingPost as any).video_url || (editingPost as any).video_link || (editingPost as any).videoLink || '',
+                subType: (editingPost as any).subType || (editingPost as any).sub_type || (editingPost.type === 'BulletPost' ? 'BulletPost' : ''),
+                bulletPoints: (editingPost as any).bulletPoints || (editingPost as any).bullet_points || (editingPost as any).bullets || [],
+                bullet_points: (editingPost as any).bulletPoints || (editingPost as any).bullet_points || (editingPost as any).bullets || [],
               }}
             />
           ) : viewingPost ? (
@@ -1181,7 +1237,7 @@ export default function DashboardPage() {
                           News Body Content
                         </Typography>
                         <Typography variant="body2" sx={{ color: isDark ? 'rgba(255,255,255,0.72)' : 'rgba(28,20,69,0.8)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                          {viewingPost.content}
+                          {formatDisplayContent(viewingPost)}
                         </Typography>
                       </Box>
 
@@ -1200,7 +1256,7 @@ export default function DashboardPage() {
                             Post Type
                           </Typography>
                           <Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 700 }}>
-                            {viewingPost.type}
+                            {viewingPost.subType || (viewingPost as any).sub_type || viewingPost.type}
                           </Typography>
                         </Grid>
                       </Grid>
@@ -1309,8 +1365,8 @@ export default function DashboardPage() {
                           </Box>
 
                           {/* Body text */}
-                          <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.76rem', lineHeight: 1.6, display: 'block' }}>
-                            {viewingPost.content}
+                          <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.76rem', lineHeight: 1.6, display: 'block', whiteSpace: 'pre-wrap' }}>
+                            {formatDisplayContent(viewingPost)}
                           </Typography>
 
                           {/* Timestamp */}
@@ -1843,7 +1899,7 @@ export default function DashboardPage() {
                       <Grid item xs={1.2}>
                         <Box>
                           <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600 }}>
-                            {post.type}
+                            {post.subType || (post as any).sub_type || post.type}
                           </Typography>
                           <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
                             {post.language}

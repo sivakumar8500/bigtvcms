@@ -35,7 +35,8 @@ import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.
 import { LanguageRepository } from '@/modules/language/repositories/language.repository';
 import { HtmlEditor } from './HtmlEditor';
 import { Loader } from '@/shared/components/Loader';
-import { stripHtml } from '@/shared/utils/html.utils';
+import { stripHtml, stripAllTagsExceptLinkTags } from '@/shared/utils/html.utils';
+import { formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
 
 // Multilingual lists to support strict translation guidelines
 const categoriesList = [
@@ -120,6 +121,10 @@ const translations = {
     errGalleryMin: 'Please upload at least 3 images',
     errGalleryMax: 'Maximum 10 images allowed',
     hintGallery: 'Min 3 • Max 10 images',
+    lblImageAdUrl: 'Image Ad URL',
+    phImageAdUrl: 'https://example.com/ad-landing-page...',
+    errImageAdUrlRequired: 'Image Ad URL is required',
+    errImageAdUrlInvalid: 'Please enter a valid URL (starting with http:// or https://)',
   },
   te: {
     tabEn: 'ఇంగ్లీష్',
@@ -176,6 +181,10 @@ const translations = {
     errGalleryMin: 'దయచేసి కనీసం 3 చిత్రాలను అప్‌లోడ్ చేయండి',
     errGalleryMax: 'గరిష్టంగా 10 చిత్రాలు మాత్రమే అనుమతించబడతాయి',
     hintGallery: 'కనీసం 3 • గరిష్టంగా 10 చిత్రాలు',
+    lblImageAdUrl: 'ఇమేజ్ ప్రకటన URL',
+    phImageAdUrl: 'https://example.com/ad-landing-page...',
+    errImageAdUrlRequired: 'ఇమేజ్ ప్రకటన URL అవసరం',
+    errImageAdUrlInvalid: 'దయచేసి చెల్లుబాటు అయ్యే URL ఎంటర్ చేయండి (http:// లేదా https:// తో ప్రారంభం)',
   },
   hi: {
     tabEn: 'अंग्रेज़ी',
@@ -232,6 +241,10 @@ const translations = {
     errGalleryMin: 'कृपया कम से कम 3 छवियां अपलोड करें',
     errGalleryMax: 'अधिकतम 10 छवियां की अनुमति है',
     hintGallery: 'न्यूनतम 3 • अधिकतम 10 छवियां',
+    lblImageAdUrl: 'इमेज विज्ञापन URL',
+    phImageAdUrl: 'https://example.com/ad-landing-page...',
+    errImageAdUrlRequired: 'इमेज विज्ञापन URL आवश्यक है',
+    errImageAdUrlInvalid: 'कृपया एक वैध URL दर्ज करें (http:// या https:// से शुरू)',
   },
   ml: {
     tabEn: 'ഇംഗ്ലീഷ്',
@@ -285,9 +298,13 @@ const translations = {
     errVideoSourceRequired: 'ദയവായി ഒരു వీడియో ഉറവിടം തിരഞ്ഞെടുക്കുക',
     errVideoUrlRequired: 'വീഡിയോ URL ആവശ്യമാണ്',
     lblGalleryImages: 'ഗാലറി ചിത്രങ്ങൾ *',
-    errGalleryMin: 'ദയവായി കുറഞ്ഞത് 3 ചിത്രങ്ങളെങ്കിലും അപ്‌ലോడ్ చేయുക',
+    errGalleryMin: 'ദയവായി കുറഞ്ഞത് 3 ചിത്രങ്ങളെങ്കിലും അപ്‌ലോഡ് చేయുക',
     errGalleryMax: 'പരമാവധി 10 ചിത്രങ്ങൾ മാത്രമേ അനുവദിക്കൂ',
     hintGallery: 'കുറഞ്ഞത് 3 • പരമാവധി 10 ചിത്രങ്ങൾ',
+    lblImageAdUrl: 'ഇമേജ് പരസ്യ URL',
+    phImageAdUrl: 'https://example.com/ad-landing-page...',
+    errImageAdUrlRequired: 'ഇമേജ് പരസ്യ URL ആവശ്യമാണ്',
+    errImageAdUrlInvalid: 'ദയവായി ഒരു സാധുവായ URL നൽകുക (http:// അല്ലെങ്കിൽ https:// യിൽ തുടങ്ങുന്നത്)',
   },
 };
 
@@ -310,8 +327,10 @@ export interface CreateNewsFormData {
   publishMode?: 'now' | 'draft' | 'schedule';
   scheduleTime?: string;
   languageId?: number;
-  categoryIds?: number[];
-  locationIds?: number[];
+  categoryIds?: (number | string)[];
+  category_ids?: (number | string)[];
+  locationIds?: (number | string)[];
+  location_ids?: (number | string)[];
   aitagIds?: number[];
   aitag_ids?: number[];
   postType?: string;
@@ -322,6 +341,7 @@ export interface CreateNewsFormData {
   sendNotification?: boolean;
   isNotification?: boolean;
   imageTitle: string;
+  imageAdUrl?: string;
   webUrl?: string;
   postUrl?: string;
   videoSource?: string;
@@ -329,6 +349,9 @@ export interface CreateNewsFormData {
   video_platform?: string;
   video_url?: string;
   galleryImages?: string[];
+  bulletPoints?: string[];
+  bullet_points?: string[];
+  subType?: string;
 }
 
 interface CreateNewsFormProps {
@@ -471,8 +494,20 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
             .filter((pt) => pt.name);
           setApiPostTypes(mapped);
 
-          // Auto-select 'Standard' as default when creating a new post
-          if (!initialData && mapped.length > 0) {
+          if (initialData && mapped.length > 0) {
+            const rawType = initialData.type || (initialData as any).post_type || (initialData as any).typename || (initialData as any).type_id || (initialData as any).typeId;
+            const hasVideo = Boolean((initialData as any).videoUrl || (initialData as any).video_url || (initialData as any).video_link || (initialData as any).videoLink);
+            const matched = mapped.find(
+              (pt) =>
+                String(pt.id) === String(rawType) ||
+                pt.name.toLowerCase() === String(rawType).toLowerCase() ||
+                (hasVideo && pt.name.toLowerCase().includes('video')) ||
+                (String(rawType).toLowerCase().includes('video') && pt.name.toLowerCase().includes('video'))
+            );
+            if (matched) {
+              setType(matched.name);
+            }
+          } else if (!initialData && mapped.length > 0) {
             const standard = mapped.find((pt) => pt.name.toLowerCase() === 'standard');
             setType(standard ? standard.name : mapped[0].name);
           }
@@ -533,14 +568,44 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         : initialData.titleEn)
       : '') || ''
   );
-  const [body, setBody] = useState<string>(
-    (initialData
-      ? (initialData.postLanguage === 'te' ? initialData.bodyTe
-        : initialData.postLanguage === 'hi' ? initialData.bodyHi
-        : initialData.postLanguage === 'ml' ? initialData.bodyMl
-        : initialData.bodyEn)
-      : '') || ''
-  );
+  const combineContentAndBullets = (rawBody?: string, bullets?: string[]): string => {
+    let content = (rawBody || '').trim();
+
+    if (/<ul[^>]*>/i.test(content) || /<li[^>]*>/i.test(content)) {
+      return content;
+    }
+
+    const cleanBullets = Array.isArray(bullets)
+      ? bullets.map((b) => String(b).replace(/[\[\]]/g, '').trim()).filter(Boolean)
+      : [];
+
+    const parsed = formatBulletPostContentAndBullets(content, cleanBullets);
+    const headerText = parsed.content.trim();
+    const finalBullets = parsed.bulletPoints.length > 0 ? parsed.bulletPoints : cleanBullets;
+
+    if (finalBullets.length === 0) {
+      if (!headerText) return '';
+      return /<[^>]+>/.test(headerText) ? headerText : `<p>${headerText}</p>`;
+    }
+
+    const cleanHeaderText = headerText.replace(/<[^>]+>/g, '').trim();
+    const headerHtml = cleanHeaderText ? `<p>${cleanHeaderText}</p>` : '';
+    const bulletsHtml = `<ul>${finalBullets.map((b: string) => `<li>${b.replace(/^[•\>\*\.\_\s]+/, '').replace(/<[^>]+>/g, '').trim()}</li>`).join('')}</ul>`;
+
+    return `${headerHtml}${bulletsHtml}`;
+  };
+
+  const [body, setBody] = useState<string>(() => {
+    if (!initialData) return '';
+    const rawBody = (
+      initialData.postLanguage === 'te' ? initialData.bodyTe
+      : initialData.postLanguage === 'hi' ? initialData.bodyHi
+      : initialData.postLanguage === 'ml' ? initialData.bodyMl
+      : initialData.bodyEn
+    ) || '';
+    const bullets = (initialData as any).bulletPoints || (initialData as any).bullet_points || [];
+    return combineContentAndBullets(rawBody, bullets);
+  });
 
   // Reverse-map Telugu category names back to English keys for checkbox preselection
   const teluguToEnglishCategoryMap: Record<string, string> = {
@@ -555,9 +620,15 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   };
   const mapCategoryToKey = (cat: string) => teluguToEnglishCategoryMap[cat] || cat;
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    initialData?.categories ? initialData.categories.map(mapCategoryToKey) : []
-  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
+    if (!initialData) return [];
+    const raw = [
+      ...(initialData.categories || []),
+      ...((initialData as any).categoryIds || []),
+      ...((initialData as any).category_ids || []),
+    ];
+    return Array.from(new Set(raw.map((r) => mapCategoryToKey(String(r))).filter(Boolean)));
+  });
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
     if (!initialData) return [];
     const raw = [
@@ -567,17 +638,26 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     ];
     return raw.map(String).filter(Boolean);
   });
-  const [location, setLocation] = useState<string[]>(initialData?.location || []);
+  const [location, setLocation] = useState<string[]>(() => {
+    if (!initialData) return [];
+    const raw = [
+      ...(initialData.location || []),
+      ...((initialData as any).locationIds || []),
+      ...((initialData as any).location_ids || []),
+    ];
+    return Array.from(new Set(raw.map(String).filter(Boolean)));
+  });
   const [type, setType] = useState(() => {
-    const validTypes = ['Standard', 'Video', 'Reel', 'Podcast'];
-    const initType = initialData?.type;
+    const validTypes = ['Standard', 'Video', 'Reel', 'Podcast', 'BulletPost'];
+    const rawSubType = (initialData as any)?.subType || (initialData as any)?.sub_type;
+    const initType = rawSubType || initialData?.type || (initialData as any)?.post_type || (initialData as any)?.typename;
     if (initType) {
-      const found = validTypes.find((t) => t.toLowerCase() === initType.toLowerCase());
+      const found = validTypes.find((t) => t.toLowerCase() === String(initType).toLowerCase());
       if (found) return found;
       if (initType === 'sivakumar' || initType === 'string') {
         return 'Standard';
       }
-      return initType;
+      return String(initType);
     }
     return 'Standard';
   });
@@ -603,10 +683,13 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     if (initialData && (initialData as any).send_notification !== undefined) {
       return Boolean((initialData as any).send_notification);
     }
-    return true;
+    return false;
   });
   const [notificationTitle, setNotificationTitle] = useState<string>((initialData as any)?.notificationTitle || (initialData as any)?.notificationtitle || '');
   const [imageTitle, setImageTitle] = useState<string>((initialData as any)?.imageTitle || (initialData as any)?.imagetitel || '');
+  const [imageAdUrl, setImageAdUrl] = useState<string>(
+    () => (initialData as any)?.imageAdUrl || (initialData as any)?.image_ad_url || initialData?.postUrl || (initialData as any)?.web_post_url || initialData?.webUrl || ''
+  );
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -618,10 +701,15 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [scheduleTime, setScheduleTime] = useState<string>('');
 
   const isImageOrGalleryType =
-  ['image', 'image ad', 'gallery', 'video'].includes(type.toLowerCase().trim()) ||
-  type.toLowerCase().includes('image') ||
-  type.toLowerCase().includes('gallery') ||
-  type.toLowerCase().includes('video');
+    ['image', 'image ad', 'gallery', 'video'].includes(type.toLowerCase().trim()) ||
+    type.toLowerCase().includes('image') ||
+    type.toLowerCase().includes('gallery') ||
+    type.toLowerCase().includes('video');
+
+  const isImageAd =
+    type.toLowerCase().trim() === 'imagead' ||
+    type.toLowerCase().trim() === 'image ad' ||
+    type.toLowerCase().replace(/\s+/g, '') === 'imagead';
 
   const langIdMap: Record<string, number> = { en: 1, te: 2, hi: 3, ml: 4 };
 
@@ -631,6 +719,21 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       setPostLanguage(language);
     }
   }, [language]);
+
+  // Sync imageAdUrl when initialData changes (edit mode) — lazy initializer only runs once
+  useEffect(() => {
+    if (initialData) {
+      const resolved =
+        (initialData as any).imageAdUrl ||
+        (initialData as any).image_ad_url ||
+        initialData.postUrl ||
+        (initialData as any).web_post_url ||
+        (initialData as any).webPostUrl ||
+        initialData.webUrl ||
+        '';
+      setImageAdUrl(resolved);
+    }
+  }, [initialData]);
 
   // Reset isWebPost to false when post type is BulletPost, StandardLink, or BigBlackStanded
   useEffect(() => {
@@ -683,71 +786,89 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
 
   // Map initial categories to dynamicCategories keys so already selected categories are checked in edit mode
   useEffect(() => {
-    if (initialData && initialData.categories && initialData.categories.length > 0 && dynamicCategories.length > 0) {
-      const resolved: string[] = [];
-      initialData.categories.forEach((raw: any) => {
-        if (raw === undefined || raw === null || raw === '') return;
-        const match = dynamicCategories.find((dc) => {
-          if (dc.key === raw || String(dc.key) === String(raw)) return true;
-          if (dc.id === raw || String(dc.id) === String(raw)) return true;
-          if (dc.labelEn && dc.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
-          if (dc.labelTe && dc.labelTe === String(raw)) return true;
-          if (dc.labelHi && dc.labelHi === String(raw)) return true;
-          if (dc.labelMl && dc.labelMl === String(raw)) return true;
-          return false;
-        });
-        if (match) {
-          resolved.push(match.key);
-        } else if (typeof raw === 'string') {
-          resolved.push(mapCategoryToKey(raw));
-        }
-      });
-      if (resolved.length > 0) {
-        const newSet = Array.from(new Set(resolved));
-        setSelectedCategories((prev) => {
-          if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
-            return prev;
+    if (initialData) {
+      const rawCategories: Array<string | number> = [
+        ...(initialData.categories || []),
+        ...((initialData as any).categoryIds || []),
+        ...((initialData as any).category_ids || []),
+      ];
+      if (rawCategories.length > 0 && dynamicCategories.length > 0) {
+        const resolved: string[] = [];
+        rawCategories.forEach((raw: any) => {
+          if (raw === undefined || raw === null || raw === '') return;
+          const match = dynamicCategories.find((dc) => {
+            if (dc.key === raw || String(dc.key) === String(raw)) return true;
+            if (dc.id === raw || String(dc.id) === String(raw) || Number(dc.id) === Number(raw)) return true;
+            if (dc.labelEn && dc.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+            if (dc.labelTe && dc.labelTe === String(raw)) return true;
+            if (dc.labelHi && dc.labelHi === String(raw)) return true;
+            if (dc.labelMl && dc.labelMl === String(raw)) return true;
+            return false;
+          });
+          if (match) {
+            resolved.push(match.key);
+          } else if (typeof raw === 'string') {
+            resolved.push(mapCategoryToKey(raw));
+          } else if (typeof raw === 'number') {
+            resolved.push(String(raw));
           }
-          return newSet;
         });
+        if (resolved.length > 0) {
+          const newSet = Array.from(new Set(resolved));
+          setSelectedCategories((prev) => {
+            if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
+              return prev;
+            }
+            return newSet;
+          });
+        }
       }
     }
   }, [initialData, dynamicCategories.map((c) => `${c.id}:${c.key}`).join(',')]);
 
   // Map initial locations to dynamicLocations keys so already selected locations are checked in edit mode
   useEffect(() => {
-    if (initialData && initialData.location && initialData.location.length > 0 && dynamicLocations.length > 0) {
-      const resolved: string[] = [];
-      initialData.location.forEach((raw: any) => {
-        if (raw === undefined || raw === null || raw === '') return;
-        const match = dynamicLocations.find((dl) => {
-          if (dl.key === raw || String(dl.key) === String(raw)) return true;
-          if (dl.id === raw || String(dl.id) === String(raw)) return true;
-          if (dl.labelEn && dl.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
-          if (dl.labelTe && dl.labelTe === String(raw)) return true;
-          if (dl.labelHi && dl.labelHi === String(raw)) return true;
-          if (dl.labelMl && dl.labelMl === String(raw)) return true;
-          return false;
-        });
-        if (match) {
-          resolved.push(match.key);
-        } else if (typeof raw === 'string') {
-          resolved.push(raw);
-        }
-      });
-      if (resolved.length > 0) {
-        const newSet = Array.from(new Set(resolved));
-        setLocation((prev) => {
-          if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
-            return prev;
+    if (initialData) {
+      const rawLocations: Array<string | number> = [
+        ...(initialData.location || []),
+        ...((initialData as any).locationIds || []),
+        ...((initialData as any).location_ids || []),
+      ];
+      if (rawLocations.length > 0 && dynamicLocations.length > 0) {
+        const resolved: string[] = [];
+        rawLocations.forEach((raw: any) => {
+          if (raw === undefined || raw === null || raw === '') return;
+          const match = dynamicLocations.find((dl) => {
+            if (dl.key === raw || String(dl.key) === String(raw)) return true;
+            if (dl.id === raw || String(dl.id) === String(raw) || Number(dl.id) === Number(raw)) return true;
+            if (dl.labelEn && dl.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+            if (dl.labelTe && dl.labelTe === String(raw)) return true;
+            if (dl.labelHi && dl.labelHi === String(raw)) return true;
+            if (dl.labelMl && dl.labelMl === String(raw)) return true;
+            return false;
+          });
+          if (match) {
+            resolved.push(match.key);
+          } else if (typeof raw === 'string') {
+            resolved.push(raw);
+          } else if (typeof raw === 'number') {
+            resolved.push(String(raw));
           }
-          return newSet;
         });
+        if (resolved.length > 0) {
+          const newSet = Array.from(new Set(resolved));
+          setLocation((prev) => {
+            if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) {
+              return prev;
+            }
+            return newSet;
+          });
+        }
       }
     }
   }, [initialData, dynamicLocations.map((l) => `${l.id}:${l.key}`).join(',')]);
 
-  // Sync isWebPost and webUrl when initialData updates (e.g. after async fetch in edit mode)
+  // Sync form state when initialData updates (e.g. after async detail fetch in edit mode)
   useEffect(() => {
     if (initialData) {
       const isWeb = Boolean(
@@ -769,8 +890,118 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         setWebUrl(url);
         setPostUrl(url);
       }
+
+      const vUrl =
+        (initialData as any).videoUrl ||
+        (initialData as any).video_url ||
+        (initialData as any).video_link ||
+        (initialData as any).videoLink ||
+        '';
+      if (vUrl) {
+        setVideoUrl(vUrl);
+      }
+
+      const rawSubType = (initialData as any).subType || (initialData as any).sub_type;
+      const rawType = rawSubType || initialData.type || (initialData as any).post_type || (initialData as any).typename || (initialData as any).type_id || (initialData as any).typeId;
+      if (rawType || vUrl) {
+        const validTypes = ['Standard', 'Video', 'Reel', 'Podcast', 'BulletPost'];
+        let matchedName = '';
+        if (apiPostTypes.length > 0) {
+          const matched = apiPostTypes.find(
+            (pt) =>
+              String(pt.id) === String(rawType) ||
+              pt.name.toLowerCase() === String(rawType).toLowerCase() ||
+              (Boolean(vUrl) && pt.name.toLowerCase().includes('video')) ||
+              (String(rawType).toLowerCase().includes('video') && pt.name.toLowerCase().includes('video'))
+          );
+          if (matched) matchedName = matched.name;
+        }
+        if (!matchedName) {
+          const found = validTypes.find((t) => t.toLowerCase() === String(rawType).toLowerCase());
+          if (found) {
+            matchedName = found;
+          } else if (vUrl || String(rawType).toLowerCase().includes('video')) {
+            matchedName = 'Video';
+          } else if (String(rawType).toLowerCase().includes('reel')) {
+            matchedName = 'Reel';
+          } else if (String(rawType).toLowerCase().includes('podcast')) {
+            matchedName = 'Podcast';
+          } else if (String(rawType).toLowerCase().includes('bullet')) {
+            matchedName = 'BulletPost';
+          }
+        }
+        if (matchedName) setType(matchedName);
+      }
+
+      const vSource =
+        (initialData as any).videoSource ||
+        (initialData as any).video_platform ||
+        (initialData as any).video_source ||
+        '';
+      if (vSource) {
+        setVideoSource(vSource);
+      }
+
+      if (initialData.postLanguage) {
+        setPostLanguage(initialData.postLanguage);
+      }
+
+      const newTitle = (initialData.postLanguage === 'te' ? initialData.titleTe
+        : initialData.postLanguage === 'hi' ? initialData.titleHi
+        : initialData.postLanguage === 'ml' ? initialData.titleMl
+        : initialData.titleEn) || '';
+      if (newTitle) setTitle(newTitle);
+
+      const rawBody = (initialData.postLanguage === 'te' ? initialData.bodyTe
+        : initialData.postLanguage === 'hi' ? initialData.bodyHi
+        : initialData.postLanguage === 'ml' ? initialData.bodyMl
+        : initialData.bodyEn) || '';
+      const bullets = (initialData as any).bulletPoints || (initialData as any).bullet_points || (initialData as any).bullets || [];
+      const combinedBody = combineContentAndBullets(rawBody, bullets);
+      if (combinedBody) setBody(combinedBody);
+
+      const rawCats = [
+        ...(initialData.categories || []),
+        ...((initialData as any).categoryIds || []),
+        ...((initialData as any).category_ids || []),
+      ].map(String).filter(Boolean);
+      if (rawCats.length > 0) {
+        setSelectedCategories((prev) => {
+          const combined = Array.from(new Set([...prev, ...rawCats]));
+          if (combined.length === prev.length && combined.every((v, i) => v === prev[i])) return prev;
+          return combined;
+        });
+      }
+
+      const rawLocs = [
+        ...(initialData.location || []),
+        ...((initialData as any).locationIds || []),
+        ...((initialData as any).location_ids || []),
+      ].map(String).filter(Boolean);
+      if (rawLocs.length > 0) {
+        setLocation((prev) => {
+          const combined = Array.from(new Set([...prev, ...rawLocs]));
+          if (combined.length === prev.length && combined.every((v, i) => v === prev[i])) return prev;
+          return combined;
+        });
+      }
     }
   }, [
+    initialData?.postLanguage,
+    initialData?.titleTe,
+    initialData?.titleEn,
+    initialData?.titleHi,
+    initialData?.titleMl,
+    initialData?.bodyTe,
+    initialData?.bodyEn,
+    initialData?.bodyHi,
+    initialData?.bodyMl,
+    (initialData as any)?.category_ids?.join(','),
+    (initialData as any)?.categoryIds?.join(','),
+    initialData?.categories?.join(','),
+    (initialData as any)?.location_ids?.join(','),
+    (initialData as any)?.locationIds?.join(','),
+    initialData?.location?.join(','),
     (initialData as any)?.isWebPost,
     (initialData as any)?.is_web_post,
     (initialData as any)?.isWebpost,
@@ -779,19 +1010,30 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     (initialData as any)?.webPostUrl,
     (initialData as any)?.postUrl,
     (initialData as any)?.post_url,
+    (initialData as any)?.type,
+    (initialData as any)?.post_type,
+    (initialData as any)?.typename,
+    (initialData as any)?.videoUrl,
+    (initialData as any)?.video_url,
+    (initialData as any)?.videoSource,
+    (initialData as any)?.video_platform,
   ]);
 
+  const prevTypeRef = useRef<string>(type);
 
-  // Reset video/gallery fields when switching post types
+  // Reset video/gallery fields when switching post types manually
   useEffect(() => {
-    // Reset video fields when switching away from video types
-    if (!type.toLowerCase().includes('video')) {
-      setVideoSource('');
-      setVideoUrl('');
-    }
-    // Reset gallery images when switching away from gallery type
-    if (!type.toLowerCase().includes('gallery')) {
-      setGalleryItems([]);
+    if (prevTypeRef.current !== type) {
+      // Reset video fields when switching away from video types
+      if (!type.toLowerCase().includes('video')) {
+        setVideoSource('');
+        setVideoUrl('');
+      }
+      // Reset gallery images when switching away from gallery type
+      if (!type.toLowerCase().includes('gallery')) {
+        setGalleryItems([]);
+      }
+      prevTypeRef.current = type;
     }
   }, [type]);
 
@@ -814,7 +1056,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     setPostUrl('');
     setVideoSource('');
     setVideoUrl('');
-    setSendNotification(true);
+    setSendNotification(false);
     setNotificationTitle('');
     setImageTitle('');
     setErrors({});
@@ -826,10 +1068,69 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     onClose();
   };
 
+  const isCategoryChecked = (cat: { id?: string | number; key: string; labelEn?: string; labelTe?: string; labelHi?: string; labelMl?: string }) => {
+    if (!selectedCategories || selectedCategories.length === 0) return false;
+    const catIdentifiers = [
+      cat.key,
+      String(cat.key),
+      cat.id !== undefined && cat.id !== null ? String(cat.id) : '',
+      cat.id !== undefined && cat.id !== null ? cat.id : '',
+      cat.labelEn || '',
+      cat.labelTe || '',
+      cat.labelHi || '',
+      cat.labelMl || '',
+      teluguToEnglishCategoryMap[cat.labelTe || ''] || '',
+      mapCategoryToKey(cat.key),
+    ].filter(Boolean);
+
+    return selectedCategories.some((s) => catIdentifiers.includes(s) || catIdentifiers.includes(String(s)));
+  };
+
+  const handleCategoryToggleObj = (cat: { id?: string | number; key: string; labelEn?: string; labelTe?: string }) => {
+    const isChecked = isCategoryChecked(cat);
+    const catIdentifiers = [
+      cat.key,
+      String(cat.key),
+      cat.id !== undefined && cat.id !== null ? String(cat.id) : '',
+      cat.id !== undefined && cat.id !== null ? cat.id : '',
+      cat.labelEn || '',
+      cat.labelTe || '',
+    ].filter(Boolean);
+
+    setSelectedCategories((prev) => {
+      if (isChecked) {
+        return prev.filter((c) => !catIdentifiers.includes(c) && !catIdentifiers.includes(String(c)));
+      } else {
+        return [...prev, cat.key];
+      }
+    });
+  };
+
   const handleCategoryToggle = (categoryKey: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryKey) ? prev.filter((c) => c !== categoryKey) : [...prev, categoryKey]
-    );
+    const found = dynamicCategories.find((c) => c.key === categoryKey || String(c.id) === String(categoryKey));
+    if (found) {
+      handleCategoryToggleObj(found);
+    } else {
+      setSelectedCategories((prev) =>
+        prev.includes(categoryKey) ? prev.filter((c) => c !== categoryKey) : [...prev, categoryKey]
+      );
+    }
+  };
+
+  const isLocationChecked = (loc: { id?: string | number; key: string; labelEn?: string; labelTe?: string; labelHi?: string; labelMl?: string }) => {
+    if (!location || location.length === 0) return false;
+    const locIdentifiers = [
+      loc.key,
+      String(loc.key),
+      loc.id !== undefined && loc.id !== null ? String(loc.id) : '',
+      loc.id !== undefined && loc.id !== null ? loc.id : '',
+      loc.labelEn || '',
+      loc.labelTe || '',
+      loc.labelHi || '',
+      loc.labelMl || '',
+    ].filter(Boolean);
+
+    return location.some((l) => locIdentifiers.includes(l) || locIdentifiers.includes(String(l)));
   };
 
   const handleTagsChange = (selected: string[] | string) => {
@@ -936,11 +1237,17 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       errMap.notificationTitle = t.errNotificationTitleWordLimit;
     }
 
-    // Image Title (Optional for Image, Image Ad, Gallery post types)
-    if (!isImageOrGalleryType && !imageTitle.trim()) {
-      errMap.imageTitle = t.errImageTitleRequired;
-    } else if (imageTitle.trim() && countWords(imageTitle) > TITLE_WORD_LIMIT) {
-      errMap.imageTitle = t.errImageTitleWordLimit;
+    // Image Title / Image Ad URL
+    if (isImageAd) {
+      if (imageAdUrl.trim() && !/^https?:\/\/.+/i.test(imageAdUrl.trim())) {
+        errMap.imageAdUrl = t.errImageAdUrlInvalid;
+      }
+    } else {
+      if (!isImageOrGalleryType && !imageTitle.trim()) {
+        errMap.imageTitle = t.errImageTitleRequired;
+      } else if (imageTitle.trim() && countWords(imageTitle) > TITLE_WORD_LIMIT) {
+        errMap.imageTitle = t.errImageTitleWordLimit;
+      }
     }
 
     // Content
@@ -1018,68 +1325,87 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     }
 
     const languageId = initialData?.languageId || langIdMap[postLanguage] || 1;
-    const categoryIds = selectedCategories
-      .map((catKey) => {
-        const found = dynamicCategories.find(
-          (dc) =>
-            dc.key === catKey ||
-            dc.id === catKey ||
-            String(dc.id) === String(catKey) ||
-            dc.labelEn === catKey ||
-            dc.labelTe === catKey ||
-            dc.labelHi === catKey ||
-            dc.labelMl === catKey
-        );
-        const rawId = found?.id ?? (typeof catKey === 'number' ? catKey : parseInt(String(catKey), 10));
-        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
-      })
-      .filter((id): id is number => id !== null && id > 0);
+    const categoryIds = Array.from(
+      new Set(
+        selectedCategories
+          .map((catKey) => {
+            const found = dynamicCategories.find(
+              (dc) =>
+                dc.key === catKey ||
+                dc.id === catKey ||
+                String(dc.id) === String(catKey) ||
+                dc.labelEn === catKey ||
+                dc.labelTe === catKey ||
+                dc.labelHi === catKey ||
+                dc.labelMl === catKey
+            );
+            const rawId = found?.id ?? (typeof catKey === 'number' ? catKey : parseInt(String(catKey), 10));
+            return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+          })
+          .filter((id): id is number => id !== null && id > 0)
+      )
+    );
 
-    const locationIds = location
-      .map((locKey) => {
-        const found = dynamicLocations.find(
-          (dl) =>
-            dl.key === locKey ||
-            dl.id === locKey ||
-            String(dl.id) === String(locKey) ||
-            dl.labelEn === locKey ||
-            dl.labelTe === locKey ||
-            dl.labelHi === locKey ||
-            dl.labelMl === locKey
-        );
-        const rawId = found?.id ?? (typeof locKey === 'number' ? locKey : parseInt(String(locKey), 10));
-        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
-      })
-      .filter((id): id is number => id !== null && id > 0);
+    const locationIds = Array.from(
+      new Set(
+        location
+          .map((locKey) => {
+            const found = dynamicLocations.find(
+              (dl) =>
+                dl.key === locKey ||
+                dl.id === locKey ||
+                String(dl.id) === String(locKey) ||
+                dl.labelEn === locKey ||
+                dl.labelTe === locKey ||
+                dl.labelHi === locKey ||
+                dl.labelMl === locKey
+            );
+            const rawId = found?.id ?? (typeof locKey === 'number' ? locKey : parseInt(String(locKey), 10));
+            return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+          })
+          .filter((id): id is number => id !== null && id > 0)
+      )
+    );
 
-    const parsedAitagIds = selectedTags
-      .map((tagKey) => {
-        const found = dynamicTags.find(
-          (dt) =>
-            dt.key === tagKey ||
-            dt.id === tagKey ||
-            String(dt.id) === String(tagKey) ||
-            dt.labelEn === tagKey ||
-            dt.labelTe === tagKey ||
-            dt.labelHi === tagKey ||
-            dt.labelMl === tagKey
-        );
-        const rawId = found?.id ?? (typeof tagKey === 'number' ? tagKey : parseInt(String(tagKey), 10));
-        return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
-      })
-      .filter((id): id is number => id !== null && id > 0);
+    const parsedAitagIds = Array.from(
+      new Set(
+        selectedTags
+          .map((tagKey) => {
+            const found = dynamicTags.find(
+              (dt) =>
+                dt.key === tagKey ||
+                dt.id === tagKey ||
+                String(dt.id) === String(tagKey) ||
+                dt.labelEn === tagKey ||
+                dt.labelTe === tagKey ||
+                dt.labelHi === tagKey ||
+                dt.labelMl === tagKey
+            );
+            const rawId = found?.id ?? (typeof tagKey === 'number' ? tagKey : parseInt(String(tagKey), 10));
+            return typeof rawId === 'number' && !isNaN(rawId) && rawId > 0 ? rawId : null;
+          })
+          .filter((id): id is number => id !== null && id > 0)
+      )
+    );
 
     const aitagIds = parsedAitagIds;
 
+    const cleanTitle = stripHtml(title);
+    const isLinkFormat = type.toLowerCase().includes('link') || type.toLowerCase().includes('standardlink');
+    const cleanBody = isLinkFormat ? stripAllTagsExceptLinkTags(body) : stripHtml(body);
+    const cleanNotifTitle = sendNotification ? stripHtml(notificationTitle) : '';
+    const cleanImgTitle = isImageAd ? '' : stripHtml(imageTitle);
+    const finalPostUrl = isImageAd ? imageAdUrl.trim() : webUrl;
+
     onSubmit({
-      titleEn: postLanguage === 'en' ? title : '',
-      bodyEn: postLanguage === 'en' ? body : '',
-      titleTe: postLanguage === 'te' ? title : '',
-      bodyTe: postLanguage === 'te' ? body : '',
-      titleHi: postLanguage === 'hi' ? title : '',
-      bodyHi: postLanguage === 'hi' ? body : '',
-      titleMl: postLanguage === 'ml' ? title : '',
-      bodyMl: postLanguage === 'ml' ? body : '',
+      titleEn: postLanguage === 'en' ? cleanTitle : '',
+      bodyEn: postLanguage === 'en' ? cleanBody : '',
+      titleTe: postLanguage === 'te' ? cleanTitle : '',
+      bodyTe: postLanguage === 'te' ? cleanBody : '',
+      titleHi: postLanguage === 'hi' ? cleanTitle : '',
+      bodyHi: postLanguage === 'hi' ? cleanBody : '',
+      titleMl: postLanguage === 'ml' ? cleanTitle : '',
+      bodyMl: postLanguage === 'ml' ? cleanBody : '',
       categories: selectedCategories,
       tags: selectedTags,
       location,
@@ -1099,16 +1425,17 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       isSticky,
       isStickyPost: isSticky,
       isWebPost,
-      webUrl,
-      postUrl: webUrl,
+      webUrl: isImageAd ? finalPostUrl : webUrl,
+      postUrl: finalPostUrl,
+      imageAdUrl: imageAdUrl.trim(),
       videoSource,
       videoUrl,
       video_platform: videoSource,
       video_url: videoUrl,
-      notificationTitle: sendNotification ? notificationTitle : '',
+      notificationTitle: cleanNotifTitle,
       sendNotification,
       isNotification: sendNotification,
-      imageTitle,
+      imageTitle: cleanImgTitle,
     });
     setIsUploading(false);
     handleReset();
@@ -1414,30 +1741,44 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 value: selectedTags,
                 onChange: (e) => handleTagsChange(e.target.value as string[]),
                 renderValue: (selected) => {
-                  const selectedArr = selected as string[];
-                  if (selectedArr.length === dynamicTags.length) {
+                  const selectedArr = (selected as string[]) || [];
+                  if (selectedArr.length === dynamicTags.length && dynamicTags.length > 0) {
                     return <Chip label="All Tags" size="small" sx={{ borderRadius: '6px' }} />;
                   }
+                  const resolvedItems: Array<{ key: string; label: string }> = [];
+                  selectedArr.forEach((val) => {
+                    if (!val) return;
+                    const tag = dynamicTags.find(
+                      (t) =>
+                        t.key === val ||
+                        String(t.id) === String(val) ||
+                        t.labelEn === val ||
+                        t.labelTe === val ||
+                        t.labelHi === val ||
+                        t.labelMl === val
+                    );
+                    const label = (language === 'te' ? tag?.labelTe : language === 'hi' ? tag?.labelHi : language === 'ml' ? tag?.labelMl : tag?.labelEn) || tag?.labelEn || tag?.key || (typeof val === 'string' && isNaN(Number(val)) ? val : '');
+                    const key = tag?.key || String(val);
+                    if (label && !resolvedItems.some((item) => item.key === key || item.label === label)) {
+                      resolvedItems.push({ key, label });
+                    }
+                  });
                   return (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selectedArr.map((val, idx) => {
-                        const tag = dynamicTags.find((t) => t.key === val);
-                        const label = language === 'te' ? tag?.labelTe : language === 'hi' ? tag?.labelHi : language === 'ml' ? tag?.labelMl : tag?.labelEn;
-                        return (
-                          <Chip
-                            key={`${val}-${idx}`}
-                            label={label}
-                            size="small"
-                            sx={{
-                              borderRadius: '6px',
-                              height: '20px',
-                              fontSize: '0.72rem',
-                              backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.1)',
-                              color: isDark ? '#a6e2f5' : '#1c1445',
-                            }}
-                          />
-                        );
-                      })}
+                      {resolvedItems.map((item, idx) => (
+                        <Chip
+                          key={`${item.key}-${idx}`}
+                          label={item.label}
+                          size="small"
+                          sx={{
+                            borderRadius: '6px',
+                            height: '20px',
+                            fontSize: '0.72rem',
+                            backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.1)',
+                            color: isDark ? '#a6e2f5' : '#1c1445',
+                          }}
+                        />
+                      ))}
                     </Box>
                   );
                 },
@@ -1485,30 +1826,44 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 value: location,
                 onChange: (e) => handleLocationChange(e.target.value as string[]),
                 renderValue: (selected) => {
-                  const selectedArr = selected as string[];
-                  if (selectedArr.length === dynamicLocations.length) {
+                  const selectedArr = (selected as string[]) || [];
+                  if (selectedArr.length === dynamicLocations.length && dynamicLocations.length > 0) {
                     return <Chip label="All Locations" size="small" sx={{ borderRadius: '6px' }} />;
                   }
+                  const resolvedItems: Array<{ key: string; label: string }> = [];
+                  selectedArr.forEach((val) => {
+                    if (!val) return;
+                    const loc = dynamicLocations.find(
+                      (l) =>
+                        l.key === val ||
+                        String(l.id) === String(val) ||
+                        l.labelEn === val ||
+                        l.labelTe === val ||
+                        l.labelHi === val ||
+                        l.labelMl === val
+                    );
+                    const label = (language === 'te' ? loc?.labelTe : language === 'hi' ? loc?.labelHi : language === 'ml' ? loc?.labelMl : loc?.labelEn) || loc?.labelEn || loc?.key || (typeof val === 'string' && isNaN(Number(val)) ? val : '');
+                    const key = loc?.key || String(val);
+                    if (label && !resolvedItems.some((item) => item.key === key || item.label === label)) {
+                      resolvedItems.push({ key, label });
+                    }
+                  });
                   return (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selectedArr.map((val, idx) => {
-                        const loc = dynamicLocations.find((l) => l.key === val);
-                        const label = language === 'te' ? loc?.labelTe : language === 'hi' ? loc?.labelHi : language === 'ml' ? loc?.labelMl : loc?.labelEn;
-                        return (
-                          <Chip
-                            key={`${val}-${idx}`}
-                            label={label}
-                            size="small"
-                            sx={{
-                              borderRadius: '6px',
-                              height: '20px',
-                              fontSize: '0.72rem',
-                              backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.1)',
-                              color: isDark ? '#a6e2f5' : '#1c1445',
-                            }}
-                          />
-                        );
-                      })}
+                      {resolvedItems.map((item, idx) => (
+                        <Chip
+                          key={`${item.key}-${idx}`}
+                          label={item.label}
+                          size="small"
+                          sx={{
+                            borderRadius: '6px',
+                            height: '20px',
+                            fontSize: '0.72rem',
+                            backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.1)',
+                            color: isDark ? '#a6e2f5' : '#1c1445',
+                          }}
+                        />
+                      ))}
                     </Box>
                   );
                 },
@@ -1529,14 +1884,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
               }}
             >
               <MenuItem value="all">
-                <Checkbox checked={location.length === dynamicLocations.length} size="small" />
+                <Checkbox checked={dynamicLocations.length > 0 && dynamicLocations.every((loc) => isLocationChecked(loc))} size="small" />
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>Select All</Typography>
               </MenuItem>
               {dynamicLocations.map((loc, idx) => {
                 const label = (language === 'te' ? loc.labelTe : language === 'hi' ? loc.labelHi : language === 'ml' ? loc.labelMl : loc.labelEn) || loc.labelEn || loc.key || `Location ${idx + 1}`;
                 return (
                   <MenuItem key={`loc-${loc.id ?? loc.key}-${idx}`} value={loc.key}>
-                    <Checkbox checked={location.includes(loc.key)} size="small" />
+                    <Checkbox checked={isLocationChecked(loc)} size="small" />
                     {label}
                   </MenuItem>
                 );
@@ -1630,10 +1985,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={selectedCategories.length === dynamicCategories.length}
-                        indeterminate={selectedCategories.length > 0 && selectedCategories.length < dynamicCategories.length}
+                        checked={dynamicCategories.length > 0 && dynamicCategories.every((cat) => isCategoryChecked(cat))}
+                        indeterminate={dynamicCategories.some((cat) => isCategoryChecked(cat)) && !dynamicCategories.every((cat) => isCategoryChecked(cat))}
                         onChange={() => {
-                          if (selectedCategories.length === dynamicCategories.length) {
+                          if (dynamicCategories.every((cat) => isCategoryChecked(cat))) {
                             setSelectedCategories([]);
                           } else {
                             setSelectedCategories(dynamicCategories.map((c) => c.key));
@@ -1663,8 +2018,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         control={
                           <Checkbox
                             inputProps={{ 'aria-label': label }}
-                            checked={selectedCategories.includes(cat.key)}
-                            onChange={() => handleCategoryToggle(cat.key)}
+                            checked={isCategoryChecked(cat)}
+                            onChange={() => handleCategoryToggleObj(cat)}
                             size="small"
                             sx={{
                               color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
@@ -1930,12 +2285,18 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         selectedColor: '#7c3aed',
                       },
                     ].map((src) => {
-                      const isSelected = videoSource === src.id;
+                      const isSelected = Boolean(
+                        videoSource &&
+                          (videoSource.toLowerCase() === src.id.toLowerCase() ||
+                            (src.id === 'x' && (videoSource.toLowerCase().includes('twitter') || videoSource.toLowerCase().includes('x'))) ||
+                            (src.id === 'youtube' && (videoSource.toLowerCase().includes('youtube') || videoSource.toLowerCase() === 'yt')) ||
+                            (src.id === 'bigtv' && videoSource.toLowerCase().includes('bigtv')))
+                      );
                       return (
                         <Box
                           key={src.id}
                           onClick={() => {
-                            setVideoSource(isSelected ? '' : src.id);
+                            setVideoSource(isSelected ? '' : (src.id === 'x' ? 'Twitter' : src.id));
                             if (errors.videoSource) setErrors((prev) => { const n = { ...prev }; delete n.videoSource; return n; });
                           }}
                           sx={{
@@ -2137,43 +2498,78 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   </Box>
                 </Box>
 
-                {/* Image Title */}
-                <Box>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={isImageOrGalleryType ? t.lblImageTitle.replace('*', '').trim() : t.lblImageTitle}
-                    placeholder={t.phImageTitle}
-                    value={imageTitle}
-                    onChange={(e) => {
-                      setImageTitle(e.target.value);
-                      if (errors.imageTitle) setErrors((prev) => { const n = { ...prev }; delete n.imageTitle; return n; });
-                    }}
-                    error={!!errors.imageTitle}
-                    helperText={errors.imageTitle || ''}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        color: isDark ? '#ffffff' : '#1c1445',
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
-                        borderRadius: '10px',
-                        '& fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
-                        '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
-                        '&.Mui-focused fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
-                      },
-                      '& .MuiInputLabel-root': { color: errors.imageTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
-                      '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: countWords(imageTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                      display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(imageTitle) > 10 ? 700 : 400,
-                    }}
-                  >
-                    {t.wordCount(countWords(imageTitle), 10)}
-                  </Typography>
-                </Box>
+                {/* Image Title / Image Ad URL */}
+                {isImageAd ? (
+                  <Box>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label={t.lblImageAdUrl}
+                      placeholder={t.phImageAdUrl}
+                      value={imageAdUrl}
+                      onChange={(e) => {
+                        setImageAdUrl(e.target.value);
+                        if (errors.imageAdUrl) setErrors((prev) => { const n = { ...prev }; delete n.imageAdUrl; return n; });
+                      }}
+                      error={!!errors.imageAdUrl}
+                      helperText={errors.imageAdUrl || ''}
+                      InputProps={{
+                        startAdornment: (
+                          <Box component="span" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mr: 0.5, fontSize: '0.9rem' }}>🔗</Box>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                          borderRadius: '10px',
+                          '& fieldset': { borderColor: errors.imageAdUrl ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                          '&.Mui-focused fieldset': { borderColor: errors.imageAdUrl ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                        },
+                        '& .MuiInputLabel-root': { color: errors.imageAdUrl ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
+                        '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  <Box>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label={isImageOrGalleryType ? t.lblImageTitle.replace('*', '').trim() : t.lblImageTitle}
+                      placeholder={t.phImageTitle}
+                      value={imageTitle}
+                      onChange={(e) => {
+                        setImageTitle(e.target.value);
+                        if (errors.imageTitle) setErrors((prev) => { const n = { ...prev }; delete n.imageTitle; return n; });
+                      }}
+                      error={!!errors.imageTitle}
+                      helperText={errors.imageTitle || ''}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                          borderRadius: '10px',
+                          '& fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                          '&.Mui-focused fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                        },
+                        '& .MuiInputLabel-root': { color: errors.imageTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
+                        '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: countWords(imageTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                        display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(imageTitle) > 10 ? 700 : 400,
+                      }}
+                    >
+                      {t.wordCount(countWords(imageTitle), 10)}
+                    </Typography>
+                  </Box>
+                )}
 
                 <HtmlEditor
                   label={t.lblBody}

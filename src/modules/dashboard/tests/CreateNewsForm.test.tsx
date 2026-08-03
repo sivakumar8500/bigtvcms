@@ -461,6 +461,7 @@ describe('CreateNewsForm component', () => {
         onSubmit={mockOnSubmit}
         isDark={false}
         language="en"
+        initialData={{ sendNotification: true }}
       />
     );
 
@@ -511,5 +512,93 @@ describe('CreateNewsForm component', () => {
 
     expect(screen.queryByText('Image title is required')).toBeNull();
   });
+
+  it('should hide ImageTitle field and display ImageAdUrl field when post type is ImageAd', () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          type: 'Image Ad',
+        }}
+      />
+    );
+
+    expect(screen.queryByLabelText(/Image Title/i)).toBeNull();
+    expect(screen.getByLabelText(/Image Ad URL/i)).toBeInTheDocument();
+  });
+
+  it('should submit imageAdUrl as postUrl when post type is ImageAd', async () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          titleEn: 'Ad Test Headline',
+          bodyEn: 'Test ImageAd post content body',
+          categories: ['General'],
+          tags: ['Trending'],
+          location: ['Telangana'],
+          type: 'Image Ad',
+          imageUrl: 'https://example.com/ad.jpg',
+          postLanguage: 'en',
+          imageAdUrl: 'https://example.com/ad-landing',
+        }}
+      />
+    );
+
+    const submitBtn = screen.getByRole('button', { name: 'Update News' });
+    fireEvent.click(submitBtn);
+
+    // In edit mode, the preview title is 'Edit News Preview'
+    await waitFor(() => {
+      expect(screen.getByText(/News Preview/i)).toBeInTheDocument();
+    });
+
+    const confirmBtn = screen.getByRole('button', { name: 'Save Changes' });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          postUrl: 'https://example.com/ad-landing',
+          imageAdUrl: 'https://example.com/ad-landing',
+          imageTitle: '',
+        })
+      );
+    });
+  });
+
+  it('should validate invalid imageAdUrl format when ImageAd post type is selected', () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          titleEn: 'Ad Test Headline',
+          bodyEn: 'Test ImageAd post content body',
+          categories: ['General'],
+          tags: ['Trending'],
+          location: ['Telangana'],
+          type: 'Image Ad',
+          imageUrl: 'https://example.com/ad.jpg',
+          postLanguage: 'en',
+          imageAdUrl: 'invalid-url',
+        }}
+      />
+    );
+
+    const submitBtn = screen.getByRole('button', { name: 'Update News' });
+    fireEvent.click(submitBtn);
+
+    expect(screen.getByText(/Please enter a valid URL/i)).toBeInTheDocument();
+  });
 });
+
 
