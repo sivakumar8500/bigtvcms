@@ -1732,7 +1732,7 @@ export default function DashboardPage() {
                 </Tooltip>
               </Box>
 
-          {/* Table Data Board Container */}
+          {/* Table Data Board Container — Reels-style flex layout */}
           <Box
             sx={{
               backgroundColor: isDark ? 'rgba(38, 28, 86, 0.35)' : '#ffffff',
@@ -1742,20 +1742,23 @@ export default function DashboardPage() {
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             }}
           >
-            {/* Headers row */}
-            <Grid
-              container
-              alignItems="center"
+            {/* Header Row — Reels-style */}
+            <Box
               sx={{
+                display: 'flex',
+                alignItems: 'center',
                 p: 2,
                 color: isDark ? '#d0caeb' : '#5c548a',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8f7ff',
               }}
             >
-              {/* Select-All Checkbox header */}
-              <Grid item xs={0.7}>
+              {/* Checkbox col */}
+              <Box sx={{ flex: '0 0 40px', px: 0.5 }}>
                 <Tooltip title={isAllPageSelected ? t.bulkClear : t.colSelect}>
                   <Checkbox
                     id="select-all-checkbox"
@@ -1765,23 +1768,22 @@ export default function DashboardPage() {
                     onChange={handleSelectAll}
                     sx={{
                       color: isDark ? '#d0caeb' : '#5c548a',
-                      '&.Mui-checked, &.MuiCheckbox-indeterminate': {
-                        color: isDark ? '#a6e2f5' : '#1c1445',
-                      },
+                      '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: isDark ? '#a6e2f5' : '#1c1445' },
                       p: 0,
                     }}
                   />
                 </Tooltip>
-              </Grid>
-              <Grid item xs={1.1}>{t.colImage}</Grid>
-              <Grid item xs={2.0}>{t.colCategory}</Grid>
-              <Grid item xs={3.4}>{t.colTitle}</Grid>
-              <Grid item xs={1.2}>{t.colType}</Grid>
-              <Grid item xs={1.6}>{t.colDate}</Grid>
-              <Grid item xs={2}>{t.colActions}</Grid>
-            </Grid>
+              </Box>
+              <Box sx={{ flex: '0 0 32px', px: 0.5 }}>#</Box>
+              <Box sx={{ flex: '0 0 64px', px: 1 }}>{t.colImage}</Box>
+              <Box sx={{ flex: '1.8 1 0', px: 1 }}>{t.colCategory}</Box>
+              <Box sx={{ flex: '3 1 0', px: 1 }}>{t.colTitle}</Box>
+              <Box sx={{ flex: '1.4 1 0', px: 1 }}>{t.colType}</Box>
+              <Box sx={{ flex: '1.4 1 0', px: 1 }}>{t.colDate}</Box>
+              <Box sx={{ flex: '1.8 1 0', px: 1 }}>{t.colActions}</Box>
+            </Box>
 
-            {/* List rows */}
+            {/* Data Rows — Reels-style flex rows */}
             {loading ? (
               <Loader message="Loading news posts..." minHeight="300px" />
             ) : paginatedData.length > 0 ? (
@@ -1790,15 +1792,17 @@ export default function DashboardPage() {
                 const remainingCategories = post.categories.slice(2);
                 const hasMoreCategories = remainingCategories.length > 0;
                 const isRowSelected = selectedIds.has(post.id);
+                const rowColors = ['#ef5350', '#7e57c2', '#26a69a', '#ffa726', '#ab47bc', '#42a5f5', '#26c6da'];
+                const rowColor = rowColors[idx % rowColors.length];
 
                 return (
                   <Box key={post.id}>
-                    <Grid
-                      container
-                      alignItems="center"
+                    <Box
                       sx={{
-                        p: 2,
-                        color: isDark ? '#ffffff' : '#1c1445',
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 2,
+                        py: 1.6,
                         transition: 'all 0.2s ease',
                         backgroundColor: isRowSelected
                           ? (isDark ? 'rgba(166,226,245,0.07)' : 'rgba(28,20,69,0.04)')
@@ -1806,165 +1810,217 @@ export default function DashboardPage() {
                         '&:hover': {
                           backgroundColor: isRowSelected
                             ? (isDark ? 'rgba(166,226,245,0.1)' : 'rgba(28,20,69,0.06)')
-                            : (isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)'),
+                            : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(28,20,69,0.02)'),
                         },
                       }}
                     >
-                      {/* Row Checkbox */}
-                      <Grid item xs={0.7}>
+                      {/* Checkbox */}
+                      <Box sx={{ flex: '0 0 40px', px: 0.5 }}>
                         <Checkbox
                           size="small"
                           checked={isRowSelected}
                           onChange={() => handleToggleSelect(post.id)}
                           sx={{
                             color: isDark ? '#d0caeb' : '#5c548a',
-                            '&.Mui-checked': {
-                              color: isDark ? '#a6e2f5' : '#1c1445',
-                            },
+                            '&.Mui-checked': { color: isDark ? '#a6e2f5' : '#1c1445' },
                             p: 0,
                           }}
                         />
-                      </Grid>
+                      </Box>
 
-                      {/* Image Column */}
-                      <Grid item xs={1.1}>
+                      {/* Row # — colored badge like ReelsTable */}
+                      <Box sx={{ flex: '0 0 32px', px: 0.5 }}>
                         <Box
                           sx={{
-                            width: '55px',
-                            height: '55px',
-                            borderRadius: '8px',
-                            backgroundColor: 'rgba(0,0,0,0.02)',
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            backgroundImage: `url(${post.image})`,
+                            px: 0.8,
+                            py: 0.3,
+                            borderRadius: '6px',
+                            backgroundColor: `${rowColor}22`,
+                            border: `1px solid ${rowColor}44`,
+                            display: 'inline-block',
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: rowColor, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.72rem' }}>
+                            {idx + 1 + (page - 1) * recordsPerPage}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Thumbnail */}
+                      <Box sx={{ flex: '0 0 64px', px: 1 }}>
+                        <Box
+                          component="img"
+                          src={post.image}
+                          alt="Banner"
+                          sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: '10px',
+                            objectFit: 'cover',
+                            border: `1px solid ${rowColor}55`,
+                            backgroundColor: `${rowColor}22`,
                           }}
                         />
-                      </Grid>
+                      </Box>
 
-                      {/* Category Column */}
-                      <Grid item xs={2.0}>
-                        <Tooltip
-                          title={
-                            hasMoreCategories
-                              ? `Full List: ${post.categories.join(', ')}`
-                              : ''
-                          }
-                          arrow
-                        >
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, cursor: hasMoreCategories ? 'help' : 'default' }}>
+                      {/* Category */}
+                      <Box sx={{ flex: '1.8 1 0', px: 1 }}>
+                        <Tooltip title={hasMoreCategories ? `Full List: ${post.categories.join(', ')}` : ''} arrow>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4, cursor: hasMoreCategories ? 'help' : 'default' }}>
                             {primaryCategories.map((cat: string, cIdx: number) => (
-                              <Box key={cIdx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: isDark ? '#a6e2f5' : '#1c1445' }} />
-                                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
+                              <Box key={cIdx} sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                                <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: rowColor, flexShrink: 0 }} />
+                                <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.8rem', color: isDark ? '#ffffff' : '#1c1445' }}>
                                   {cat}
                                 </Typography>
                               </Box>
                             ))}
                             {hasMoreCategories && (
-                              <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, mt: 0.2, pl: 1.5 }}>
+                              <Typography variant="caption" sx={{ color: rowColor, fontWeight: 700, pl: 1.3, fontSize: '0.72rem' }}>
                                 +{remainingCategories.length} more
                               </Typography>
                             )}
                           </Box>
                         </Tooltip>
-                      </Grid>
+                      </Box>
 
-                      {/* Title and Content Column */}
-                      <Grid item xs={3.4} sx={{ pr: 2 }}>
+                      {/* Title + Content */}
+                      <Box sx={{ flex: '3 1 0', px: 1 }}>
                         <Tooltip
                           title={
                             <Box sx={{ p: 1, maxWidth: '300px' }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: isDark ? '#a6e2f5' : '#1c1445', mb: 1 }}>
-                                {post.title}
-                              </Typography>
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-                                {post.content}
-                              </Typography>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: isDark ? '#a6e2f5' : '#1c1445', mb: 0.8 }}>{post.title}</Typography>
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.5 }}>{post.content}</Typography>
                             </Box>
                           }
                           arrow
                         >
                           <Box sx={{ cursor: 'help' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5, lineClamp: 1, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 700,
+                                mb: 0.3,
+                                fontSize: '0.92rem',
+                                color: isDark ? '#ffffff' : '#1c1445',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            >
                               {post.title}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a', lineClamp: 1, display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: isDark ? '#d0caeb' : '#5c548a',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                              }}
+                            >
                               {post.content}
                             </Typography>
                           </Box>
                         </Tooltip>
-                      </Grid>
+                      </Box>
 
-                      {/* Post Type & Language Column */}
-                      <Grid item xs={1.2}>
-                        <Box>
-                          <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600 }}>
+                      {/* Type + Language — chip style */}
+                      <Box sx={{ flex: '1.4 1 0', px: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'inline-block',
+                            px: 1.2,
+                            py: 0.3,
+                            borderRadius: '8px',
+                            backgroundColor: isDark ? 'rgba(166,226,245,0.12)' : 'rgba(28,20,69,0.07)',
+                            border: isDark ? '1px solid rgba(166,226,245,0.2)' : '1px solid rgba(28,20,69,0.12)',
+                            mb: 0.4,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, fontSize: '0.72rem' }}>
                             {post.subType || (post as any).sub_type || post.type}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
-                            {post.language}
-                          </Typography>
                         </Box>
-                      </Grid>
+                        <Typography variant="caption" sx={{ display: 'block', color: isDark ? '#d0caeb' : '#9e9e9e', fontSize: '0.72rem' }}>
+                          {post.language}
+                        </Typography>
+                      </Box>
 
-                      {/* Date & Time Column */}
-                      <Grid item xs={1.6}>
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {post.date}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
-                            {post.time}
-                          </Typography>
-                        </Box>
-                      </Grid>
+                      {/* Date + Time */}
+                      <Box sx={{ flex: '1.4 1 0', px: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.82rem', color: isDark ? '#ffffff' : '#1c1445' }}>
+                          {post.date}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#9e9e9e', fontSize: '0.72rem' }}>
+                          {post.time}
+                        </Typography>
+                      </Box>
 
-                      {/* Actions Column */}
-                      <Grid item xs={2}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {/* Actions — Reels-style icon + outlined buttons */}
+                      <Box sx={{ flex: '1.8 1 0', px: 1, display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                        <Tooltip title="View">
                           <IconButton
                             size="small"
                             onClick={() => setViewingPost(post)}
                             sx={{
-                              color: isDark ? '#a6e2f5' : '#1c1445',
-                              backgroundColor: isDark ? 'rgba(166,226,245,0.08)' : 'rgba(28,20,69,0.05)',
-                              '&:hover': { backgroundColor: isDark ? 'rgba(166,226,245,0.15)' : 'rgba(28,20,69,0.1)' },
+                              color: isDark ? '#a6e2f5' : '#1976d2',
+                              backgroundColor: isDark ? 'rgba(166,226,245,0.1)' : 'rgba(25,118,210,0.08)',
+                              borderRadius: '8px',
+                              p: 0.6,
+                              '&:hover': { backgroundColor: isDark ? 'rgba(166,226,245,0.2)' : 'rgba(25,118,210,0.15)' },
                             }}
                           >
                             <Visibility sx={{ fontSize: '1.1rem' }} />
                           </IconButton>
-                          <IconButton
+                        </Tooltip>
+                        <Tooltip title="Edit">
+                          <Button
                             size="small"
+                            variant="outlined"
+                            startIcon={<Edit sx={{ fontSize: '0.9rem !important' }} />}
                             onClick={() => setEditingPost(post)}
                             sx={{
-                              color: '#ffc107',
-                              backgroundColor: 'rgba(255,193,7,0.08)',
-                              '&:hover': { backgroundColor: 'rgba(255,193,7,0.15)' },
+                              borderRadius: '8px',
+                              textTransform: 'none',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              px: 1.2,
+                              py: 0.4,
+                              borderColor: rowColor + '66',
+                              color: rowColor,
+                              '&:hover': { backgroundColor: rowColor + '11', borderColor: rowColor },
                             }}
                           >
-                            <Edit sx={{ fontSize: '1.1rem' }} />
-                          </IconButton>
+                            Edit
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="Delete">
                           <IconButton
                             size="small"
                             onClick={() => handleSingleDelete(post.id)}
                             sx={{
                               color: '#f44336',
                               backgroundColor: 'rgba(244,67,54,0.08)',
+                              borderRadius: '8px',
+                              p: 0.6,
                               '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
                             }}
                           >
                             <Delete sx={{ fontSize: '1.1rem' }} />
                           </IconButton>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                    {idx < paginatedData.length - 1 && <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />}
+                        </Tooltip>
+                      </Box>
+                    </Box>
+                    {idx < paginatedData.length - 1 && <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)' }} />}
                   </Box>
-                )
+                );
               })
             ) : (
-              <Box sx={{ p: 4, textAlign: 'center', color: isDark ? '#d0caeb' : '#5c548a' }}>
-                <Typography variant="body2">{t.noRecords}</Typography>
+              <Box sx={{ p: 6, textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#9e9e9e' }}>{t.noRecords}</Typography>
               </Box>
             )}
           </Box>
