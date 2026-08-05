@@ -14,6 +14,8 @@ import {
   Article,
   Web as WebIcon,
   Newspaper as NewspaperIcon,
+  LocalMovies as LocalMoviesIcon,
+  VideoLibrary,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,6 +36,8 @@ const sidebarTranslations = {
     menuLanguages: 'Languages',
     menuAiTags: 'AiTags',
     menuReels: 'Reels',
+    menuMovies: 'Movies',
+    menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
   },
   te: {
@@ -47,6 +51,8 @@ const sidebarTranslations = {
     menuLanguages: 'భాషలు',
     menuAiTags: 'AiTags',
     menuReels: 'రీల్స్',
+    menuMovies: 'సినిమాలు',
+    menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
   },
   hi: {
@@ -60,6 +66,8 @@ const sidebarTranslations = {
     menuLanguages: 'भाषाएँ',
     menuAiTags: 'AiTags',
     menuReels: 'रील्स',
+    menuMovies: 'मूवीज',
+    menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
   },
   ml: {
@@ -73,6 +81,8 @@ const sidebarTranslations = {
     menuLanguages: 'ഭാഷകൾ',
     menuAiTags: 'AiTags',
     menuReels: 'റീലുകൾ',
+    menuMovies: 'സിനിമകൾ',
+    menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
   },
 };
@@ -94,6 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const allMenuItems = [
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
+    { text: t.menuMovies, icon: <LocalMoviesIcon />, href: '/movies' },
     { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
     { text: t.menuEpapers, icon: <NewspaperIcon />, href: '/epapers' },
     { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
@@ -109,10 +120,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const isCreator = userRole === 'creator' || userRole === 'creators';
   const isAdmin = userRole === 'admin' || userRole === 'administrator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/movies', '/settings'];
   const adminHrefs = [
     '/dashboard',
     '/reels',
+    '/movies',
     '/web-articles',
     '/epapers',
     '/aitags',
