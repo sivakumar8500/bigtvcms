@@ -405,7 +405,7 @@ export class MoviesRepository {
     ];
 
     let combinedItems: MovieItem[] = [];
-    const seenIds = new Set<string>();
+    const seenIds = new Set<string | number>();
 
     for (const ep of endpoints) {
       try {

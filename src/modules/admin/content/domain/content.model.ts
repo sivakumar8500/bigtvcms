@@ -6,6 +6,7 @@ export interface ParentContentItem {
   title: string;
   type: 'movie' | 'series';
   posterUrl?: string;
+  poster?: string;
   releaseYear?: number;
 }
 
