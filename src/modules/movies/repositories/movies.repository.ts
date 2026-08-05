@@ -302,6 +302,8 @@ export class MoviesRepository {
       parentId: apiData.parentId || apiData.parent_id,
       seasonsCount: apiData.seasonsCount ?? apiData.seasons_count ?? 1,
       episodesCount,
+      episodes: Array.isArray(apiData.episodes) ? apiData.episodes : [],
+      trailers: Array.isArray(apiData.trailers) ? apiData.trailers : [],
       createdAt: apiData.createdAt || apiData.created_at || new Date().toISOString(),
       updatedAt: apiData.updatedAt || apiData.updated_at || new Date().toISOString(),
     };

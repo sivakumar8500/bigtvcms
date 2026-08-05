@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -32,6 +32,8 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { MovieItem } from '../domain/movies.model';
+import { AdminContentService } from '@/modules/admin/content/services/admin-content.service';
+import { EpisodeItem } from '@/modules/admin/content/domain/content.model';
 
 const movieColors = [
   '#ef5350', '#7e57c2', '#26a69a', '#ffa726', '#ab47bc', '#42a5f5', '#26c6da',
@@ -188,15 +190,48 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
     setViewDialogOpen(true);
   };
 
+  const [isPlayingVideo, setIsPlayingVideo] = useState<boolean>(false);
+  const [viewEpisodes, setViewEpisodes] = useState<EpisodeItem[]>([]);
+  const [activeEpisodeVideo, setActiveEpisodeVideo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (viewDialogOpen && selectedMovie) {
+      if (Array.isArray(selectedMovie.episodes) && selectedMovie.episodes.length > 0) {
+        const mapped = selectedMovie.episodes.map((ep: any, idx: number) => ({
+          id: String(ep.id || ep.episodeId || `ep-${idx + 1}`),
+          seasonId: String(selectedMovie.id || selectedMovie.movieId || ''),
+          episodeNumber: Number(ep.episodeNumber || ep.episode_number || idx + 1),
+          title: ep.title || ep.episodeTitle || `Episode ${idx + 1}`,
+          description: ep.description || '',
+          video: ep.videoUrl || ep.video || ep.video_url || '',
+          videoUrl: ep.videoUrl || ep.video || ep.video_url || '',
+          duration: Number(ep.duration) || 45,
+          thumbnail: ep.thumbnail || ep.poster || ep.imageUrl || selectedMovie.poster || '',
+          subtitle: ep.subtitle || '',
+        }));
+        setViewEpisodes(mapped);
+        return;
+      }
+
+      const targetId = String(selectedMovie.id || selectedMovie.movieId || '');
+      AdminContentService.getEpisodes(targetId).then((eps) => {
+        setViewEpisodes(eps);
+      });
+    } else {
+      setViewEpisodes([]);
+      setActiveEpisodeVideo(null);
+    }
+  }, [viewDialogOpen, selectedMovie]);
+
   const handleCloseViewDialog = () => {
     setViewDialogOpen(false);
     setSelectedMovie(null);
+    setIsPlayingVideo(false);
+    setActiveEpisodeVideo(null);
   };
 
-  const handlePlayVideo = (url?: string) => {
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
+  const handlePlayVideo = () => {
+    setIsPlayingVideo(true);
   };
 
   const handleManageSeries = (id: string | number) => {
@@ -237,7 +272,7 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
   const viewType = selectedMovie?.contentType || activeTab;
   const viewGenres = selectedMovie?.genres || (selectedMovie?.genre ? [selectedMovie.genre] : ['Sci-Fi', 'Action']);
   const viewLanguages = selectedMovie?.languages || (selectedMovie?.language ? [selectedMovie.language] : ['Telugu', 'English']);
-  const viewVideoUrl = selectedMovie?.videoUrl || (selectedMovie as any)?.video;
+  const viewVideoUrl = activeEpisodeVideo || selectedMovie?.videoUrl || (selectedMovie as any)?.video;
 
   let viewDurationDisplay = '';
   if (selectedMovie) {
@@ -602,65 +637,98 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
             </DialogTitle>
 
             <DialogContent sx={{ p: 3 }}>
-              {/* Poster / Banner Visual Container */}
-              <Box
-                sx={{
-                  position: 'relative',
-                  width: '100%',
-                  height: 200,
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  mb: 3,
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f0edff',
-                  border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {viewBanner || viewPoster ? (
-                  <Box
-                    component="img"
-                    src={viewBanner || viewPoster}
-                    alt={viewTitle}
-                    sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Box sx={{ textAlign: 'center', color: isDark ? '#d0caeb' : '#888' }}>
-                    {viewType === 'series' ? (
-                      <Tv sx={{ fontSize: '4rem' }} />
-                    ) : viewType === 'trailer' ? (
-                      <VideoLibrary sx={{ fontSize: '4rem' }} />
-                    ) : (
-                      <LocalMovies sx={{ fontSize: '4rem' }} />
-                    )}
-                  </Box>
-                )}
-
-                {/* Poster Thumbnail Overlay */}
-                {viewPoster && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 12,
-                      left: 16,
-                      width: 70,
-                      height: 90,
-                      borderRadius: '10px',
-                      overflow: 'hidden',
-                      border: '2px solid #ffffff',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+              {/* In-App Video Player / Poster Media Section */}
+              {viewVideoUrl ? (
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: { xs: 230, sm: 340 },
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    mb: 3,
+                    backgroundColor: '#000000',
+                    border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.1)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <video
+                    src={viewVideoUrl}
+                    controls
+                    controlsList="nodownload"
+                    disablePictureInPicture
+                    onContextMenu={(e) => e.preventDefault()}
+                    poster={viewBanner || viewPoster}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      backgroundColor: '#000000',
                     }}
                   >
+                    Your browser does not support HTML5 video playback.
+                  </video>
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: 200,
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    mb: 3,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f0edff',
+                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {viewBanner || viewPoster ? (
                     <Box
                       component="img"
-                      src={viewPoster}
-                      alt="Thumbnail"
+                      src={viewBanner || viewPoster}
+                      alt={viewTitle}
                       sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                  </Box>
-                )}
-              </Box>
+                  ) : (
+                    <Box sx={{ textAlign: 'center', color: isDark ? '#d0caeb' : '#888' }}>
+                      {viewType === 'series' ? (
+                        <Tv sx={{ fontSize: '4rem' }} />
+                      ) : viewType === 'trailer' ? (
+                        <VideoLibrary sx={{ fontSize: '4rem' }} />
+                      ) : (
+                        <LocalMovies sx={{ fontSize: '4rem' }} />
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Poster Thumbnail Overlay */}
+                  {viewPoster && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 12,
+                        left: 16,
+                        width: 70,
+                        height: 90,
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        border: '2px solid #ffffff',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={viewPoster}
+                        alt="Thumbnail"
+                        sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              )}
 
               {/* Title & Metadata */}
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: isDark ? '#ffffff' : '#1c1445' }}>
@@ -757,6 +825,150 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
                   </Box>
                 </Box>
               </Box>
+
+              {/* Episodes Horizontal View (for Web Series) */}
+              {(viewType === 'series' || activeTab === 'series') && (
+                <>
+                  <Divider sx={{ my: 2.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
+                  <Box sx={{ mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Tv sx={{ fontSize: '1.1rem', color: isDark ? '#a6e2f5' : '#1976d2' }} />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, fontSize: '0.95rem', color: isDark ? '#ffffff' : '#1c1445' }}>
+                          Episodes ({viewEpisodes.length})
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Horizontal Scroll Container */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 2,
+                        overflowX: 'auto',
+                        pb: 1.5,
+                        pt: 0.5,
+                        px: 0.5,
+                        '&::-webkit-scrollbar': { height: '6px' },
+                        '&::-webkit-scrollbar-track': { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', borderRadius: '4px' },
+                        '&::-webkit-scrollbar-thumb': { backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(25,118,210,0.2)', borderRadius: '4px' },
+                      }}
+                    >
+                      {viewEpisodes.length > 0 ? (
+                        viewEpisodes.map((ep, idx) => {
+                          const epVideo = ep.video || (ep as any).videoUrl;
+                          const isSelected = activeEpisodeVideo === epVideo;
+                          return (
+                            <Box
+                              key={ep.id || idx}
+                              onClick={() => {
+                                if (epVideo) {
+                                  setActiveEpisodeVideo(epVideo);
+                                  setIsPlayingVideo(true);
+                                }
+                              }}
+                              sx={{
+                                width: 220,
+                                minWidth: 220,
+                                flexShrink: 0,
+                                borderRadius: '14px',
+                                backgroundColor: isSelected
+                                  ? isDark ? 'rgba(166,226,245,0.15)' : 'rgba(25,118,210,0.1)'
+                                  : isDark ? 'rgba(255,255,255,0.04)' : '#f8f7ff',
+                                border: isSelected
+                                  ? `2px solid ${isDark ? '#a6e2f5' : '#1976d2'}`
+                                  : isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                                p: 1.5,
+                                transition: 'all 0.2s ease',
+                                cursor: epVideo ? 'pointer' : 'default',
+                                '&:hover': {
+                                  transform: 'translateY(-3px)',
+                                  boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                                  borderColor: isDark ? '#a6e2f5' : '#1976d2',
+                                },
+                              }}
+                            >
+                              {/* Thumbnail */}
+                              <Box
+                                sx={{
+                                  position: 'relative',
+                                  width: '100%',
+                                  height: 115,
+                                  borderRadius: '10px',
+                                  overflow: 'hidden',
+                                  mb: 1.2,
+                                  backgroundColor: '#000000',
+                                }}
+                              >
+                                <Box
+                                  component="img"
+                                  src={ep.thumbnail || viewPoster || viewBanner || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400'}
+                                  alt={ep.title}
+                                  sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundColor: 'rgba(0,0,0,0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <PlayCircleOutline sx={{ color: '#ffffff', fontSize: '2.2rem' }} />
+                                </Box>
+                                <Chip
+                                  label={`EP ${ep.episodeNumber}`}
+                                  size="small"
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 8,
+                                    left: 8,
+                                    fontWeight: 800,
+                                    fontSize: '0.68rem',
+                                    backgroundColor: 'rgba(0,0,0,0.75)',
+                                    color: '#a6e2f5',
+                                    backdropFilter: 'blur(4px)',
+                                  }}
+                                />
+                              </Box>
+
+                              {/* Episode Title */}
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: isDark ? '#ffffff' : '#1c1445',
+                                  fontSize: '0.85rem',
+                                  mb: 0.5,
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                }}
+                              >
+                                {ep.title}
+                              </Typography>
+
+                              {/* Episode Duration */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <AccessTime sx={{ fontSize: '0.8rem', color: isDark ? '#a6e2f5' : '#1976d2' }} />
+                                <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#666', fontWeight: 600 }}>
+                                  {ep.duration || 45} mins
+                                </Typography>
+                              </Box>
+                            </Box>
+                          );
+                        })
+                      ) : (
+                        <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#666', fontStyle: 'italic', py: 1 }}>
+                          No episodes added yet for this series.
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </>
+              )}
             </DialogContent>
 
             <DialogActions
@@ -775,7 +987,7 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
                     variant="contained"
                     color="primary"
                     startIcon={<PlayCircleOutline />}
-                    onClick={() => handlePlayVideo(viewVideoUrl)}
+                    onClick={handlePlayVideo}
                     sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 700 }}
                   >
                     {tView.playVideo}

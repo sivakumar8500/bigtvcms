@@ -117,6 +117,7 @@ export default function SeriesDetailsPageContent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [series, setSeries] = useState<any>(null);
   const [episodes, setEpisodes] = useState<EpisodeItem[]>([]);
+  const [playingEpisode, setPlayingEpisode] = useState<EpisodeItem | null>(null);
 
   // Episode Dialog State
   const [episodeDialogOpen, setEpisodeDialogOpen] = useState<boolean>(false);
@@ -394,6 +395,7 @@ export default function SeriesDetailsPageContent() {
                 >
                   {/* Thumbnail Container */}
                   <Box
+                    onClick={() => (ep.video || (ep as any).videoUrl) && setPlayingEpisode(ep)}
                     sx={{
                       position: 'relative',
                       width: { xs: '100%', sm: 140 },
@@ -401,6 +403,7 @@ export default function SeriesDetailsPageContent() {
                       borderRadius: '12px',
                       overflow: 'hidden',
                       flexShrink: 0,
+                      cursor: (ep.video || (ep as any).videoUrl) ? 'pointer' : 'default',
                       border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
                     }}
                   >
@@ -468,12 +471,12 @@ export default function SeriesDetailsPageContent() {
                       </Typography>
                     </Box>
 
-                    {ep.video && (
+                    {(ep.video || (ep as any).videoUrl) && (
                       <Button
                         size="small"
                         variant="contained"
                         startIcon={<PlayArrow />}
-                        onClick={() => window.open(ep.video, '_blank')}
+                        onClick={() => setPlayingEpisode(ep)}
                         sx={{
                           borderRadius: '10px',
                           textTransform: 'none',
@@ -585,6 +588,104 @@ export default function SeriesDetailsPageContent() {
           <Button onClick={() => setEpisodeDialogOpen(false)} sx={{ textTransform: 'none' }}>{t.cancel}</Button>
           <Button variant="contained" onClick={handleCreateEpisode} sx={{ borderRadius: '8px', textTransform: 'none' }}>{t.save}</Button>
         </DialogActions>
+      </Dialog>
+
+      {/* In-App Episode Video Player Dialog */}
+      <Dialog
+        open={Boolean(playingEpisode)}
+        onClose={() => setPlayingEpisode(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: isDark ? '#1a1638' : '#ffffff',
+            color: isDark ? '#ffffff' : '#1c1445',
+            borderRadius: '20px',
+            border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.08)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            overflow: 'hidden',
+          },
+        }}
+      >
+        {playingEpisode && (
+          <>
+            <DialogTitle
+              sx={{
+                p: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8f7ff',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Chip
+                  label={`EP ${playingEpisode.episodeNumber}`}
+                  size="small"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: '0.75rem',
+                    backgroundColor: isDark ? 'rgba(166,226,245,0.15)' : 'rgba(28,20,69,0.1)',
+                    color: isDark ? '#a6e2f5' : '#1c1445',
+                  }}
+                />
+                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                  {playingEpisode.title}
+                </Typography>
+              </Box>
+              <IconButton onClick={() => setPlayingEpisode(null)} sx={{ color: isDark ? '#d0caeb' : '#666' }}>
+                <Close />
+              </IconButton>
+            </DialogTitle>
+
+            <DialogContent sx={{ p: 3 }}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  height: { xs: 240, sm: 380 },
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  mb: 2.5,
+                  backgroundColor: '#000000',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                }}
+              >
+                <video
+                  src={playingEpisode.video || (playingEpisode as any).videoUrl}
+                  controls
+                  autoPlay
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                  onContextMenu={(e) => e.preventDefault()}
+                  poster={playingEpisode.thumbnail || series?.poster}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    backgroundColor: '#000000',
+                  }}
+                >
+                  Your browser does not support HTML5 video playback.
+                </video>
+              </Box>
+
+              <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#444', lineHeight: 1.6, mb: 1 }}>
+                {playingEpisode.description || 'No description available for this episode.'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1976d2', fontWeight: 700 }}>
+                Duration: {playingEpisode.duration || 45} mins
+              </Typography>
+            </DialogContent>
+
+            <DialogActions sx={{ p: 2, borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)' }}>
+              <Button onClick={() => setPlayingEpisode(null)} sx={{ textTransform: 'none', fontWeight: 600, color: isDark ? '#d0caeb' : '#666' }}>
+                {t.cancel}
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
 
       {/* Snackbar feedback */}

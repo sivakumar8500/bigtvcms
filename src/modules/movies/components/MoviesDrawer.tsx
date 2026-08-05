@@ -16,6 +16,8 @@ import {
 import { Close, LocalMovies, CloudUpload, Delete } from '@mui/icons-material';
 import { MovieItem } from '../domain/movies.model';
 import { ContentForm } from '@/modules/admin/content/components/ContentForm';
+import { ImageUploader } from '@/modules/admin/content/components/ImageUploader';
+import { VideoUploader } from '@/modules/admin/content/components/VideoUploader';
 
 interface MoviesDrawerProps {
   open: boolean;
@@ -164,250 +166,47 @@ export const MoviesDrawer: React.FC<MoviesDrawerProps> = ({
             }}
           />
 
-          {/* Poster Image File Upload Dropzone (folder: "images") */}
-          <Box>
-            <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center', gap: 0.8 }}>
-              <CloudUpload sx={{ fontSize: '1rem' }} /> Poster Image (Cloudflare R2 Direct Upload - folder: "images")
-            </Typography>
-
-            <input
-              ref={posterInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handlePosterSelected}
-            />
-
-            {currentPoster ? (
-              <Box
-                sx={{
-                  position: 'relative',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
-                  mb: 1,
-                }}
-              >
-                <Box
-                  component="img"
-                  src={currentPoster}
-                  alt="Poster preview"
-                  sx={{ width: '100%', maxHeight: '160px', objectFit: 'cover', display: 'block' }}
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    onFieldChange('poster', '');
-                    onFieldChange('posterUrl', '');
-                    onFieldChange('imageUrl', '');
-                  }}
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    color: '#ffffff',
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.8)' },
-                  }}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Box>
-            ) : (
-              <Box
-                onClick={() => posterInputRef.current?.click()}
-                sx={{
-                  p: 2.5,
-                  borderRadius: '12px',
-                  border: isDark ? '2px dashed rgba(166,226,245,0.3)' : '2px dashed rgba(28,20,69,0.2)',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  textAlign: 'center',
-                  cursor: isUploading ? 'default' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    borderColor: isDark ? '#a6e2f5' : '#1c1445',
-                    backgroundColor: isDark ? 'rgba(166,226,245,0.06)' : 'rgba(28,20,69,0.04)',
-                  },
-                }}
-              >
-                {isUploading ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                    <CircularProgress size={24} sx={{ color: isDark ? '#a6e2f5' : '#1c1445' }} />
-                    <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
-                      Uploading image to R2 Bucket...
-                    </Typography>
-                  </Box>
-                ) : (
-                  <>
-                    <CloudUpload sx={{ fontSize: '1.8rem', color: isDark ? '#a6e2f5' : '#1c1445', mb: 0.5 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1c1445' }}>
-                      Click to upload movie poster
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#9e9e9e', display: 'block', mt: 0.3 }}>
-                      Uses R2 Presigned Upload URL (folder: "images")
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            )}
-          </Box>
-
-          {/* Video File Upload (folder: "movies") */}
-          <Box>
-            <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600, mb: 1, display: 'flex', alignItems: 'center', gap: 0.8 }}>
-              <CloudUpload sx={{ fontSize: '1rem' }} /> Video File (Cloudflare R2 Direct Upload - folder: "movies")
-            </Typography>
-
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              style={{ display: 'none' }}
-              onChange={handleVideoSelected}
-            />
-
-            {currentVideo ? (
-              <Box
-                sx={{
-                  position: 'relative',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
-                  backgroundColor: '#000000',
-                  mb: 1,
-                }}
-              >
-                <Box
-                  component="video"
-                  controls
-                  src={currentVideo}
-                  sx={{ width: '100%', maxHeight: '180px', display: 'block', borderRadius: '10px' }}
-                />
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setVideoPreview(null);
-                    onFieldChange('videoUrl', '');
-                  }}
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    color: '#ffffff',
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.8)' },
-                  }}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-              </Box>
-            ) : (
-              <Box
-                onClick={() => videoInputRef.current?.click()}
-                sx={{
-                  p: 2,
-                  borderRadius: '12px',
-                  border: isDark ? '1px dashed rgba(166,226,245,0.3)' : '1px dashed rgba(28,20,69,0.2)',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: isUploading ? 'default' : 'pointer',
-                }}
-              >
-                <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontSize: '0.85rem' }}>
-                  Click to select and upload video file
-                </Typography>
-                <Button size="small" variant="outlined" sx={{ borderRadius: '8px', textTransform: 'none' }}>
-                  Browse Video
-                </Button>
-              </Box>
-            )}
-          </Box>
-
-          {uploadError && (
-            <Alert severity="error" sx={{ mt: 1, borderRadius: '8px' }}>
-              {uploadError}
-            </Alert>
-          )}
-
-          {/* Poster URL */}
-          <TextField
-            label="Poster URL (poster)"
-            variant="outlined"
-            size="small"
+          {/* Poster Image Uploader with direct visual image preview */}
+          <ImageUploader
+            label="Poster Image"
             value={form.poster || form.posterUrl || form.imageUrl || ''}
-            onChange={(e) => {
-              onFieldChange('poster', e.target.value);
-              onFieldChange('posterUrl', e.target.value);
-              onFieldChange('imageUrl', e.target.value);
+            onChange={(url) => {
+              onFieldChange('poster', url);
+              onFieldChange('posterUrl', url);
+              onFieldChange('imageUrl', url);
             }}
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: isDark ? '#ffffff' : '#1c1445',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                borderRadius: '10px',
-              },
-              '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
-            }}
+            isDark={isDark}
+            folder="series/posters"
           />
 
-          {/* Banner URL */}
-          <TextField
-            label="Banner URL (banner)"
-            variant="outlined"
-            size="small"
+          {/* Banner Image Uploader with direct visual image preview */}
+          <ImageUploader
+            label="Banner Image"
             value={form.banner || form.bannerUrl || ''}
-            onChange={(e) => {
-              onFieldChange('banner', e.target.value);
-              onFieldChange('bannerUrl', e.target.value);
+            onChange={(url) => {
+              onFieldChange('banner', url);
+              onFieldChange('bannerUrl', url);
             }}
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: isDark ? '#ffffff' : '#1c1445',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                borderRadius: '10px',
-              },
-              '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
-            }}
+            isDark={isDark}
+            folder="series/banners"
           />
 
-          {/* Thumbnail URL */}
-          <TextField
-            label="Thumbnail URL (thumbnail)"
-            variant="outlined"
-            size="small"
+          {/* Thumbnail Image Uploader with direct visual image preview */}
+          <ImageUploader
+            label="Thumbnail Image"
             value={form.thumbnail || ''}
-            onChange={(e) => onFieldChange('thumbnail', e.target.value)}
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: isDark ? '#ffffff' : '#1c1445',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                borderRadius: '10px',
-              },
-              '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
-            }}
+            onChange={(url) => onFieldChange('thumbnail', url)}
+            isDark={isDark}
+            folder="series/thumbnails"
           />
 
-          {/* Video URL */}
-          <TextField
-            label="Video URL (videoUrl)"
-            variant="outlined"
-            size="small"
+          {/* Video / Trailer File Uploader with direct video player preview */}
+          <VideoUploader
+            label="Video File / Trailer"
             value={form.videoUrl || ''}
-            onChange={(e) => onFieldChange('videoUrl', e.target.value)}
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                color: isDark ? '#ffffff' : '#1c1445',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                borderRadius: '10px',
-              },
-              '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
-            }}
+            onChange={(url) => onFieldChange('videoUrl', url)}
+            isDark={isDark}
+            folder="movies"
           />
 
           {/* Genres & Languages Row */}

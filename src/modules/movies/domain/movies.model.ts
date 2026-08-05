@@ -74,6 +74,8 @@ export interface MovieItem {
   parentId?: string;
   seasonsCount?: number;
   episodesCount?: number;
+  episodes?: any[];
+  trailers?: any[];
 
   // Compatibility / UI helper fields
   titleEn?: string;

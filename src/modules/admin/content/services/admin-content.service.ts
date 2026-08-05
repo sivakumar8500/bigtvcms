@@ -311,34 +311,70 @@ export class AdminContentService {
   }
 
   static async getEpisodes(targetId: string): Promise<EpisodeItem[]> {
+    // 1. Check stored episodes in local storage
     const storedEpisodes = this.getStoredList(STORAGE_EPISODES_KEY);
     const episodesForId = storedEpisodes.filter(
-      (e: EpisodeItem) => e.seasonId === targetId || (e as any).seriesId === targetId
+      (e: EpisodeItem) =>
+        String(e.seasonId) === String(targetId) ||
+        String((e as any).seriesId) === String(targetId) ||
+        targetId.includes(String(e.seasonId)) ||
+        String(e.seasonId).includes(targetId)
     );
     if (episodesForId.length > 0) return episodesForId;
 
-    return [
-      {
-        id: 'ep-101',
-        seasonId: targetId,
-        episodeNumber: 1,
-        title: 'Episode 1: The Arrival',
-        description: 'The ancient prophecy unfolds in a dystopian city.',
-        video: 'https://pub-7cbe5afbae3e44f98af634774fac779c.r2.dev/episodes/videos/video.mp4',
-        duration: 45,
-        thumbnail: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400',
-      },
-      {
-        id: 'ep-102',
-        seasonId: targetId,
-        episodeNumber: 2,
-        title: 'Episode 2: Guardians of Shambhala',
-        description: 'Rebels align forces to protect the unborn savior.',
-        video: 'https://pub-7cbe5afbae3e44f98af634774fac779c.r2.dev/episodes/videos/video.mp4',
-        duration: 52,
-        thumbnail: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400',
-      },
-    ];
+    // 2. Check series repository data (which contains embedded episodes from API)
+    try {
+      const allSeries = await MoviesRepository.getAll();
+      const matchedSeries = allSeries.find(
+        (s: any) =>
+          String(s.id) === String(targetId) ||
+          String(s.movieId) === String(targetId) ||
+          targetId.includes(String(s.id)) ||
+          String(s.id).includes(targetId)
+      );
+      if (matchedSeries && Array.isArray((matchedSeries as any).episodes) && (matchedSeries as any).episodes.length > 0) {
+        return (matchedSeries as any).episodes.map((item: any, idx: number) => ({
+          id: String(item.id || item.episodeId || `ep-${idx + 1}`),
+          seasonId: targetId,
+          episodeNumber: Number(item.episodeNumber || item.episode_number || idx + 1),
+          title: item.title || item.episodeTitle || `Episode ${idx + 1}`,
+          description: item.description || '',
+          video: item.videoUrl || item.video || item.video_url || '',
+          videoUrl: item.videoUrl || item.video || item.video_url || '',
+          duration: Number(item.duration) || 45,
+          thumbnail: item.thumbnail || item.poster || item.imageUrl || matchedSeries.poster || '',
+          subtitle: item.subtitle || '',
+        }));
+      }
+    } catch (e) {}
+
+    // 3. Try fetching from remote API episode endpoints
+    const headers = this.getAuthHeaders();
+    for (const url of [
+      `https://apidev.chotanews.com/api/admin/content/episode?seriesId=${targetId}`,
+      `/api/admin/content/episode?seriesId=${targetId}`,
+    ]) {
+      try {
+        const response = await axios.get(url, { headers });
+        const resData = response.data?.data || response.data;
+        if (Array.isArray(resData) && resData.length > 0) {
+          return resData.map((item: any, idx: number) => ({
+            id: String(item.id || item.episodeId || `ep-${idx + 1}`),
+            seasonId: targetId,
+            episodeNumber: Number(item.episodeNumber || item.episode_number || idx + 1),
+            title: item.title || item.episodeTitle || `Episode ${idx + 1}`,
+            description: item.description || '',
+            video: item.videoUrl || item.video || item.video_url || '',
+            videoUrl: item.videoUrl || item.video || item.video_url || '',
+            duration: Number(item.duration) || 45,
+            thumbnail: item.thumbnail || item.poster || item.imageUrl || '',
+            subtitle: item.subtitle || '',
+          }));
+        }
+      } catch (e) {}
+    }
+
+    return [];
   }
 
   static async createEpisode(payload: {
