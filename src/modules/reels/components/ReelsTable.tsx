@@ -30,12 +30,14 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
   isDark,
   language,
 }) => {
-  const colStyle = (flex: number) => ({
-    flex,
+  const GRID_COLUMNS = '48px 90px 64px 1fr 110px 95px 105px 170px';
+
+  const cellStyle = {
     display: 'flex',
     alignItems: 'center',
-    px: 1,
-  });
+    minWidth: 0,
+    overflow: 'hidden',
+  };
 
   const handleViewClick = (reel: Reel) => {
     const targetUrl =
@@ -53,14 +55,18 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
         border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: '20px',
         overflow: 'hidden',
+        overflowX: 'auto',
         boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
       }}
     >
       {/* Header Row */}
       <Box
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: GRID_COLUMNS,
+          gap: 1.5,
           p: 2,
+          alignItems: 'center',
           color: isDark ? '#d0caeb' : '#5c548a',
           fontWeight: 700,
           fontSize: '0.8rem',
@@ -68,16 +74,17 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
           backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8f7ff',
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
+          minWidth: '850px',
         }}
       >
-        <Box sx={colStyle(0.6)}>#</Box>
-        <Box sx={colStyle(1.0)}>{t.colId || 'Reel ID'}</Box>
-        <Box sx={colStyle(1.0)}>{t.colReel || 'Reel'}</Box>
-        <Box sx={colStyle(2.8)}>{t.colTitle || 'Title'}</Box>
-        <Box sx={colStyle(1.2)}>{t.colSource || 'Source'}</Box>
-        <Box sx={colStyle(1.1)}>{t.colDuration || 'Duration'}</Box>
-        <Box sx={colStyle(1.3)}>{t.colPublished || 'Published'}</Box>
-        <Box sx={colStyle(2.0)}>{t.colActions || 'Actions'}</Box>
+        <Box sx={cellStyle}>#</Box>
+        <Box sx={cellStyle}>{t.colId || 'Reel ID'}</Box>
+        <Box sx={cellStyle}>{t.colReel || 'Reel'}</Box>
+        <Box sx={cellStyle}>{t.colTitle || 'Title'}</Box>
+        <Box sx={cellStyle}>{t.colSource || 'Source'}</Box>
+        <Box sx={cellStyle}>{t.colDuration || 'Duration'}</Box>
+        <Box sx={cellStyle}>{t.colPublished || 'Published'}</Box>
+        <Box sx={cellStyle}>{t.colActions || 'Actions'}</Box>
       </Box>
 
       {/* Data Rows */}
@@ -91,10 +98,13 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
             <Box key={reel.reelId}>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: 'grid',
+                  gridTemplateColumns: GRID_COLUMNS,
+                  gap: 1.5,
                   px: 2,
                   py: 1.8,
+                  alignItems: 'center',
+                  minWidth: '850px',
                   transition: 'all 0.2s ease',
                   '&:hover': {
                     backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(28,20,69,0.02)',
@@ -102,7 +112,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 }}
               >
                 {/* Row # */}
-                <Box sx={colStyle(0.6)}>
+                <Box sx={cellStyle}>
                   <Typography
                     variant="body2"
                     sx={{ color: isDark ? '#d0caeb' : '#9e9e9e', fontWeight: 600, fontSize: '0.8rem' }}
@@ -112,10 +122,10 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Reel ID */}
-                <Box sx={colStyle(1.0)}>
+                <Box sx={cellStyle}>
                   <Box
                     sx={{
-                      px: 1.5,
+                      px: 1.2,
                       py: 0.4,
                       borderRadius: '8px',
                       backgroundColor: `${color}22`,
@@ -129,7 +139,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Reel Thumbnail Preview */}
-                <Box sx={colStyle(1.0)}>
+                <Box sx={cellStyle}>
                   <Box
                     sx={{
                       width: 44,
@@ -139,7 +149,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                       border: `1px solid ${color}55`,
                       display: 'flex',
                       alignItems: 'center',
-                      justify: 'center',
+                      justifyContent: 'center',
                       flexShrink: 0,
                       overflow: 'hidden',
                       position: 'relative',
@@ -159,7 +169,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Title */}
-                <Box sx={colStyle(2.8)}>
+                <Box sx={cellStyle}>
                   <Typography
                     variant="body2"
                     sx={{
@@ -171,6 +181,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
+                      wordBreak: 'break-word',
                     }}
                   >
                     {(language === 'te' && reel.titleTe) ||
@@ -182,7 +193,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Source */}
-                <Box sx={colStyle(1.2)}>
+                <Box sx={cellStyle}>
                   <Chip
                     icon={
                       isYouTube ? (
@@ -208,7 +219,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Duration */}
-                <Box sx={colStyle(1.1)}>
+                <Box sx={cellStyle}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <PlayArrow sx={{ fontSize: '0.85rem', color: isDark ? '#d0caeb' : '#9e9e9e' }} />
                     <Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600 }}>
@@ -218,7 +229,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Published Switch */}
-                <Box sx={colStyle(1.3)}>
+                <Box sx={cellStyle}>
                   <Tooltip title={reel.isPublished ? (t.published || 'Published') : (t.draft || 'Draft')}>
                     <Switch
                       checked={reel.isPublished}
@@ -231,7 +242,7 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                 </Box>
 
                 {/* Actions (View, Edit, Delete) */}
-                <Box sx={{ ...colStyle(2.0), gap: 1 }}>
+                <Box sx={{ ...cellStyle, gap: 1 }}>
                   {/* View Button */}
                   <Tooltip title="View Reel">
                     <IconButton
