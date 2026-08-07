@@ -16,6 +16,7 @@ import {
   Newspaper as NewspaperIcon,
   LocalMovies as LocalMoviesIcon,
   VideoLibrary,
+  Notifications as NotificationsIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -27,6 +28,7 @@ import { useUserStore } from '@/core/storage/user-store';
 const sidebarTranslations = {
   en: {
     menuCreate: 'Create News',
+    menuNotifications: 'Notifications',
     menuCategories: 'Categories',
     menuWebArticles: 'Web Articles',
     menuEpapers: 'Epapers',
@@ -42,6 +44,7 @@ const sidebarTranslations = {
   },
   te: {
     menuCreate: 'వార్తలను సృష్టించండి',
+    menuNotifications: 'నోటిఫికేషన్లు',
     menuCategories: 'విభాగాలు',
     menuWebArticles: 'వెబ్ వ్యాసాలు',
     menuEpapers: 'ఈ-పేపర్లు',
@@ -57,6 +60,7 @@ const sidebarTranslations = {
   },
   hi: {
     menuCreate: 'समाचार बनाएं',
+    menuNotifications: 'सूचनाएं',
     menuCategories: 'श्रेणियां',
     menuWebArticles: 'वेब लेख',
     menuEpapers: 'ई-पेपर',
@@ -72,6 +76,7 @@ const sidebarTranslations = {
   },
   ml: {
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
+    menuNotifications: 'അറിയിപ്പുകൾ',
     menuCategories: 'വിഭാഗങ്ങൾ',
     menuWebArticles: 'വെബ് ലേഖനങ്ങൾ',
     menuEpapers: 'ഇ-പേപ്പറുകൾ',
@@ -103,6 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
 
   const allMenuItems = [
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
+    { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuMovies, icon: <LocalMoviesIcon />, href: '/movies' },
     { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
@@ -120,9 +126,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const isCreator = userRole === 'creator' || userRole === 'creators';
   const isAdmin = userRole === 'admin' || userRole === 'administrator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/movies', '/settings'];
+  const creatorHrefs = ['/dashboard', '/notifications', '/reels', '/movies', '/settings'];
   const adminHrefs = [
     '/dashboard',
+    '/notifications',
     '/reels',
     '/movies',
     '/web-articles',

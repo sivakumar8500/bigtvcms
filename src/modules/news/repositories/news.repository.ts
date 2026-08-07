@@ -1,5 +1,7 @@
 import { apiClient } from '@/core/api/api-client';
 import { CreateNewsPostDto, NewsPostDto, UpdateNewsPostDto } from '../dto/news.dto';
+import { NotificationRepository } from '@/modules/notifications/repositories/notification.repository';
+import { SendNotificationDto } from '@/modules/notifications/dto/notification.dto';
 
 function cleanPayload<T extends Record<string, any>>(dto: T): T {
   if (!dto || typeof dto !== 'object') return dto;
@@ -26,7 +28,34 @@ export class NewsRepository {
 
   static async create(dto: CreateNewsPostDto): Promise<NewsPostDto> {
     const cleaned = cleanPayload(dto);
-    return apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', cleaned);
+    const createdPost = await apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', cleaned);
+
+    if (createdPost && createdPost.id) {
+      try {
+        const rawContent = createdPost.content || dto.content || 'Read our latest article now';
+        const cleanContent = rawContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || 'Read our latest article now';
+        const rawLink = createdPost.postUrl || dto.postUrl || (cleaned as any).webUrl || '';
+        const link = rawLink.startsWith('http') || rawLink.startsWith('myapp://')
+          ? rawLink
+          : `myapp://post/${createdPost.id}`;
+
+        const notificationPayload: SendNotificationDto = {
+          title: createdPost.notificationtitle || createdPost.title || dto.notificationtitle || dto.title || 'New Blog Published',
+          content: cleanContent,
+          post_id: createdPost.id,
+          link,
+          image_url: createdPost.image_url || dto.image_url || 'https://example.com/image.jpg',
+          brandName: 'BigTV',
+          brandLogo: 'www.logo.com',
+        };
+
+        await NotificationRepository.sendNotification(notificationPayload);
+      } catch (err) {
+        console.error('Failed to trigger sendNotification API:', err);
+      }
+    }
+
+    return createdPost;
   }
 
   static async createNews(dto: CreateNewsPostDto): Promise<NewsPostDto> {

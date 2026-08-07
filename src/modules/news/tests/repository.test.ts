@@ -1,5 +1,6 @@
 import { NewsRepository } from '../repositories/news.repository';
 import { apiClient } from '@/core/api/api-client';
+import { NotificationRepository } from '@/modules/notifications/repositories/notification.repository';
 
 jest.mock('@/core/api/api-client', () => ({
   apiClient: {
@@ -7,6 +8,12 @@ jest.mock('@/core/api/api-client', () => ({
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
+  },
+}));
+
+jest.mock('@/modules/notifications/repositories/notification.repository', () => ({
+  NotificationRepository: {
+    sendNotification: jest.fn().mockResolvedValue({ success: true }),
   },
 }));
 
@@ -38,10 +45,10 @@ describe('NewsRepository', () => {
     expect(result).toEqual(mockPost);
   });
 
-  it('should create a new news post', async () => {
+  it('should create a new news post and trigger notification', async () => {
     const createDto = {
       title: 'New Title',
-      notificationtitle: 'New Title',
+      notificationtitle: 'New Notification Title',
       imagetitel: 'New Title',
       content: 'New Content',
       created: '2026-07-22T05:00:00.000Z',
@@ -58,7 +65,7 @@ describe('NewsRepository', () => {
       isReporter: false,
       reportedBy: '',
       categoryName: ['General'],
-      postUrl: '',
+      postUrl: 'myapp://post/10',
       subType: '',
       isStickyPost: false,
       linkURLAndroid: '',
@@ -83,6 +90,15 @@ describe('NewsRepository', () => {
       '/news-posts',
       expect.not.objectContaining({ post_name: expect.anything(), post_type: expect.anything() })
     );
+    expect(NotificationRepository.sendNotification).toHaveBeenCalledWith({
+      title: 'New Notification Title',
+      content: 'New Content',
+      post_id: 10,
+      link: 'myapp://post/10',
+      image_url: 'http://example.com/img.jpg',
+      brandName: 'BigTV',
+      brandLogo: 'www.logo.com',
+    });
     expect(result).toEqual(createdResponse);
   });
 
