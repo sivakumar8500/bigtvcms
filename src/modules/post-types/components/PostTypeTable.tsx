@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Chip, Switch, Button, Divider, IconButton } from '@mui/material';
 import { Article, CheckCircle, RadioButtonUnchecked, Delete, Edit } from '@mui/icons-material';
 import { PostType } from '../domain/post-type.model';
+import { useUserStore } from '@/core/storage/user-store';
 
 interface PostTypeTableProps {
   paginatedData: PostType[];
@@ -24,6 +25,9 @@ export const PostTypeTable: React.FC<PostTypeTableProps> = ({
   t,
   isDark,
 }) => {
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
+
   const colStyle = (flex: number) => ({
     flex,
     display: 'flex',
@@ -155,20 +159,22 @@ export const PostTypeTable: React.FC<PostTypeTableProps> = ({
                   >
                     <Edit fontSize="small" />
                   </IconButton>
-                  <IconButton
-                    aria-label="Delete post type"
-                    onClick={() => handleDeleteClick(row.typeId)}
-                    size="small"
-                    sx={{
-                      color: isDark ? '#fca5a5' : '#dc2626',
-                      backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : 'rgba(220,38,38,0.08)',
-                      '&:hover': {
-                        backgroundColor: isDark ? 'rgba(239,68,68,0.2)' : 'rgba(220,38,38,0.15)',
-                      },
-                    }}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
+                  {!isAdmin && (
+                    <IconButton
+                      aria-label="Delete post type"
+                      onClick={() => handleDeleteClick(row.typeId)}
+                      size="small"
+                      sx={{
+                        color: isDark ? '#fca5a5' : '#dc2626',
+                        backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : 'rgba(220,38,38,0.08)',
+                        '&:hover': {
+                          backgroundColor: isDark ? 'rgba(239,68,68,0.2)' : 'rgba(220,38,38,0.15)',
+                        },
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
               </Box>
               {index < paginatedData.length - 1 && (

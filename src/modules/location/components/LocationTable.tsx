@@ -8,6 +8,7 @@ import {
   RadioButtonUnchecked,
 } from '@mui/icons-material';
 import { LocationState } from '../domain/location.model';
+import { useUserStore } from '@/core/storage/user-store';
 
 const markerColors = [
   '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
@@ -37,6 +38,9 @@ export const LocationTable: React.FC<LocationTableProps> = ({
   isDark,
   language,
 }) => {
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
+
   const colStyle = (flex: number) => ({
     flex,
     display: 'flex',
@@ -195,19 +199,21 @@ export const LocationTable: React.FC<LocationTableProps> = ({
                 >
                   <Edit sx={{ fontSize: '1.15rem' }} />
                 </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeleteClick(loc.stateId)}
-                  sx={{
-                    color: '#f44336',
-                    backgroundColor: 'rgba(244,67,54,0.08)',
-                    borderRadius: '8px',
-                    p: 0.6,
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
-                  }}
-                >
-                  <Delete sx={{ fontSize: '1.15rem' }} />
-                </IconButton>
+                {!isAdmin && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeleteClick(loc.stateId)}
+                    sx={{
+                      color: '#f44336',
+                      backgroundColor: 'rgba(244,67,54,0.08)',
+                      borderRadius: '8px',
+                      p: 0.6,
+                      '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
+                    }}
+                  >
+                    <Delete sx={{ fontSize: '1.15rem' }} />
+                  </IconButton>
+                )}
               </Box>
             </Box>
             {idx < paginatedData.length - 1 && (

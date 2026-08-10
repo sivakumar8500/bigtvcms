@@ -6,7 +6,7 @@ import { MoviesUploadService } from '../services/movies-upload.service';
 export const useMoviesController = () => {
   const [movies, setMovies] = useState<MovieItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTabState] = useState<'movie' | 'series' | 'trailer'>('movie');
+  const [activeTab, setActiveTabState] = useState<'movie' | 'series' | 'trailer'>('series');
   const [page, setPage] = useState<number>(1);
   const recordsPerPage = 10;
 

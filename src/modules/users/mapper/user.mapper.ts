@@ -28,6 +28,7 @@ export class UserMapper {
     active: boolean = true
   ): CreateCreatorRequestDto {
     const selectedRole = form.role || 'creator';
+
     return {
       UserName: form.name || form.username,
       location: form.location,
@@ -40,4 +41,3 @@ export class UserMapper {
     };
   }
 }
-

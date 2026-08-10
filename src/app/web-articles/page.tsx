@@ -39,12 +39,8 @@ import {
 } from '@mui/icons-material';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
-import { CreateNewsForm, CreateNewsFormData } from '@/modules/dashboard/components/CreateNewsForm';
-import { CategoryRepository } from '@/modules/category/repositories/category.repository';
-import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.repository';
-import { LocationRepository } from '@/modules/location/repositories/location.repository';
-import { TagsRepository } from '@/modules/tags/repositories/tags.repository';
-import { NewsRepository } from '@/modules/news/repositories/news.repository';
+import { useUserStore } from '@/core/storage/user-store';
+import { WpRepository } from '@/modules/news/repositories/wp.repository';
 import { Loader } from '@/shared/components/Loader';
 import { stripHtml } from '@/shared/utils/html.utils';
 
@@ -219,8 +215,10 @@ const translations = {
 export default function WebArticlesPage() {
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
+  const { user } = useUserStore();
   const isDark = mode === 'dark';
   const t = translations[language as keyof typeof translations] || translations.en;
+  const isAdmin = user?.role === 'admin';
 
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -263,36 +261,10 @@ export default function WebArticlesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [catData, typeData, locData, tagData, newsData] = await Promise.all([
-        CategoryRepository.getCategories().catch(() => []),
-        PostTypeRepository.getPostTypes().catch(() => []),
-        LocationRepository.getLocations().catch(() => []),
-        TagsRepository.getTags().catch(() => []),
-        NewsRepository.getAllNews().catch(() => []),
-      ]);
-
-      if (Array.isArray(catData)) {
-        setCategoriesList(catData.map((c: any) => c.englishName || c.name || c.category_name || '').filter(Boolean));
-      }
-      if (Array.isArray(typeData)) {
-        setPostTypesList(typeData.map((t: any) => t.name || t.typename || '').filter(Boolean));
-      }
-      if (Array.isArray(locData)) {
-        setLocationsList(locData.map((l: any) => l.state_name || l.name || '').filter(Boolean));
-      }
-      if (Array.isArray(tagData)) {
-        setTagsList(tagData.map((tg: any) => tg.name || tg.tag_name || '').filter(Boolean));
-      }
-
-      if (Array.isArray(newsData)) {
-        // Filter specifically for Web Articles (is_web_post === true or has web_post_url)
-        const webArticles = newsData.filter((item: any) =>
-          Boolean(item.is_web_post || item.isWebPost || item.isWebpost || item.web_post_url || item.webPostUrl || item.webUrl)
-        );
-        // Fallback: if no specific web articles tagged yet, show all news items with Web Articles view preset
-        const finalItems = webArticles.length > 0 ? webArticles : newsData;
-        setPosts(finalItems);
-      }
+      const wpPosts = await WpRepository.getPosts(1, 100);
+      setPosts(wpPosts);
+      const uniqueCats = Array.from(new Set(wpPosts.map(p => p.categoryName || 'Uncategorized')));
+      setCategoriesList(uniqueCats);
     } catch (err: any) {
       console.error('Failed to load web articles:', err);
     } finally {
@@ -354,62 +326,10 @@ export default function WebArticlesPage() {
     );
   };
 
-  const handleDeletePost = async (id: number) => {
-    try {
-      await NewsRepository.deleteNews(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
-      showToast(t.deleteSuccess, 'success');
-    } catch (err: any) {
-      console.error('Delete failed:', err);
-      showToast('Failed to delete web article', 'error');
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    try {
-      await Promise.all(selectedPostIds.map((id) => NewsRepository.deleteNews(id)));
-      setPosts((prev) => prev.filter((p) => !selectedPostIds.includes(p.id)));
-      setSelectedPostIds([]);
-      showToast(t.deleteSuccess, 'success');
-    } catch (err: any) {
-      console.error('Bulk delete failed:', err);
-      showToast('Failed to delete selected articles', 'error');
-    }
-  };
-
-  const handleCreatePost = async (data: CreateNewsFormData) => {
-    try {
-      await NewsRepository.createNews({
-        ...data,
-        isWebPost: true,
-        postUrl: data.webUrl || data.postUrl || '',
-      } as any);
-      showToast(t.createSuccess, 'success');
-      setCreateDrawerOpen(false);
-      fetchData();
-    } catch (err: any) {
-      console.error('Create failed:', err);
-      showToast('Failed to create web article', 'error');
-    }
-  };
-
-  const handleEditPost = async (data: CreateNewsFormData) => {
-    if (!editingPost) return;
-    try {
-      await NewsRepository.updateNews(editingPost.id, {
-        ...data,
-        is_web_post: true,
-        isWebPost: true,
-        web_post_url: data.webUrl || data.postUrl || '',
-      } as any);
-      showToast(t.updateSuccess, 'success');
-      setEditingPost(null);
-      fetchData();
-    } catch (err: any) {
-      console.error('Update failed:', err);
-      showToast('Failed to update web article', 'error');
-    }
-  };
+  const handleDeletePost = async (id: number) => {};
+  const handleBulkDelete = async () => {};
+  const handleCreatePost = async (data: any) => {};
+  const handleEditPost = async (data: any) => {};
 
   const isAllSelected = paginatedPosts.length > 0 && paginatedPosts.every((p) => selectedPostIds.includes(p.id));
   const isSomeSelected = paginatedPosts.some((p) => selectedPostIds.includes(p.id)) && !isAllSelected;
@@ -432,34 +352,7 @@ export default function WebArticlesPage() {
         <Header title={t.title} />
 
         <Box sx={{ pt: 2, px: 3, pb: 4, flex: 1, overflowY: 'auto' }}>
-          {createDrawerOpen ? (
-            <CreateNewsForm
-              onClose={() => setCreateDrawerOpen(false)}
-              onSubmit={handleCreatePost}
-              isDark={isDark}
-              language={language as any}
-              initialData={{ isWebPost: true }}
-            />
-          ) : editingPost ? (
-            <CreateNewsForm
-              onClose={() => setEditingPost(null)}
-              onSubmit={handleEditPost}
-              isDark={isDark}
-              language={language as any}
-              initialData={{
-                titleEn: editingPost.title || '',
-                bodyEn: editingPost.content || '',
-                categories: editingPost.categories || [],
-                tags: editingPost.tags || [],
-                location: editingPost.location || [],
-                type: editingPost.type || 'Standard',
-                imageUrl: editingPost.image || editingPost.imageUrl,
-                isWebPost: true,
-                webUrl: editingPost.web_post_url || editingPost.webUrl || editingPost.postUrl || '',
-                postUrl: editingPost.web_post_url || editingPost.webUrl || editingPost.postUrl || '',
-              }}
-            />
-          ) : viewingPost ? (
+          {viewingPost ? (
             <Box
               sx={{
                 backgroundColor: isDark ? 'rgba(38, 28, 86, 0.35)' : '#ffffff',
@@ -523,22 +416,7 @@ export default function WebArticlesPage() {
                   />
                 </Box>
 
-                <Button
-                  variant="contained"
-                  startIcon={<PostAdd />}
-                  onClick={() => setCreateDrawerOpen(true)}
-                  sx={{
-                    borderRadius: '12px',
-                    px: 2.5,
-                    py: 1,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    backgroundColor: '#2563eb',
-                    '&:hover': { backgroundColor: '#1d4ed8' },
-                  }}
-                >
-                  {t.createBtn}
-                </Button>
+{/* Create Button Hidden */}
               </Box>
 
               {/* Filters Bar */}
@@ -628,16 +506,7 @@ export default function WebArticlesPage() {
                   </Typography>
 
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      startIcon={<Delete />}
-                      onClick={handleBulkDelete}
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {t.bulkDelete}
-                    </Button>
+{/* Bulk Delete Hidden */}
                     <Button
                       size="small"
                       onClick={() => setSelectedPostIds([])}
@@ -820,16 +689,7 @@ export default function WebArticlesPage() {
                               <Visibility fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={() => setEditingPost(post)}>
-                              <Edit fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" color="error" onClick={() => handleDeletePost(post.id)}>
-                              <Delete fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
+{/* Edit and Delete Actions Hidden */}
                         </Grid>
                       </Grid>
                     );

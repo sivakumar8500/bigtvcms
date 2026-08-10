@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Chip, Switch, Button, Divider, IconButton } from '@mui/material';
 import { Translate, Delete } from '@mui/icons-material';
 import { Language } from '../domain/language.model';
+import { useUserStore } from '@/core/storage/user-store';
 
 const langColors = [
   '#00bcd4', '#4caf50', '#ff9800', '#e91e63',
@@ -28,6 +29,9 @@ export const LanguageTable: React.FC<LanguageTableProps> = ({
   t,
   isDark,
 }) => {
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
+
   const colStyle = (flex: number) => ({
     flex,
     display: 'flex',
@@ -193,19 +197,21 @@ export const LanguageTable: React.FC<LanguageTableProps> = ({
                 >
                   Edit
                 </Button>
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeleteClick(lang.languageId)}
-                  sx={{
-                    color: '#f44336',
-                    backgroundColor: 'rgba(244,67,54,0.08)',
-                    borderRadius: '8px',
-                    p: 0.6,
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
-                  }}
-                >
-                  <Delete sx={{ fontSize: '1.15rem' }} />
-                </IconButton>
+                {!isAdmin && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeleteClick(lang.languageId)}
+                    sx={{
+                      color: '#f44336',
+                      backgroundColor: 'rgba(244,67,54,0.08)',
+                      borderRadius: '8px',
+                      p: 0.6,
+                      '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
+                    }}
+                  >
+                    <Delete sx={{ fontSize: '1.15rem' }} />
+                  </IconButton>
+                )}
               </Box>
             </Box>
             {idx < paginatedData.length - 1 && (

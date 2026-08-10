@@ -223,27 +223,7 @@ export const MoviesPage: React.FC = () => {
                 },
               }}
             >
-              <Tab
-                value="movie"
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.tabMovies}</span>
-                    <Chip
-                      label={counts.movie}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
-                        backgroundColor: activeTab === 'movie' ? (isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.12)') : 'rgba(128,128,128,0.15)',
-                        color: activeTab === 'movie' ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? '#d0caeb' : '#5c548a'),
-                      }}
-                    />
-                  </Box>
-                }
-                icon={<LocalMovies />}
-                iconPosition="start"
-              />
+
               <Tab
                 value="series"
                 label={
@@ -265,27 +245,7 @@ export const MoviesPage: React.FC = () => {
                 icon={<Tv />}
                 iconPosition="start"
               />
-              <Tab
-                value="trailer"
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.tabTrailers}</span>
-                    <Chip
-                      label={counts.trailer}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
-                        backgroundColor: activeTab === 'trailer' ? (isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.12)') : 'rgba(128,128,128,0.15)',
-                        color: activeTab === 'trailer' ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? '#d0caeb' : '#5c548a'),
-                      }}
-                    />
-                  </Box>
-                }
-                icon={<VideoLibrary />}
-                iconPosition="start"
-              />
+
             </Tabs>
           </Box>
 

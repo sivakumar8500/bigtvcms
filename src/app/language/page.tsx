@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useLanguageStore, SupportedLanguage } from '@/core/storage/language-store';
 import { apiClient } from '@/core/api/api-client';
+import { useUserStore } from '@/core/storage/user-store';
 
 interface LanguageOption {
   key: SupportedLanguage;
@@ -149,7 +150,11 @@ export default function LanguageSelectionPage() {
   };
 
   const handleProceed = () => {
-    router.push('/dashboard');
+    const userRole = useUserStore.getState().user.role;
+    if (userRole === 'epaper_creator') router.push('/epapers');
+    else if (userRole === 'notification_creator') router.push('/notifications');
+    else if (userRole === 'movie_creator') router.push('/movies');
+    else router.push('/dashboard');
   };
 
   return (

@@ -138,7 +138,7 @@ export function useUserController() {
   }, []);
   const [filterName, setFilterName] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [filterRole, setFilterRole] = useState<'all' | 'superadmin' | 'admin' | 'creator'>('all');
+  const [filterRole, setFilterRole] = useState<'all' | 'superadmin' | 'admin' | 'creator' | 'epaper_creator' | 'movie_creator' | 'notification_creator'>('all');
   const [page, setPage] = useState(1);
   const recordsPerPage = 10;
 

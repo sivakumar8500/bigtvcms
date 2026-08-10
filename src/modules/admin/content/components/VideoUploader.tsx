@@ -135,12 +135,21 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
         >
           <Box
             component="video"
-            controls
+            controls={!isUploading}
             src={displayVideo}
-            sx={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: '12px' }}
+            sx={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: '12px', opacity: isUploading ? 0.5 : 1 }}
           />
+          {isUploading && (
+            <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', textAlign: 'center', backgroundColor: 'rgba(0,0,0,0.7)', p: 2, borderRadius: '12px', backdropFilter: 'blur(4px)' }}>
+              <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 600, display: 'block', mb: 1 }}>
+                Uploading video file ({uploadProgress}%)...
+              </Typography>
+              <LinearProgress variant="determinate" value={uploadProgress} sx={{ borderRadius: '4px', height: '6px', '& .MuiLinearProgress-bar': { backgroundColor: '#a6e2f5' }, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+            </Box>
+          )}
           <IconButton
             size="small"
+            disabled={isUploading}
             onClick={() => {
               setLocalPreview(null);
               onChange('');
@@ -152,6 +161,7 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
               backgroundColor: 'rgba(0,0,0,0.7)',
               color: '#ffffff',
               '&:hover': { backgroundColor: '#f44336' },
+              ...(isUploading && { opacity: 0.5, pointerEvents: 'none' })
             }}
           >
             <Delete fontSize="small" />

@@ -125,8 +125,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const userRole = (user?.role || '').toLowerCase().trim();
   const isCreator = userRole === 'creator' || userRole === 'creators';
   const isAdmin = userRole === 'admin' || userRole === 'administrator';
+  const isSuperAdmin = userRole === 'superadmin' || userRole === 'super_admin';
+  const isEpaperCreator = userRole === 'epaper_creator';
+  const isMovieCreator = userRole === 'movie_creator';
+  const isNotificationCreator = userRole === 'notification_creator';
 
-  const creatorHrefs = ['/dashboard', '/notifications', '/reels', '/movies', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/web-articles', '/settings'];
+  const epaperCreatorHrefs = ['/epapers', '/settings'];
+  const movieCreatorHrefs = ['/movies', '/settings'];
+  const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
+  
   const adminHrefs = [
     '/dashboard',
     '/notifications',
@@ -144,13 +152,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   ];
 
   const menuItems = allMenuItems.filter((item) => {
-    if (isCreator) {
-      return creatorHrefs.includes(item.href);
-    }
-    if (isAdmin) {
-      return adminHrefs.includes(item.href);
-    }
-    return true; // superadmin or unrestricted
+    if (isEpaperCreator) return epaperCreatorHrefs.includes(item.href);
+    if (isMovieCreator) return movieCreatorHrefs.includes(item.href);
+    if (isNotificationCreator) return notificationCreatorHrefs.includes(item.href);
+    if (isCreator) return creatorHrefs.includes(item.href);
+    if (isAdmin) return adminHrefs.includes(item.href);
+    if (isSuperAdmin) return true;
+    return false;
   });
 
   return (

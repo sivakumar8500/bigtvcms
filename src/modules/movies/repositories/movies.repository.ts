@@ -3,7 +3,6 @@ import { MovieItem, CreateMovieDto, MovieApiData } from '../domain/movies.model'
 
 const LOCAL_BACKEND_URL = 'http://localhost:8000/api/admin/content/movie';
 const REMOTE_API_URL = 'https://apidev.chotanews.com/api/admin/content/movie';
-const PUBLIC_CONTENT_API_URL = 'https://apidev.chotanews.com/api/content/movie';
 const PROXY_API_URL = '/api/api/admin/content/movie';
 const LOCAL_STORAGE_KEY = 'bigtv_cms_movies_list';
 
@@ -225,14 +224,14 @@ export class MoviesRepository {
     return pathExtension ? `${baseUrl}/${pathExtension}` : baseUrl;
   }
 
-  private static mapApiToItem(apiData: any, defaultContentType?: 'movie' | 'series' | 'trailer'): MovieItem {
+  private static mapApiToItem(apiData: any, defaultContentType?: 'movie' | 'series' | 'trailer' | 'episode'): MovieItem {
     const id = apiData.id || apiData.movieId || `mov_${Math.random().toString(36).substr(2, 9)}`;
     const title = apiData.title || apiData.movieTitle || 'Untitled Movie';
     const poster = apiData.poster || apiData.posterUrl || apiData.poster_url || apiData.imageUrl || '';
     const banner = apiData.banner || apiData.bannerUrl || apiData.banner_url || poster;
     const thumbnail = apiData.thumbnail || poster;
 
-    const contentType: 'movie' | 'series' | 'trailer' =
+    const contentType: 'movie' | 'series' | 'trailer' | 'episode' =
       apiData.contentType ||
       apiData.type ||
       defaultContentType ||
@@ -362,7 +361,7 @@ export class MoviesRepository {
     } catch (e) {}
   }
 
-  private static parseApiResponse(data: any[], defaultContentType?: 'movie' | 'series' | 'trailer'): MovieItem[] {
+  private static parseApiResponse(data: any[], defaultContentType?: 'movie' | 'series' | 'trailer' | 'episode'): MovieItem[] {
     const result: MovieItem[] = [];
     data.forEach((item: any) => {
       const movie = MoviesRepository.mapApiToItem(item, defaultContentType);
@@ -383,11 +382,7 @@ export class MoviesRepository {
   }
 
   static async getAll(): Promise<MovieItem[]> {
-    const primaryUrl = this.getTargetUrl();
-    const publicSeriesUrl = 'https://apidev.chotanews.com/api/content/series';
-    const adminSeriesUrl = 'https://apidev.chotanews.com/api/admin/content/series';
-    const publicTrailerUrl = 'https://apidev.chotanews.com/api/content/trailer';
-    const adminTrailerUrl = 'https://apidev.chotanews.com/api/admin/content/trailer';
+    const baseUrl = 'https://apidev.chotanews.com/api/content';
 
     const getHeaders = () => {
       if (typeof window === 'undefined') return {};
@@ -397,13 +392,7 @@ export class MoviesRepository {
     const headers = getHeaders();
 
     const endpoints = [
-      { url: primaryUrl, defaultType: 'movie' as const },
-      { url: REMOTE_API_URL, defaultType: 'movie' as const },
-      { url: PUBLIC_CONTENT_API_URL, defaultType: 'movie' as const },
-      { url: publicSeriesUrl, defaultType: 'series' as const },
-      { url: adminSeriesUrl, defaultType: 'series' as const },
-      { url: publicTrailerUrl, defaultType: 'trailer' as const },
-      { url: adminTrailerUrl, defaultType: 'trailer' as const },
+      { url: `${baseUrl}?type=series`, defaultType: 'series' as const },
     ];
 
     let combinedItems: MovieItem[] = [];

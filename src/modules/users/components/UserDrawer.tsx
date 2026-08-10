@@ -399,6 +399,9 @@ export const UserDrawer: React.FC<UserDrawerProps> = ({
               <MenuItem value="superadmin">{t.roleSuperAdmin || 'Superadmin'}</MenuItem>
               <MenuItem value="admin">{t.roleAdmin || 'Admin'}</MenuItem>
               <MenuItem value="creator">{t.roleCreator || 'Creator'}</MenuItem>
+              <MenuItem value="epaper_creator">{t.roleEpaperCreator || 'Epaper Creator'}</MenuItem>
+              <MenuItem value="movie_creator">{t.roleMovieCreator || 'Movie Creator'}</MenuItem>
+              <MenuItem value="notification_creator">{t.roleNotificationCreator || 'Notification Creator'}</MenuItem>
             </TextField>
           </Box>
 

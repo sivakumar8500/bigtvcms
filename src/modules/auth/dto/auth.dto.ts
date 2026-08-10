@@ -11,9 +11,11 @@ export interface LoginResponseDto {
   message?: string;
   detail?: string;
   role?: string;
+  user_type?: string;
   creator?: {
     active?: boolean;
     role?: string;
+    user_type?: string;
     name?: string;
     UserName?: string;
   };

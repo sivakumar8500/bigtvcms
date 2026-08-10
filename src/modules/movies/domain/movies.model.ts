@@ -40,7 +40,7 @@ export interface CreateMovieDto {
 export interface MovieItem {
   id: string | number;
   movieId?: string | number;
-  contentType?: 'movie' | 'series' | 'trailer';
+  contentType?: 'movie' | 'series' | 'trailer' | 'episode';
   title: string;
   movieTitle?: string;
   description?: string;

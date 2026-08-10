@@ -13,6 +13,7 @@ export const movieFormSchema = z.object({
   rating: z.union([z.string(), z.number()]).transform((val) => String(val)),
   status: z.enum(['published', 'draft', 'scheduled', 'active', 'inactive']).default('published'),
   isFeatured: z.boolean().default(false),
+  imageTitle: z.string().optional(),
   video: z.string().min(1, { message: 'Movie video file is required' }),
   duration: z.coerce.number().min(1, { message: 'Duration must be at least 1 minute' }),
   subtitle: z.string().optional(),
@@ -40,6 +41,7 @@ export const seriesFormSchema = z.object({
   rating: z.union([z.string(), z.number()]).optional(),
   status: z.enum(['published', 'draft', 'scheduled', 'active', 'inactive']).default('published'),
   isFeatured: z.boolean().default(false),
+  imageTitle: z.string().optional(),
 });
 
 export const seasonSchema = z.object({

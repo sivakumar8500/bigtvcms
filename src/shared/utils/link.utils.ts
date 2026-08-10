@@ -46,7 +46,7 @@ export function formatLinksAndContent(linksInput: any, content?: string): Format
 
   // 2. Extract <a> tags from content, replace with <linkX>text</linkX>
   if (updatedContent && typeof updatedContent === 'string') {
-    const anchorRegex = /<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>(.*?)<\/a>/gi;
+    const anchorRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
 
     updatedContent = updatedContent.replace(anchorRegex, (fullMatch, url, innerText) => {
       const cleanUrl = url.trim();

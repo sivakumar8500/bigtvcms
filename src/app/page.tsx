@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import LoginPage from './login/page';
+import { useUserStore } from '@/core/storage/user-store';
 
 export default function RootPage() {
   const router = useRouter();
@@ -19,7 +20,11 @@ export default function RootPage() {
 
     if (token) {
       setHasToken(true);
-      router.replace('/dashboard');
+      const userRole = useUserStore.getState().user.role;
+      if (userRole === 'epaper_creator') router.replace('/epapers');
+      else if (userRole === 'notification_creator') router.replace('/notifications');
+      else if (userRole === 'movie_creator') router.replace('/movies');
+      else router.replace('/dashboard');
     } else {
       setHasToken(false);
       const cleanPath = path.replace(/^\/(en|te|hi|ml)(\/|$)/, '/');

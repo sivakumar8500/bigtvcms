@@ -201,9 +201,9 @@ export class AdminContentService {
     const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://apidev.chotanews.com/api';
     const cleanBase = envBase.replace(/\/$/, '');
     let baseUrl = cleanBase.endsWith('/api')
-      ? `${cleanBase}/content/series`
-      : `${cleanBase}/api/content/series`;
-    return id ? `${baseUrl}/${id}` : baseUrl;
+      ? `${cleanBase}/content`
+      : `${cleanBase}/api/content`;
+    return id ? `${baseUrl}?type=series&id=${id}` : `${baseUrl}?type=series`;
   }
 
   static async getAllSeries(): Promise<any[]> {
@@ -231,7 +231,7 @@ export class AdminContentService {
     const publicUrl = this.getPublicSeriesTargetUrl(id);
     const headers = this.getAuthHeaders();
 
-    for (const url of [targetUrl, publicUrl, `/api/admin/content/series/${id}`, `/api/content/series/${id}`]) {
+    for (const url of [targetUrl, publicUrl, `/api/admin/content/series/${id}`, `/api/content?type=series&id=${id}`]) {
       try {
         const response = await axios.get(url, { headers });
         const resData = response.data?.data || response.data;
@@ -351,8 +351,8 @@ export class AdminContentService {
     // 3. Try fetching from remote API episode endpoints
     const headers = this.getAuthHeaders();
     for (const url of [
-      `https://apidev.chotanews.com/api/admin/content/episode?seriesId=${targetId}`,
-      `/api/admin/content/episode?seriesId=${targetId}`,
+      `https://apidev.chotanews.com/api/content?type=episode&series_id=${targetId}`,
+      `/api/content?type=episode&series_id=${targetId}`,
     ]) {
       try {
         const response = await axios.get(url, { headers });

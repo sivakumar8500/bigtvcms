@@ -663,7 +663,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   });
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.imageUrl || null);
   const [galleryItems, setGalleryItems] = useState<Array<{ url: string; file?: File }>>(() => {
-    const imgs: string[] = (initialData as any)?.galleryImages || [];
+    const imgs: string[] = (initialData as any)?.galleryImages || (initialData as any)?.gallery || [];
     return imgs.map((url) => ({ url }));
   });
   const [isSticky, setIsSticky] = useState<boolean>((initialData as any)?.isStickyPost ?? initialData?.isSticky ?? false);
@@ -687,6 +687,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   });
   const [notificationTitle, setNotificationTitle] = useState<string>((initialData as any)?.notificationTitle || (initialData as any)?.notificationtitle || '');
   const [imageTitle, setImageTitle] = useState<string>((initialData as any)?.imageTitle || (initialData as any)?.imagetitel || '');
+  const [showImageTitle, setShowImageTitle] = useState<boolean>(
+    Boolean((initialData as any)?.imageTitle || (initialData as any)?.imagetitel)
+  );
   const [imageAdUrl, setImageAdUrl] = useState<string>(
     () => (initialData as any)?.imageAdUrl || (initialData as any)?.image_ad_url || initialData?.postUrl || (initialData as any)?.web_post_url || initialData?.webUrl || ''
   );
@@ -1243,9 +1246,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         errMap.imageAdUrl = t.errImageAdUrlInvalid;
       }
     } else {
-      if (!isImageOrGalleryType && !imageTitle.trim()) {
+      if (showImageTitle && !isImageOrGalleryType && !imageTitle.trim()) {
         errMap.imageTitle = t.errImageTitleRequired;
-      } else if (imageTitle.trim() && countWords(imageTitle) > TITLE_WORD_LIMIT) {
+      } else if (showImageTitle && imageTitle.trim() && countWords(imageTitle) > TITLE_WORD_LIMIT) {
         errMap.imageTitle = t.errImageTitleWordLimit;
       }
     }
@@ -1391,10 +1394,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     const aitagIds = parsedAitagIds;
 
     const cleanTitle = stripHtml(title);
-    const isLinkFormat = type.toLowerCase().includes('link') || type.toLowerCase().includes('standardlink');
-    const cleanBody = isLinkFormat ? stripAllTagsExceptLinkTags(body) : stripHtml(body);
+    const cleanBody = body;
     const cleanNotifTitle = sendNotification ? stripHtml(notificationTitle) : '';
-    const cleanImgTitle = isImageAd ? '' : stripHtml(imageTitle);
+    const cleanImgTitle = isImageAd || !showImageTitle ? '' : stripHtml(imageTitle);
     const finalPostUrl = isImageAd ? imageAdUrl.trim() : webUrl;
 
     onSubmit({
@@ -1579,35 +1581,74 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   </Box>
                 </Box>
                 {/* Phone Body */}
-                <Box sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
-                    {imageUrl ? (
-                      <Box component="img" src={imageUrl} alt="Banner" sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    ) : (
-                      <Box sx={{ width: '100%', height: '100%', backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography variant="caption" sx={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.62rem' }}>No Image</Typography>
-                      </Box>
-                    )}
-                    <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(229,57,53,0.95)', py: 0.5, px: 1.2 }}>
-                      <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.65rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }} dangerouslySetInnerHTML={{ __html: title || '6@0M7?  2G&A' }} />
-                    </Box>
-                  </Box>
-                  <Box sx={{ height: '2.5px', backgroundColor: '#e53935' }} />
-                  <Box sx={{ p: 1.2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0.8 }}>
-                      <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.78rem', lineHeight: 1.3, flexGrow: 1 }} dangerouslySetInnerHTML={{ __html: title || '鈰嗣�鈰啤�鈰獅倏鈰� 鈰耜�鈰舟�' }} />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, border: '1px solid #e53935', borderRadius: '16px', px: 0.7, py: 0.15, flexShrink: 0, backgroundColor: '#ffffff' }}>
-                        <ThumbUpOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
-                        <ChatBubbleOutline sx={{ fontSize: '0.62rem', color: '#e53935' }} />
-                        <ShareOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
-                        <SyncOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
-                      </Box>
-                    </Box>
-                    <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.68rem', lineHeight: 1.6, display: 'block' }} dangerouslySetInnerHTML={{ __html: body || '鈰𨫼�鈰颴�鈰��鈺� 鈰耜�鈰舟�' }} />
-                    <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.58rem', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
-                      =R {publishMode === 'schedule' && scheduleTime ? `Scheduled ${scheduleTime}` : 'Just now'}
-                    </Typography>
-                  </Box>
+                <Box sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+                  {(() => {
+                    const tLower = type.toLowerCase().trim();
+                    const isFullScreen = ['image', 'image ad', 'video', 'reel'].includes(tLower);
+                    const isGallery = tLower.includes('gallery');
+
+                    if (isGallery) {
+                      return (
+                        <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', backgroundColor: '#000', display: 'flex', flexDirection: 'column', scrollSnapType: 'y mandatory', flexGrow: 1 }}>
+                          {galleryItems.length > 0 ? galleryItems.map((item, idx) => (
+                            <Box key={idx} sx={{ width: '100%', height: '100%', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                              <Box component="img" src={item.url} alt={`Gallery ${idx}`} sx={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                            </Box>
+                          )) : (
+                            <Box sx={{ width: '100%', height: '100%', backgroundColor: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>No Gallery Images</Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      );
+                    }
+
+                    if (isFullScreen) {
+                      return (
+                        <Box sx={{ width: '100%', height: '100%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}>
+                          {imageUrl ? (
+                            <Box component="img" src={imageUrl} alt="Full Screen Banner" sx={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                          ) : (
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>No Media Content</Typography>
+                          )}
+                        </Box>
+                      );
+                    }
+
+                    // Default: Standard, BulletPost, StandardLink
+                    return (
+                      <>
+                        <Box sx={{ position: 'relative', width: '100%', height: '40%', flexShrink: 0, overflow: 'hidden' }}>
+                          {imageUrl ? (
+                            <Box component="img" src={imageUrl} alt="Banner" sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          ) : (
+                            <Box sx={{ width: '100%', height: '100%', backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Typography variant="caption" sx={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.62rem' }}>No Image</Typography>
+                            </Box>
+                          )}
+                          <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(229,57,53,0.95)', py: 0.5, px: 1.2 }}>
+                            <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.65rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }} dangerouslySetInnerHTML={{ __html: title || 'News Title' }} />
+                          </Box>
+                        </Box>
+                        <Box sx={{ height: '2.5px', backgroundColor: '#e53935', flexShrink: 0 }} />
+                        <Box sx={{ p: 1.2, display: 'flex', flexDirection: 'column', gap: 1, flexGrow: 1, overflowY: 'auto' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0.8 }}>
+                            <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.78rem', lineHeight: 1.3, flexGrow: 1 }} dangerouslySetInnerHTML={{ __html: title || 'Headline Title' }} />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4, border: '1px solid #e53935', borderRadius: '16px', px: 0.7, py: 0.15, flexShrink: 0, backgroundColor: '#ffffff' }}>
+                              <ThumbUpOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
+                              <ChatBubbleOutline sx={{ fontSize: '0.62rem', color: '#e53935' }} />
+                              <ShareOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
+                              <SyncOutlined sx={{ fontSize: '0.62rem', color: '#e53935' }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.68rem', lineHeight: 1.6, display: 'block' }} dangerouslySetInnerHTML={{ __html: body || 'News Body Content' }} />
+                          <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.58rem', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
+                            ⏱ {publishMode === 'schedule' && scheduleTime ? `Scheduled ${scheduleTime}` : 'Just now'}
+                          </Typography>
+                        </Box>
+                      </>
+                    );
+                  })()}
                 </Box>
                 {/* Home Indicator */}
                 <Box sx={{ width: '80px', height: '3px', backgroundColor: '#999999', borderRadius: '2px', position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)' }} />
@@ -1680,7 +1721,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         {/* Top Dropdowns Grid */}
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
           {/* Language Selection (Single Select Dropdown) */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={3} sx={{ display: 'none' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <TextField
                 select
@@ -2533,41 +2574,93 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     />
                   </Box>
                 ) : (
-                  <Box>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label={isImageOrGalleryType ? t.lblImageTitle.replace('*', '').trim() : t.lblImageTitle}
-                      placeholder={t.phImageTitle}
-                      value={imageTitle}
-                      onChange={(e) => {
-                        setImageTitle(e.target.value);
-                        if (errors.imageTitle) setErrors((prev) => { const n = { ...prev }; delete n.imageTitle; return n; });
-                      }}
-                      error={!!errors.imageTitle}
-                      helperText={errors.imageTitle || ''}
+                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        disabled={!showImageTitle}
+                        label={isImageOrGalleryType ? t.lblImageTitle.replace('*', '').trim() : t.lblImageTitle}
+                        placeholder={t.phImageTitle}
+                        value={imageTitle}
+                        onChange={(e) => {
+                          setImageTitle(e.target.value);
+                          if (errors.imageTitle) setErrors((prev) => { const n = { ...prev }; delete n.imageTitle; return n; });
+                        }}
+                        error={!!errors.imageTitle}
+                        helperText={errors.imageTitle || ''}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            color: isDark ? '#ffffff' : '#1c1445',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                            borderRadius: '10px',
+                            '& fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                            '&.Mui-focused fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                          },
+                          '& .MuiInputLabel-root': { color: errors.imageTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
+                          '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: countWords(imageTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                          display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(imageTitle) > 10 ? 700 : 400,
+                        }}
+                      >
+                        {t.wordCount(countWords(imageTitle), 10)}
+                      </Typography>
+                    </Box>
+
+                    <Box
                       sx={{
-                        '& .MuiOutlinedInput-root': {
-                          color: isDark ? '#ffffff' : '#1c1445',
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
-                          borderRadius: '10px',
-                          '& fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
-                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
-                          '&.Mui-focused fieldset': { borderColor: errors.imageTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
-                        },
-                        '& .MuiInputLabel-root': { color: errors.imageTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
-                        '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
-                      }}
-                    />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: countWords(imageTitle) > 10 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                        display: 'block', mt: 0.3, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(imageTitle) > 10 ? 700 : 400,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 1,
+                        px: 1.5,
+                        py: 0.6,
+                        height: '40px',
+                        borderRadius: '10px',
+                        border: showImageTitle
+                          ? (isDark ? '1px solid rgba(166,226,245,0.25)' : '1px solid rgba(28,20,69,0.2)')
+                          : (isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.15)'),
+                        backgroundColor: showImageTitle
+                          ? (isDark ? 'rgba(166,226,245,0.08)' : 'rgba(28,20,69,0.04)')
+                          : (isDark ? 'rgba(255,255,255,0.04)' : '#ffffff'),
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
                       }}
                     >
-                      {t.wordCount(countWords(imageTitle), 10)}
-                    </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          color: showImageTitle ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? '#d0caeb' : '#5c548a'),
+                        }}
+                      >
+                        {t.lblImageTitle.replace('*', '').trim()}
+                      </Typography>
+                      <Switch
+                        checked={showImageTitle}
+                        onChange={(e) => {
+                          setShowImageTitle(e.target.checked);
+                          if (!e.target.checked) setImageTitle('');
+                        }}
+                        size="small"
+                        inputProps={{ 'aria-label': t.lblImageTitle }}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: isDark ? '#a6e2f5' : '#1c1445',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                          },
+                        }}
+                      />
+                    </Box>
                   </Box>
                 )}
 

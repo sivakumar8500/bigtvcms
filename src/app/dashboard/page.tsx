@@ -45,6 +45,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
+import { useUserStore } from '@/core/storage/user-store';
 import { CreateNewsForm, CreateNewsFormData } from '@/modules/dashboard/components/CreateNewsForm';
 import { CategoryRepository } from '@/modules/category/repositories/category.repository';
 import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.repository';
@@ -275,7 +276,10 @@ export default function DashboardPage() {
   const router = useRouter();
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
+  const { user } = useUserStore();
   const t = translations[language] || translations.en;
+  
+  const isAdmin = user?.role === 'admin';
 
   const isDark = mode === 'dark';
 
@@ -1138,6 +1142,7 @@ export default function DashboardPage() {
                 videoSource: (editingPost as any).videoSource || (editingPost as any).video_platform || (editingPost as any).video_source || '',
                 videoUrl: (editingPost as any).videoUrl || (editingPost as any).video_url || (editingPost as any).video_link || (editingPost as any).videoLink || '',
                 subType: (editingPost as any).subType || (editingPost as any).sub_type || (editingPost.type === 'BulletPost' ? 'BulletPost' : ''),
+                galleryImages: editingPost.gallery || (editingPost as any).galleryImages || (editingPost as any).gallery_images || [],
                 bulletPoints: (editingPost as any).bulletPoints || (editingPost as any).bullet_points || (editingPost as any).bullets || [],
                 bullet_points: (editingPost as any).bulletPoints || (editingPost as any).bullet_points || (editingPost as any).bullets || [],
               }}
@@ -1336,46 +1341,93 @@ export default function DashboardPage() {
                       </Box>
 
                       {/* Phone Scroll Body */}
-                      <Box sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                        {/* Banner Image + Red Overlay Title */}
-                        <Box sx={{ position: 'relative', width: '100%', height: '160px', overflow: 'hidden' }}>
-                          <Box component="img" src={viewingPost.image} alt={viewingPost.title} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(229,57,53,0.95)', py: 0.6, px: 1.5 }}>
-                            <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.72rem', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                              {viewingPost.title}
-                            </Typography>
-                          </Box>
-                        </Box>
+                      {/* Phone Scroll Body */}
+                      <Box sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+                        {(() => {
+                          const typeString = String(viewingPost.subType || (viewingPost as any).sub_type || viewingPost.type || '');
+                          const tLower = typeString.toLowerCase().trim();
+                          const isFullScreen = ['image', 'image ad', 'video', 'reel'].includes(tLower);
+                          const isGallery = tLower.includes('gallery');
 
-                        {/* Red separator */}
-                        <Box sx={{ height: '3px', backgroundColor: '#e53935' }} />
+                          if (isGallery) {
+                            const galleryImgs = viewingPost.gallery || [];
+                            return (
+                              <Box sx={{ width: '100%', height: '100%', overflowY: 'auto', backgroundColor: '#000', display: 'flex', flexDirection: 'column', scrollSnapType: 'y mandatory', flexGrow: 1 }}>
+                                {galleryImgs.length > 0 ? galleryImgs.map((imgUrl: string, idx: number) => (
+                                  <Box key={idx} sx={{ width: '100%', height: '100%', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                                    <Box component="img" src={imgUrl} alt={`Gallery ${idx}`} sx={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                                  </Box>
+                                )) : (
+                                  <Box sx={{ width: '100%', height: '100%', backgroundColor: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}>
+                                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>No Gallery Images</Typography>
+                                  </Box>
+                                )}
+                              </Box>
+                            );
+                          }
 
-                        {/* Headline + Action Pill */}
-                        <Box sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
-                            <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.85rem', lineHeight: 1.3, flexGrow: 1 }}>
-                              {viewingPost.title}
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #e53935', borderRadius: '20px', px: 0.8, py: 0.2, flexShrink: 0, backgroundColor: '#ffffff' }}>
-                              <Box component="span" sx={{ fontSize: '0.68rem' }}>👍</Box>
-                              <Box component="span" sx={{ fontSize: '0.68rem' }}>💬</Box>
-                              <Box component="span" sx={{ fontSize: '0.68rem' }}>📤</Box>
-                              <Box component="span" sx={{ fontSize: '0.68rem' }}>🔄</Box>
-                            </Box>
-                          </Box>
+                          if (isFullScreen) {
+                            return (
+                              <Box sx={{ width: '100%', height: '100%', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}>
+                                {viewingPost.image ? (
+                                  <Box component="img" src={viewingPost.image} alt="Full Screen Media" sx={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                                ) : (
+                                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>No Media Content</Typography>
+                                )}
+                              </Box>
+                            );
+                          }
 
-                          {/* Body text */}
-                          <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.76rem', lineHeight: 1.6, display: 'block', whiteSpace: 'pre-wrap' }}>
-                            {formatDisplayContent(viewingPost)}
-                          </Typography>
+                          // Default standard post layout
+                          return (
+                            <>
+                              {/* Banner Image + Red Overlay Title */}
+                              <Box sx={{ position: 'relative', width: '100%', height: '40%', flexShrink: 0, overflow: 'hidden' }}>
+                                {viewingPost.image ? (
+                                  <Box component="img" src={viewingPost.image} alt={viewingPost.title} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                ) : (
+                                  <Box sx={{ width: '100%', height: '100%', backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Typography variant="caption" sx={{ color: 'rgba(0,0,0,0.3)', fontSize: '0.62rem' }}>No Image</Typography>
+                                  </Box>
+                                )}
+                                <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(229,57,53,0.95)', py: 0.6, px: 1.5 }}>
+                                  <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.72rem', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                                    {viewingPost.title}
+                                  </Typography>
+                                </Box>
+                              </Box>
 
-                          {/* Timestamp */}
-                          <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.62rem', display: 'flex', alignItems: 'center', gap: 0.4, mt: 0.5 }}>
-                            🕒 {viewingPost.date} · {viewingPost.time}
-                          </Typography>
-                        </Box>
+                              {/* Red separator */}
+                              <Box sx={{ height: '3px', backgroundColor: '#e53935', flexShrink: 0 }} />
+
+                              {/* Headline + Action Pill */}
+                              <Box sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1.5, flexGrow: 1, overflowY: 'auto' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+                                  <Typography sx={{ color: '#e53935', fontWeight: 800, fontSize: '0.85rem', lineHeight: 1.3, flexGrow: 1 }}>
+                                    {viewingPost.title}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #e53935', borderRadius: '20px', px: 0.8, py: 0.2, flexShrink: 0, backgroundColor: '#ffffff' }}>
+                                    <Box component="span" sx={{ fontSize: '0.68rem' }}>👍</Box>
+                                    <Box component="span" sx={{ fontSize: '0.68rem' }}>💬</Box>
+                                    <Box component="span" sx={{ fontSize: '0.68rem' }}>📤</Box>
+                                    <Box component="span" sx={{ fontSize: '0.68rem' }}>🔄</Box>
+                                  </Box>
+                                </Box>
+
+                                {/* Body text */}
+                                <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.76rem', lineHeight: 1.6, display: 'block', whiteSpace: 'pre-wrap' }}>
+                                  {formatDisplayContent(viewingPost)}
+                                </Typography>
+
+                                {/* Timestamp */}
+                                <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.62rem', display: 'flex', alignItems: 'center', gap: 0.4, mt: 0.5 }}>
+                                  🕒 {viewingPost.date} · {viewingPost.time}
+                                </Typography>
+                              </Box>
+                            </>
+                          );
+                        })()}
                       </Box>
-
                       {/* Home Indicator */}
                       <Box sx={{ width: '100px', height: '4px', backgroundColor: '#999999', borderRadius: '2px', position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)' }} />
                     </Box>
@@ -1448,23 +1500,25 @@ export default function DashboardPage() {
                   </Button>
 
                   {/* Delete button */}
-                  <Button
-                    id="bulk-delete-btn"
-                    variant="contained"
-                    size="small"
-                    startIcon={<Delete />}
-                    onClick={handleBulkDelete}
-                    sx={{
-                      borderRadius: '10px',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: '0.82rem',
-                      backgroundColor: '#f44336',
-                      '&:hover': { backgroundColor: '#d32f2f' },
-                    }}
-                  >
-                    {t.bulkDelete}
-                  </Button>
+                  {!isAdmin && (
+                    <Button
+                      id="bulk-delete-btn"
+                      variant="contained"
+                      size="small"
+                      startIcon={<Delete />}
+                      onClick={handleBulkDelete}
+                      sx={{
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '0.82rem',
+                        backgroundColor: '#f44336',
+                        '&:hover': { backgroundColor: '#d32f2f' },
+                      }}
+                    >
+                      {t.bulkDelete}
+                    </Button>
+                  )}
 
                   {/* Clear selection */}
                   <Tooltip title={t.bulkClear}>

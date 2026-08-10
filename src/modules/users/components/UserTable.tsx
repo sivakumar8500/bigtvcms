@@ -10,6 +10,7 @@ import {
   Edit,
 } from '@mui/icons-material';
 import { User } from '../domain/user.model';
+import { useUserStore } from '@/core/storage/user-store';
 
 const avatarColors = [
   '#00bcd4', '#4caf50', '#ff9800', '#e91e63', '#9c27b0', '#3f51b5'
@@ -26,6 +27,35 @@ interface UserTableProps {
   isDark: boolean;
 }
 
+const getRoleStyles = (role: string | undefined, isDark: boolean) => {
+  const normalizedRole = role || 'creator';
+  
+  const colors: Record<string, string> = {
+    superadmin: '#e91e63',
+    admin: '#9c27b0',
+    epaper_creator: '#4caf50',
+    movie_creator: '#ff9800',
+    notification_creator: '#3f51b5',
+    creator: '#00bcd4',
+  };
+
+  const hexColor = colors[normalizedRole] || colors.creator;
+  
+  // convert hex to rgb for rgba usage
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : '0,188,212';
+  };
+  
+  const rgb = hexToRgb(hexColor);
+  
+  return {
+    backgroundColor: isDark ? `rgba(${rgb},0.15)` : `rgba(${rgb},0.1)`,
+    color: hexColor,
+    borderColor: `${hexColor}44`,
+  };
+};
+
 export const UserTable: React.FC<UserTableProps> = ({
   paginatedData,
   page,
@@ -37,6 +67,8 @@ export const UserTable: React.FC<UserTableProps> = ({
   isDark,
 }) => {
   const [showPasswords, setShowPasswords] = useState<Record<number, boolean>>({});
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
 
   const togglePasswordVisibility = (userId: number) => {
     setShowPasswords((prev) => ({
@@ -181,14 +213,8 @@ export const UserTable: React.FC<UserTableProps> = ({
                     fontWeight: 600,
                     fontSize: '0.72rem',
                     textTransform: 'capitalize',
-                    backgroundColor: user.role === 'superadmin'
-                      ? (isDark ? 'rgba(233,30,99,0.15)' : 'rgba(233,30,99,0.1)')
-                      : user.role === 'admin'
-                      ? (isDark ? 'rgba(156,39,176,0.15)' : 'rgba(156,39,176,0.1)')
-                      : (isDark ? 'rgba(0,188,212,0.15)' : 'rgba(0,188,212,0.1)'),
-                    color: user.role === 'superadmin' ? '#e91e63' : user.role === 'admin' ? '#9c27b0' : '#00bcd4',
                     border: '1px solid',
-                    borderColor: user.role === 'superadmin' ? '#e91e6344' : user.role === 'admin' ? '#9c27b044' : '#00bcd444',
+                    ...getRoleStyles(user.role, isDark),
                   }}
                 />
               </Box>
@@ -237,20 +263,22 @@ export const UserTable: React.FC<UserTableProps> = ({
                 >
                   <Edit sx={{ fontSize: '1.15rem' }} />
                 </IconButton>
-                <IconButton
-                  size="small"
-                  aria-label="Delete creator"
-                  onClick={() => handleDeleteClick(user.userId)}
-                  sx={{
-                    color: '#f44336',
-                    backgroundColor: 'rgba(244,67,54,0.08)',
-                    borderRadius: '8px',
-                    p: 0.6,
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
-                  }}
-                >
-                  <Delete sx={{ fontSize: '1.15rem' }} />
-                </IconButton>
+                {!isAdmin && (
+                  <IconButton
+                    size="small"
+                    aria-label="Delete creator"
+                    onClick={() => handleDeleteClick(user.userId)}
+                    sx={{
+                      color: '#f44336',
+                      backgroundColor: 'rgba(244,67,54,0.08)',
+                      borderRadius: '8px',
+                      p: 0.6,
+                      '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
+                    }}
+                  >
+                    <Delete sx={{ fontSize: '1.15rem' }} />
+                  </IconButton>
+                )}
               </Box>
             </Box>
             {idx < paginatedData.length - 1 && (

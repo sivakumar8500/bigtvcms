@@ -48,6 +48,7 @@ import { Loader } from '@/shared/components/Loader';
 import { EpaperRepository } from '@/modules/epaper/repositories/epaper.repository';
 import { EpaperDto } from '@/modules/epaper/dto/epaper.dto';
 import { UploadService } from '@/modules/media/services/upload.service';
+import { useUserStore } from '@/core/storage/user-store';
 
 const translations = {
   en: {
@@ -216,8 +217,10 @@ const epaperColors = [
 export default function EpapersPage() {
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
+  const { user } = useUserStore();
   const isDark = mode === 'dark';
   const t = translations[language as keyof typeof translations] || translations.en;
+  const isAdmin = user?.role === 'admin';
 
   const [epapers, setEpapers] = useState<EpaperDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -861,9 +864,11 @@ export default function EpapersPage() {
                           <IconButton size="small" onClick={() => handleEditClick(item)} sx={{ color: isDark ? '#a6e2f5' : '#1c1445', mr: 0.5 }}>
                             <Edit fontSize="small" />
                           </IconButton>
-                          <IconButton size="small" onClick={() => handleDelete(item.id)} sx={{ color: '#ef5350' }}>
-                            <Delete fontSize="small" />
-                          </IconButton>
+                          {!isAdmin && (
+                            <IconButton size="small" onClick={() => handleDelete(item.id)} sx={{ color: '#ef5350' }}>
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          )}
                         </Box>
                       </Box>
                       <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} />

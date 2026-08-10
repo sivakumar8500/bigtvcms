@@ -8,6 +8,7 @@ import {
   Edit,
 } from '@mui/icons-material';
 import { Category } from '../domain/category.model';
+import { useUserStore } from '@/core/storage/user-store';
 
 const categoryColors = [
   '#7c6df5', '#f5a623', '#4fc3f7', '#66bb6a',
@@ -39,6 +40,9 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
   isDark,
   language,
 }) => {
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
+
   const colStyle = (flex: number) => ({
     flex,
     display: 'flex',
@@ -208,19 +212,21 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                 >
                   <Edit sx={{ fontSize: '1.15rem' }} />
                 </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeleteClick(cat.categoryId)}
-                  sx={{
-                    color: '#f44336',
-                    backgroundColor: 'rgba(244,67,54,0.08)',
-                    borderRadius: '8px',
-                    p: 0.6,
-                    '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
-                  }}
-                >
-                  <Delete sx={{ fontSize: '1.15rem' }} />
-                </IconButton>
+                {!isAdmin && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDeleteClick(cat.categoryId)}
+                    sx={{
+                      color: '#f44336',
+                      backgroundColor: 'rgba(244,67,54,0.08)',
+                      borderRadius: '8px',
+                      p: 0.6,
+                      '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
+                    }}
+                  >
+                    <Delete sx={{ fontSize: '1.15rem' }} />
+                  </IconButton>
+                )}
               </Box>
             </Box>
             {idx < paginatedData.length - 1 && (

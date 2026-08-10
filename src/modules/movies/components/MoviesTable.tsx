@@ -33,6 +33,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { MovieItem } from '../domain/movies.model';
 import { AdminContentService } from '@/modules/admin/content/services/admin-content.service';
+import { useUserStore } from '@/core/storage/user-store';
 import { EpisodeItem } from '@/modules/admin/content/domain/content.model';
 
 const movieColors = [
@@ -172,6 +173,8 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
   language,
 }) => {
   const router = useRouter();
+  const { user: currentUser } = useUserStore();
+  const isAdmin = currentUser?.role === 'admin';
 
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
   const [selectedMovie, setSelectedMovie] = useState<MovieItem | null>(null);
@@ -531,21 +534,23 @@ export const MoviesTable: React.FC<MoviesTableProps> = ({
                     </Tooltip>
 
                     {/* Delete Button */}
-                    <Tooltip title="Delete Content">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteClick(targetId)}
-                        sx={{
-                          color: '#f44336',
-                          backgroundColor: 'rgba(244,67,54,0.08)',
-                          borderRadius: '8px',
-                          p: 0.6,
-                          '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
-                        }}
-                      >
-                        <Delete sx={{ fontSize: '1.15rem' }} />
-                      </IconButton>
-                    </Tooltip>
+                    {!isAdmin && (
+                      <Tooltip title="Delete Content">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteClick(targetId)}
+                          sx={{
+                            color: '#f44336',
+                            backgroundColor: 'rgba(244,67,54,0.08)',
+                            borderRadius: '8px',
+                            p: 0.6,
+                            '&:hover': { backgroundColor: 'rgba(244,67,54,0.15)' },
+                          }}
+                        >
+                          <Delete sx={{ fontSize: '1.15rem' }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </Box>
                 </Box>
                 {idx < paginatedData.length - 1 && (

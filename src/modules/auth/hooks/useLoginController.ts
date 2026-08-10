@@ -57,7 +57,11 @@ export function useLoginController() {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token) {
-        router.replace('/dashboard');
+        const userRole = useUserStore.getState().user.role;
+        if (userRole === 'epaper_creator') router.replace('/epapers');
+        else if (userRole === 'notification_creator') router.replace('/notifications');
+        else if (userRole === 'movie_creator') router.replace('/movies');
+        else router.replace('/dashboard');
       }
     }
   }, [router]);
@@ -125,7 +129,7 @@ export function useLoginController() {
           localStorage.setItem('access_token', token);
         }
 
-        const userRole = res.creator?.role || res.role;
+        const userRole = res.creator?.user_type || res.creator?.role || res.user_type || res.role;
         useUserStore.getState().loginUser(form.username, {
           role: userRole,
           name: res.creator?.name || res.creator?.UserName || form.username,

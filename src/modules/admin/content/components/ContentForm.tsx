@@ -173,13 +173,14 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
   const { language } = useLanguageStore();
   const t = translations[language] || translations.en;
 
-  const [contentType, setContentType] = useState<ContentType>(initialContentType || 'movie');
+  const [contentType, setContentType] = useState<ContentType>(initialContentType || 'series');
 
   useEffect(() => {
     if (initialContentType) {
       setContentType(initialContentType);
     }
   }, [initialContentType]);
+  const [showImageTitle, setShowImageTitle] = useState<boolean>(false);
   const [seriesEpisodes, setSeriesEpisodes] = useState<EpisodeDraftItem[]>([]);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -210,6 +211,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
       duration: 120,
       subtitle: '',
       trailerId: '',
+      imageTitle: '',
     },
   });
 
@@ -229,6 +231,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
       rating: '8.0',
       status: 'published',
       isFeatured: false,
+      imageTitle: '',
     },
   });
 
@@ -397,10 +400,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
             },
           }}
         >
-          <Tab value="movie" label={t.movieTab} icon={<Movie />} iconPosition="start" />
           <Tab value="series" label={t.seriesTab} icon={<Tv />} iconPosition="start" />
           <Tab value="episode" label={t.episodeTab} icon={<OndemandVideo />} iconPosition="start" />
-          <Tab value="trailer" label={t.trailerTab} icon={<VideoLibrary />} iconPosition="start" />
         </Tabs>
       </Box>
 
@@ -454,6 +455,36 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
                   />
                 )}
               />
+            </Box>
+
+            {/* Image Title Toggle & Field */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <FormControlLabel
+                control={<Switch checked={showImageTitle} onChange={(e) => setShowImageTitle(e.target.checked)} color="primary" />}
+                label={<Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1c1445' }}>{t.enableImageTitle || 'Enable Image Title'}</Typography>}
+              />
+              {showImageTitle && (
+                <Controller
+                  name="imageTitle"
+                  control={movieForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label={t.imageTitle || 'Image Title'}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                          borderRadius: '10px',
+                        },
+                        '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
+                      }}
+                    />
+                  )}
+                />
+              )}
             </Box>
 
             {/* Description */}
@@ -528,8 +559,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
               />
             </Box>
 
-            {/* Genres & Languages Multi-Select Row */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5 }}>
+            {/* Genres Row */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr' }, gap: 2.5 }}>
               <Controller
                 name="genres"
                 control={movieForm.control}
@@ -562,37 +593,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
                 )}
               />
 
-              <Controller
-                name="languages"
-                control={movieForm.control}
-                render={({ field }) => (
-                  <FormControl size="small" fullWidth>
-                    <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.languages}</InputLabel>
-                    <Select
-                      multiple
-                      value={field.value || []}
-                      onChange={field.onChange}
-                      input={<OutlinedInput label={t.languages} />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((val) => (
-                            <Chip key={val} label={val} size="small" sx={{ borderRadius: '6px' }} />
-                          ))}
-                        </Box>
-                      )}
-                      sx={{
-                        color: isDark ? '#ffffff' : '#1c1445',
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                        borderRadius: '10px',
-                      }}
-                    >
-                      {LANGUAGE_OPTIONS.map((l) => (
-                        <MenuItem key={l} value={l}>{l}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
+
             </Box>
 
             {/* Rating, Age Restriction & Status Row */}
@@ -759,6 +760,36 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
               />
             </Box>
 
+            {/* Image Title Toggle & Field */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <FormControlLabel
+                control={<Switch checked={showImageTitle} onChange={(e) => setShowImageTitle(e.target.checked)} color="primary" />}
+                label={<Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1c1445' }}>{t.enableImageTitle || 'Enable Image Title'}</Typography>}
+              />
+              {showImageTitle && (
+                <Controller
+                  name="imageTitle"
+                  control={seriesForm.control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label={t.imageTitle || 'Image Title'}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                          borderRadius: '10px',
+                        },
+                        '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
+                      }}
+                    />
+                  )}
+                />
+              )}
+            </Box>
+
             {/* Description */}
             <Controller
               name="description"
@@ -831,8 +862,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
               />
             </Box>
 
-            {/* Genres & Languages Multi-Select Row */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5 }}>
+            {/* Genres Row */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr' }, gap: 2.5 }}>
               <Controller
                 name="genres"
                 control={seriesForm.control}
@@ -865,37 +896,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({ isDark = true, initial
                 )}
               />
 
-              <Controller
-                name="languages"
-                control={seriesForm.control}
-                render={({ field }) => (
-                  <FormControl size="small" fullWidth>
-                    <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.languages}</InputLabel>
-                    <Select
-                      multiple
-                      value={field.value || []}
-                      onChange={field.onChange}
-                      input={<OutlinedInput label={t.languages} />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((val) => (
-                            <Chip key={val} label={val} size="small" sx={{ borderRadius: '6px' }} />
-                          ))}
-                        </Box>
-                      )}
-                      sx={{
-                        color: isDark ? '#ffffff' : '#1c1445',
-                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                        borderRadius: '10px',
-                      }}
-                    >
-                      {LANGUAGE_OPTIONS.map((l) => (
-                        <MenuItem key={l} value={l}>{l}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
+
             </Box>
 
             {/* Rating, Age Restriction & Status Row */}
