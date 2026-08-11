@@ -21,6 +21,7 @@ const mockMoviesList = [
   {
     id: 1,
     movieId: 1,
+    contentType: 'series',
     title: 'Kalki 2898 AD',
     movieTitle: 'Kalki 2898 AD',
     titleEn: 'Kalki 2898 AD',
@@ -40,19 +41,21 @@ describe('MoviesPage Component', () => {
   it('renders Movies page with filter controls and Add Movie button', async () => {
     render(<MoviesPage />);
 
-    expect(screen.getByPlaceholderText('Filter by Movie Title...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Filter by Series Title...')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Filter by ID...')).toBeInTheDocument();
 
     const movieTitle = await screen.findByText('Kalki 2898 AD');
     expect(movieTitle).toBeInTheDocument();
   });
 
-  it('opens drawer when Add Movie button is clicked', async () => {
+  it('opens drawer when Add Series button is clicked', async () => {
     render(<MoviesPage />);
+    
+    await waitFor(() => {
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
 
-    await screen.findByText('Kalki 2898 AD');
-
-    const addBtn = screen.getByRole('button', { name: /Add Movie|మూవీని జోడించండి/i });
+    const addBtn = screen.getByRole('button', { name: /Add Series|సిరీస్‌ను జోడించండి/i });
 
     await act(async () => {
       fireEvent.click(addBtn);

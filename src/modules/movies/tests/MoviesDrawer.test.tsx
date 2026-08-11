@@ -90,7 +90,7 @@ describe('MoviesDrawer Component', () => {
       />
     );
 
-    const posterUploadText = screen.getByText('Click to upload movie poster');
+    const posterUploadText = screen.getByText('Drag & drop poster image or click to browse');
     fireEvent.click(posterUploadText);
   });
 });

@@ -43,6 +43,7 @@ import { useUserStore } from '@/core/storage/user-store';
 import { WpRepository } from '@/modules/news/repositories/wp.repository';
 import { Loader } from '@/shared/components/Loader';
 import { stripHtml } from '@/shared/utils/html.utils';
+import { CreateNewsForm } from '@/modules/dashboard/components/CreateNewsForm';
 
 // Translations for Web Articles Page (4 languages)
 const translations = {
@@ -351,8 +352,27 @@ export default function WebArticlesPage() {
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         <Header title={t.title} />
 
-        <Box sx={{ pt: 2, px: 3, pb: 4, flex: 1, overflowY: 'auto' }}>
-          {viewingPost ? (
+        <Box sx={{ flex: 1, overflowY: 'auto', p: (editingPost || viewingPost) ? 0 : 3, pt: (editingPost || viewingPost) ? 0 : 2, pb: (editingPost || viewingPost) ? 0 : 4 }}>
+          {editingPost ? (
+            <CreateNewsForm
+              onClose={() => setEditingPost(null)}
+              onSubmit={handleEditPost}
+              isDark={isDark}
+              language={language as any}
+              initialData={{
+                titleEn: editingPost.title || '',
+                bodyEn: editingPost.content || '',
+                categories: editingPost.categories || [],
+                tags: editingPost.tags || [],
+                location: editingPost.location || [],
+                type: editingPost.type || 'Standard',
+                imageUrl: editingPost.image || editingPost.imageUrl,
+                isWebPost: true,
+                webUrl: editingPost.web_post_url || editingPost.webUrl || editingPost.postUrl || '',
+                postUrl: editingPost.web_post_url || editingPost.webUrl || editingPost.postUrl || '',
+              }}
+            />
+          ) : viewingPost ? (
             <Box
               sx={{
                 backgroundColor: isDark ? 'rgba(38, 28, 86, 0.35)' : '#ffffff',
@@ -689,7 +709,12 @@ export default function WebArticlesPage() {
                               <Visibility fontSize="small" />
                             </IconButton>
                           </Tooltip>
-{/* Edit and Delete Actions Hidden */}
+                          <Tooltip title="Edit">
+                            <IconButton size="small" onClick={() => setEditingPost(post)}>
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+{/* Delete Action Hidden */}
                         </Grid>
                       </Grid>
                     );

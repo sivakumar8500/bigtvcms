@@ -173,7 +173,8 @@ export const useMoviesController = () => {
   };
 
   const deleteMovie = async (id: string | number) => {
-    await MoviesRepository.delete(id);
+    const item = movies.find((m) => m.id === id || m.movieId === id);
+    await MoviesRepository.delete(id, item?.contentType || 'movie');
     setMovies((prev) => prev.filter((m) => m.id !== id && m.movieId !== id));
   };
 

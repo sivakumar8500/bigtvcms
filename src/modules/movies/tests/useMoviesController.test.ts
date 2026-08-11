@@ -10,6 +10,7 @@ const mockMovies = [
   {
     id: 1,
     movieId: 1,
+    contentType: 'movie',
     title: 'Kalki 2898 AD',
     movieTitle: 'Kalki 2898 AD',
     titleEn: 'Kalki 2898 AD',
@@ -24,6 +25,7 @@ const mockMovies = [
   {
     id: 2,
     movieId: 2,
+    contentType: 'movie',
     title: 'Pushpa 2',
     movieTitle: 'Pushpa 2',
     titleEn: 'Pushpa 2',
@@ -49,6 +51,10 @@ describe('useMoviesController', () => {
   it('should fetch and set movies list on mount', async () => {
     const { result } = renderHook(() => useMoviesController());
 
+    await act(async () => {
+      result.current.setActiveTab('movie');
+    });
+
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -59,6 +65,10 @@ describe('useMoviesController', () => {
 
   it('should filter movies by title and id', async () => {
     const { result } = renderHook(() => useMoviesController());
+
+    await act(async () => {
+      result.current.setActiveTab('movie');
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -152,6 +162,10 @@ describe('useMoviesController', () => {
   it('should delete a movie', async () => {
     const { result } = renderHook(() => useMoviesController());
 
+    await act(async () => {
+      result.current.setActiveTab('movie');
+    });
+
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -160,7 +174,7 @@ describe('useMoviesController', () => {
       await result.current.deleteMovie(1);
     });
 
-    expect(MoviesRepository.delete).toHaveBeenCalledWith(1);
+    expect(MoviesRepository.delete).toHaveBeenCalledWith(1, expect.any(String));
   });
 
   it('should upload poster file via MoviesUploadService', async () => {

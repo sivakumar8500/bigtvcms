@@ -551,8 +551,14 @@ export class MoviesRepository {
     return updated;
   }
 
-  static async delete(id: string | number): Promise<boolean> {
-    const targetUrl = this.getTargetUrl(String(id));
+  static async delete(id: string | number, contentType?: string): Promise<boolean> {
+    let targetUrl = this.getTargetUrl(String(id));
+
+    if (contentType === 'series') {
+      const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://apidev.chotanews.com/api';
+      targetUrl = `${envBase.replace(/\/$/, '')}/admin/content?type=series&id=${id}`;
+    }
+
     try {
       await axios.delete(targetUrl);
     } catch (error) {

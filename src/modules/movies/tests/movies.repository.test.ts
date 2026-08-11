@@ -44,7 +44,7 @@ describe('MoviesRepository', () => {
 
     const result = await MoviesRepository.getAll();
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/admin\/content\/movie/), expect.anything());
+    expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringMatching(/\/api\/content\?type=series/), expect.anything());
     expect(result.length).toBeGreaterThan(0);
     expect(result[0].title).toBe('Nikhil Kumar');
     expect(result[0].rating).toBe(8.8);

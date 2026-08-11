@@ -25,6 +25,7 @@ import {
   ChatBubbleOutline,
   ShareOutlined,
   SyncOutlined,
+  AutoAwesome,
 } from '@mui/icons-material';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { apiClient } from '@/core/api/api-client';
@@ -696,6 +697,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -2676,16 +2678,57 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   isDark={isDark}
                   minHeight="220px"
                 />
-                {/* Body word counter */}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                    display: 'block', mt: -1.5, textAlign: 'right', fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
-                  }}
-                >
-                  {t.wordCount(countWords(body), 50)}
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    disabled={isSummarizing || !stripHtml(body).trim()}
+                    onClick={async () => {
+                      setIsSummarizing(true);
+                      try {
+                        const res = await fetch('https://apidev.chotanews.com/summarize', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ content: stripHtml(body) })
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data && (data.summary || data.content)) {
+                            const newContent = data.summary || data.content;
+                            // Ensure the new content is formatted as HTML paragraph
+                            const htmlContent = newContent.startsWith('<') ? newContent : `<p>${newContent}</p>`;
+                            setBody(htmlContent);
+                          }
+                        }
+                      } catch (e) {
+                        console.error('Summarize error:', e);
+                      } finally {
+                        setIsSummarizing(false);
+                      }
+                    }}
+                    startIcon={<AutoAwesome fontSize="small" />}
+                    sx={{
+                      textTransform: 'none',
+                      fontSize: '0.75rem',
+                      py: 0.3,
+                      borderColor: '#a6e2f5',
+                      color: '#a6e2f5',
+                      '&:hover': { borderColor: '#8cd5ed', backgroundColor: 'rgba(166,226,245,0.1)' },
+                      '&.Mui-disabled': { borderColor: 'rgba(166,226,245,0.3)', color: 'rgba(166,226,245,0.3)' }
+                    }}
+                  >
+                    {isSummarizing ? 'Generating...' : 'Regenerate (AI)'}
+                  </Button>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                      fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
+                    }}
+                  >
+                    {t.wordCount(countWords(body), 50)}
+                  </Typography>
+                </Box>
               </Box>
 
               {/* Image Uploader �� single for regular types, gallery grid for Gallery type */}
