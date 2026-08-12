@@ -98,6 +98,7 @@ describe('NewsRepository', () => {
       image_url: 'http://example.com/img.jpg',
       brandName: 'BigTV',
       brandLogo: 'www.logo.com',
+      lan: 'en',
     });
     expect(result).toEqual(createdResponse);
   });

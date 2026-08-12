@@ -47,6 +47,7 @@ export class NewsRepository {
           image_url: createdPost.image_url || dto.image_url || 'https://example.com/image.jpg',
           brandName: 'BigTV',
           brandLogo: 'www.logo.com',
+          lan: (dto as any).lan || (createdPost as any).lan || 'en',
         };
 
         await NotificationRepository.sendNotification(notificationPayload);
