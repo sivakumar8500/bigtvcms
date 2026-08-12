@@ -37,7 +37,7 @@ export class NewsRepository {
         const rawLink = createdPost.postUrl || dto.postUrl || (cleaned as any).webUrl || '';
         const link = rawLink.startsWith('http') || rawLink.startsWith('myapp://')
           ? rawLink
-          : `myapp://post/${createdPost.id}`;
+          : `https://app.chotanews.com/individualPage?postId=${createdPost.id}`;
 
         const notificationPayload: SendNotificationDto = {
           title: createdPost.notificationtitle || createdPost.title || dto.notificationtitle || dto.title || 'New Blog Published',

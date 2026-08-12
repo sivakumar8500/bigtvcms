@@ -52,8 +52,8 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
   const handlePostIdChange = (val: string) => {
     setPostId(val);
     if (errors.postId) setErrors((prev) => { const n = { ...prev }; delete n.postId; return n; });
-    if (!link || link.startsWith('myapp://post/')) {
-      setLink(val ? `myapp://post/${val}` : '');
+    if (!link || link.startsWith('https://app.chotanews.com/individualPage?postId=') || link.startsWith('myapp://post/')) {
+      setLink(val ? `https://app.chotanews.com/individualPage?postId=${val}` : '');
     }
   };
 
@@ -274,7 +274,7 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
               fullWidth
               size="small"
               label={`${t.lblLink || 'Link'} *`}
-              placeholder="e.g. myapp://post/125"
+              placeholder="e.g. https://app.chotanews.com/individualPage?postId=125"
               value={link}
               onChange={(e) => {
                 setLink(e.target.value);
