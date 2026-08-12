@@ -83,6 +83,7 @@ describe('SendNotificationForm', () => {
         image_url: 'https://example.com/image.jpg',
         brandName: 'BigTV',
         brandLogo: 'www.logo.com',
+        lan: 'en',
       });
       expect(mockOnSuccess).toHaveBeenCalled();
       expect(mockOnClose).toHaveBeenCalled();

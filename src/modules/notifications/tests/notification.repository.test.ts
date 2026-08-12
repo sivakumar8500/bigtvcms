@@ -19,6 +19,7 @@ describe('NotificationRepository', () => {
       image_url: 'https://example.com/image.jpg',
       brandName: 'BigTV',
       brandLogo: 'www.logo.com',
+      lan: 'en',
     };
 
     const mockResponse = {

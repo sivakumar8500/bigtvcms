@@ -6,6 +6,8 @@ export interface SendNotificationDto {
   image_url: string;
   brandName: string;
   brandLogo: string;
+  lan: string;
+  send_time?: string;
 }
 
 export interface SendNotificationResponse {

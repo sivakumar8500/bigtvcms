@@ -7,6 +7,10 @@ import {
   Button,
   IconButton,
   Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { Close, Send as SendIcon } from '@mui/icons-material';
 import { SendNotificationDto } from '../dto/notification.dto';
@@ -34,6 +38,8 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
   const [imageUrl, setImageUrl] = useState<string>('');
   const [brandName, setBrandName] = useState<string>('BigTV');
   const [brandLogo, setBrandLogo] = useState<string>('www.logo.com');
+  const [lan, setLan] = useState<string>('en');
+  const [sendTime, setSendTime] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -95,7 +101,12 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
       image_url: imageUrl.trim(),
       brandName: brandName.trim() || 'BigTV',
       brandLogo: brandLogo.trim() || 'www.logo.com',
+      lan,
     };
+
+    if (sendTime) {
+      payload.send_time = sendTime;
+    }
 
     try {
       await NotificationRepository.sendNotification(payload);
@@ -105,6 +116,8 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
       setPostId('');
       setLink('');
       setImageUrl('');
+      setLan('en');
+      setSendTime('');
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -294,6 +307,53 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
               }}
               error={!!errors.imageUrl}
               helperText={errors.imageUrl || ''}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                  borderRadius: '10px',
+                },
+                '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
+              }}
+            />
+          </Grid>
+
+          {/* Language Selection */}
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                  borderRadius: '10px',
+                },
+                '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
+              }}
+            >
+              <InputLabel>{t.lblLanguage || 'Language'}</InputLabel>
+              <Select
+                value={lan}
+                label={t.lblLanguage || 'Language'}
+                onChange={(e) => setLan(e.target.value)}
+              >
+                <MenuItem value="en">English (en)</MenuItem>
+                <MenuItem value="te">Telugu (te)</MenuItem>
+                <MenuItem value="hi">Hindi (hi)</MenuItem>
+                <MenuItem value="ml">Malayalam (ml)</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* Send Time */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              size="small"
+              type="datetime-local"
+              label={t.lblSendTime || 'Send Time'}
+              InputLabelProps={{ shrink: true }}
+              value={sendTime}
+              onChange={(e) => setSendTime(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: isDark ? '#ffffff' : '#1c1445',
