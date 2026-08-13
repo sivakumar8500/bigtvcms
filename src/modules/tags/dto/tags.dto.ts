@@ -12,10 +12,12 @@ export interface AiTagDto {
 }
 
 export interface CreateAiTagDto {
-  name_en: string;
-  name_te: string;
-  name_hi?: string;
-  name_ml: string;
+  translations: {
+    en: string;
+    te: string;
+    hi?: string;
+    ml: string;
+  };
   image_url?: string;
   device_id?: string;
 }
@@ -26,10 +28,12 @@ export interface CreateAiTagResponse {
 }
 
 export interface UpdateAiTagDto {
-  name_en: string;
-  name_te: string;
-  name_hi?: string;
-  name_ml: string;
+  translations: {
+    en: string;
+    te: string;
+    hi?: string;
+    ml: string;
+  };
   image_url?: string;
   device_id?: string;
   is_active?: boolean;

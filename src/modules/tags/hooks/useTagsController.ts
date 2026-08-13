@@ -170,7 +170,7 @@ export function useTagsController() {
         showToast('AI Tag updated successfully!', 'success');
         handleCloseDrawer();
       } else {
-        const createDto = TagMapper.toCreateDto(form);
+        const createDto = TagMapper.toCreateDto(form, uploadedImage || undefined);
         const response = await TagsRepository.create(createDto);
         const newDomainTag = TagMapper.toDomain(response.data);
         setRows((prev) => [newDomainTag, ...prev]);

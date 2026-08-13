@@ -24,10 +24,12 @@ export class TagMapper {
     imageUrl?: string
   ): CreateAiTagDto {
     return {
-      name_en: form.tagEn,
-      name_te: form.tagTe,
-      name_hi: form.tagHi,
-      name_ml: form.tagMl,
+      translations: {
+        en: form.tagEn,
+        te: form.tagTe,
+        hi: form.tagHi,
+        ml: form.tagMl,
+      },
       image_url: imageUrl || undefined,
     };
   }
@@ -38,10 +40,12 @@ export class TagMapper {
     isActive?: boolean
   ): UpdateAiTagDto {
     return {
-      name_en: form.tagEn,
-      name_te: form.tagTe,
-      name_hi: form.tagHi,
-      name_ml: form.tagMl,
+      translations: {
+        en: form.tagEn,
+        te: form.tagTe,
+        hi: form.tagHi,
+        ml: form.tagMl,
+      },
       image_url: imageUrl || undefined,
       is_active: isActive !== undefined ? isActive : true,
     };

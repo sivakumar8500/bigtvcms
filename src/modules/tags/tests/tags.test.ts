@@ -81,7 +81,7 @@ describe('Tag Mapper', () => {
       tagMl: 'കായിക വിനോദം',
     };
     const createDto = TagMapper.toCreateDto(form, 'https://example.com/tag.jpg');
-    expect(createDto.name_en).toBe('Sports');
+    expect(createDto.translations.en).toBe('Sports');
     expect(createDto.image_url).toBe('https://example.com/tag.jpg');
   });
 
@@ -92,7 +92,7 @@ describe('Tag Mapper', () => {
       tagMl: 'കായിക വിനോദം',
     };
     const updateDto = TagMapper.toUpdateDto(form, 'https://example.com/tag.jpg');
-    expect(updateDto.name_en).toBe('Sports');
+    expect(updateDto.translations.en).toBe('Sports');
     expect(updateDto.image_url).toBe('https://example.com/tag.jpg');
     expect(updateDto.is_active).toBe(true);
   });
@@ -331,9 +331,12 @@ describe('useTagsController hook', () => {
     });
 
     expect(TagsRepository.update).toHaveBeenCalledWith(91, {
-      name_en: 'Trending Updated',
-      name_te: 'ట్రెండింగ్',
-      name_ml: 'ട്രെൻഡിംഗ്',
+      translations: {
+        en: 'Trending Updated',
+        te: 'ట్రెండింగ్',
+        hi: undefined,
+        ml: 'ട്രെൻഡിംഗ്',
+      },
       image_url: undefined,
       is_active: true,
     });
