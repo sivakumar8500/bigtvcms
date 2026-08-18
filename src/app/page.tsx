@@ -20,10 +20,19 @@ export default function RootPage() {
 
     if (token) {
       setHasToken(true);
-      const userRole = useUserStore.getState().user.role;
+      const userRole = (useUserStore.getState().user.role || '').toLowerCase().trim();
       if (userRole === 'epaper_creator') router.replace('/epapers');
       else if (userRole === 'notification_creator') router.replace('/notifications');
       else if (userRole === 'movie_creator') router.replace('/movies');
+      else if (
+        userRole === 'adsdynapic' ||
+        userRole === 'ads_dynapic' ||
+        userRole === 'adsdynapix' ||
+        userRole === 'ads_dynapix' ||
+        userRole === 'adsdynapix_creator' ||
+        userRole === 'ads_dynapix_creator'
+      )
+        router.replace('/ads-dynapix');
       else router.replace('/dashboard');
     } else {
       setHasToken(false);

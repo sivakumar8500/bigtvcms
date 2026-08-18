@@ -150,10 +150,19 @@ export default function LanguageSelectionPage() {
   };
 
   const handleProceed = () => {
-    const userRole = useUserStore.getState().user.role;
+    const userRole = (useUserStore.getState().user.role || '').toLowerCase().trim();
     if (userRole === 'epaper_creator') router.push('/epapers');
     else if (userRole === 'notification_creator') router.push('/notifications');
     else if (userRole === 'movie_creator') router.push('/movies');
+    else if (
+      userRole === 'adsdynapic' ||
+      userRole === 'ads_dynapic' ||
+      userRole === 'adsdynapix' ||
+      userRole === 'ads_dynapix' ||
+      userRole === 'adsdynapix_creator' ||
+      userRole === 'ads_dynapix_creator'
+    )
+      router.push('/ads-dynapix');
     else router.push('/dashboard');
   };
 

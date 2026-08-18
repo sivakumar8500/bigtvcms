@@ -15,8 +15,8 @@ import {
   Web as WebIcon,
   Newspaper as NewspaperIcon,
   LocalMovies as LocalMoviesIcon,
-  VideoLibrary,
   Notifications as NotificationsIcon,
+  Campaign as CampaignIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -39,6 +39,7 @@ const sidebarTranslations = {
     menuAiTags: 'AiTags',
     menuReels: 'Reels',
     menuMovies: 'Movies',
+    menuAdsDynapix: 'Ads Dynapix',
     menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
   },
@@ -55,6 +56,7 @@ const sidebarTranslations = {
     menuAiTags: 'AiTags',
     menuReels: 'రీల్స్',
     menuMovies: 'సినిమాలు',
+    menuAdsDynapix: 'యాడ్స్ డైనాపిక్స్',
     menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
   },
@@ -71,6 +73,7 @@ const sidebarTranslations = {
     menuAiTags: 'AiTags',
     menuReels: 'रील्स',
     menuMovies: 'मूवीज',
+    menuAdsDynapix: 'ऐड्स डायनापिक्स',
     menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
   },
@@ -87,6 +90,7 @@ const sidebarTranslations = {
     menuAiTags: 'AiTags',
     menuReels: 'റീലുകൾ',
     menuMovies: 'സിനിമകൾ',
+    menuAdsDynapix: 'ആഡ്സ് ഡൈനാപിക്സ്',
     menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
   },
@@ -119,6 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuPostTypes, icon: <Article />, href: '/post-types' },
     { text: t.menuCreators, icon: <People />, href: '/creators' },
     { text: t.menuLanguages, icon: <LanguageIcon />, href: '/languages' },
+    { text: t.menuAdsDynapix, icon: <CampaignIcon />, href: '/ads-dynapix' },
     { text: t.menuSettings, icon: <Settings />, href: '/settings' },
   ];
 
@@ -129,11 +134,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const isEpaperCreator = userRole === 'epaper_creator';
   const isMovieCreator = userRole === 'movie_creator';
   const isNotificationCreator = userRole === 'notification_creator';
+  const isAdsDynapixCreator =
+    userRole === 'adsdynapic' ||
+    userRole === 'ads_dynapic' ||
+    userRole === 'adsdynapix' ||
+    userRole === 'ads_dynapix' ||
+    userRole === 'adsdynapix_creator' ||
+    userRole === 'ads_dynapix_creator';
 
   const creatorHrefs = ['/dashboard', '/reels', '/web-articles', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
+  const adsDynapixCreatorHrefs = ['/ads-dynapix'];
   
   const adminHrefs = [
     '/dashboard',
@@ -148,10 +161,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/post-types',
     '/creators',
     '/languages',
+    '/ads-dynapix',
     '/settings',
   ];
 
   const menuItems = allMenuItems.filter((item) => {
+    if (isAdsDynapixCreator) return adsDynapixCreatorHrefs.includes(item.href);
     if (isEpaperCreator) return epaperCreatorHrefs.includes(item.href);
     if (isMovieCreator) return movieCreatorHrefs.includes(item.href);
     if (isNotificationCreator) return notificationCreatorHrefs.includes(item.href);

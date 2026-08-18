@@ -36,6 +36,10 @@ const getRoleStyles = (role: string | undefined, isDark: boolean) => {
     epaper_creator: '#4caf50',
     movie_creator: '#ff9800',
     notification_creator: '#3f51b5',
+    adsdynapic: '#2563eb',
+    ads_dynapic: '#2563eb',
+    adsdynapix: '#2563eb',
+    ads_dynapix: '#2563eb',
     creator: '#00bcd4',
   };
 

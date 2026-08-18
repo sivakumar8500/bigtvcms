@@ -402,6 +402,7 @@ export const UserDrawer: React.FC<UserDrawerProps> = ({
               <MenuItem value="epaper_creator">{t.roleEpaperCreator || 'Epaper Creator'}</MenuItem>
               <MenuItem value="movie_creator">{t.roleMovieCreator || 'Movie Creator'}</MenuItem>
               <MenuItem value="notification_creator">{t.roleNotificationCreator || 'Notification Creator'}</MenuItem>
+              <MenuItem value="adsdynapic">{t.roleAdsDynapixCreator || 'Ads Dynapix Creator (adsdynapic)'}</MenuItem>
             </TextField>
           </Box>
 
