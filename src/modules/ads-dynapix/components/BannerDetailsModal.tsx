@@ -78,7 +78,7 @@ export const BannerDetailsModal: React.FC<BannerDetailsModalProps> = ({
               ))}
             </Box>
           ) : (
-            <Typography variant="caption" sx={{ color: isDark ? '#8d87b3' : '#9e9e9e', italic: true }}>
+            <Typography variant="caption" sx={{ color: isDark ? '#8d87b3' : '#9e9e9e', fontStyle: 'italic' }}>
               No horizontal banners configured
             </Typography>
           )}
@@ -112,7 +112,7 @@ export const BannerDetailsModal: React.FC<BannerDetailsModalProps> = ({
               ))}
             </Box>
           ) : (
-            <Typography variant="caption" sx={{ color: isDark ? '#8d87b3' : '#9e9e9e', italic: true }}>
+            <Typography variant="caption" sx={{ color: isDark ? '#8d87b3' : '#9e9e9e', fontStyle: 'italic' }}>
               No vertical banners configured
             </Typography>
           )}
