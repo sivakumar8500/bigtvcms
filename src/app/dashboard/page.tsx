@@ -1895,7 +1895,7 @@ export default function DashboardPage() {
                           }}
                         >
                           <Typography variant="caption" sx={{ color: rowColor, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.72rem' }}>
-                            {idx + 1 + (page - 1) * recordsPerPage}
+                            {post.id}
                           </Typography>
                         </Box>
                       </Box>
