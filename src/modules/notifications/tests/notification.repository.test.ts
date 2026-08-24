@@ -87,7 +87,7 @@ describe('NotificationRepository', () => {
       const res = await NotificationRepository.getNotifications(0, 20);
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://api.pravasamedia.com/api/v1/sendNotification',
+        'https://api.pravasamedia.com/api/v1/sendNotification/stats',
         {
           params: { skip: 0, take: 20 },
           headers: { 'Content-Type': 'application/json' },
@@ -116,29 +116,31 @@ describe('NotificationRepository', () => {
       });
     });
 
-    it('should map a list notification response with items and total correctly', async () => {
+    it('should map a list notification response with nested notifications items and total correctly', async () => {
       const mockListResponse = {
         data: {
           success: true,
           data: {
-            items: [
-              {
-                id: '1',
-                title: 'Test Title',
-                content: 'Test Content',
-                postId: 100,
-                link: 'link1',
-                imageUrl: 'img1',
-                status: 'PENDING',
-                totalTargeted: 50,
-                successCount: 40,
-                failureCount: 10,
-                createdAt: '2026-08-01',
-              },
-            ],
-            total: 15,
-            skip: 0,
-            take: 20,
+            notifications: {
+              items: [
+                {
+                  id: '1',
+                  title: 'Test Title',
+                  content: 'Test Content',
+                  postId: 100,
+                  link: 'link1',
+                  imageUrl: 'img1',
+                  status: 'PENDING',
+                  totalTargeted: 50,
+                  successCount: 40,
+                  failureCount: 10,
+                  createdAt: '2026-08-01',
+                },
+              ],
+              total: 15,
+              skip: 0,
+              take: 20,
+            },
           },
           timestamp: '2026-08-24T09:59:36.270Z',
         },

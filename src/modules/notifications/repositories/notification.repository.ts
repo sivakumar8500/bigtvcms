@@ -11,6 +11,10 @@ export class NotificationRepository {
     process.env.NEXT_PUBLIC_NOTIFICATION_API_URL ||
     'https://api.pravasamedia.com/api/v1/sendNotification';
 
+  private static readonly NOTIFICATION_STATS_API_URL =
+    process.env.NEXT_PUBLIC_NOTIFICATION_STATS_API_URL ||
+    'https://api.pravasamedia.com/api/v1/sendNotification/stats';
+
   static async sendNotification(payload: SendNotificationDto): Promise<SendNotificationResponse> {
     const response = await axios.post<SendNotificationResponse>(this.NOTIFICATION_API_URL, payload, {
       headers: {
@@ -24,7 +28,7 @@ export class NotificationRepository {
     skip: number = 0,
     take: number = 20
   ): Promise<GetNotificationsResponse> {
-    const response = await axios.get<any>(this.NOTIFICATION_API_URL, {
+    const response = await axios.get<any>(this.NOTIFICATION_STATS_API_URL, {
       params: { skip, take },
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +48,13 @@ export class NotificationRepository {
     let total = 0;
 
     if (raw.data) {
-      if (Array.isArray(raw.data)) {
+      if (raw.data.notifications) {
+        const notificationsObj = raw.data.notifications;
+        if (Array.isArray(notificationsObj.items)) {
+          items = notificationsObj.items.map(NotificationRepository.mapRawNotificationItem);
+          total = typeof notificationsObj.total === 'number' ? notificationsObj.total : items.length;
+        }
+      } else if (Array.isArray(raw.data)) {
         items = raw.data.map(NotificationRepository.mapRawNotificationItem);
         total = raw.data.length;
       } else if (Array.isArray(raw.data.items)) {
@@ -64,8 +74,8 @@ export class NotificationRepository {
       data: {
         items,
         total,
-        skip: typeof raw.data?.skip === 'number' ? raw.data.skip : skip,
-        take: typeof raw.data?.take === 'number' ? raw.data.take : take,
+        skip: typeof raw.data?.skip === 'number' ? raw.data.skip : (typeof raw.data?.notifications?.skip === 'number' ? raw.data.notifications.skip : skip),
+        take: typeof raw.data?.take === 'number' ? raw.data.take : (typeof raw.data?.notifications?.take === 'number' ? raw.data.notifications.take : take),
       },
       timestamp: raw.timestamp || new Date().toISOString(),
     };
