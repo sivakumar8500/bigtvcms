@@ -52,7 +52,7 @@ describe('NotificationRepository', () => {
     const res = await NotificationRepository.sendNotification(payload);
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      'http://192.168.70.251/api/v1/sendNotification',
+      'https://api.pravasamedia.com/api/v1/sendNotification/3e05643c-286a-4356-bdb6-be1805a39293/stats',
       payload,
       { headers: { 'Content-Type': 'application/json' } }
     );
