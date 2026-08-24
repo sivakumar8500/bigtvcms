@@ -10,6 +10,7 @@ function cleanPayload<T extends Record<string, any>>(dto: T): T {
   delete (clean as any).post_type;
   delete (clean as any).is_web_post;
   delete (clean as any).web_post_url;
+  delete (clean as any).sendNotification;
   return clean;
 }
 
@@ -30,7 +31,7 @@ export class NewsRepository {
     const cleaned = cleanPayload(dto);
     const createdPost = await apiClient.post<NewsPostDto, CreateNewsPostDto>('/news-posts', cleaned);
 
-    if (createdPost && createdPost.id) {
+    if (createdPost && createdPost.id && dto.sendNotification) {
       try {
         const rawContent = createdPost.content || dto.content || 'Read our latest article now';
         const cleanContent = rawContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || 'Read our latest article now';

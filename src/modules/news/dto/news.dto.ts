@@ -86,6 +86,7 @@ export interface CreateNewsPostDto {
   web_post_url?: string;
   device_id?: string;
   aitag_ids?: number[];
+  sendNotification?: boolean;
 }
 
 export interface UpdateNewsPostDto {

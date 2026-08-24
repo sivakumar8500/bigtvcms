@@ -41,5 +41,6 @@ export interface NewsPost {
   web_post_url?: string;
   createdAt?: string;
   updatedAt?: string;
+  sendNotification?: boolean;
 }
 

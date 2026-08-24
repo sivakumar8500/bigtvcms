@@ -183,6 +183,7 @@ export class NewsMapper {
       location_ids: (domain.locationIds ?? (domain as any).location_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (domain.aitagIds ?? (domain as any).aitag_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       isWebPost: isWebPostVal,
+      sendNotification: domain.sendNotification ?? (domain as any).sendNotification,
     };
   }
 

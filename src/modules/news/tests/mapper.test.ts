@@ -89,6 +89,7 @@ describe('NewsMapper', () => {
       aitagIds: [0],
       postType: 'Standard',
       isSticky: true,
+      sendNotification: true,
     };
 
     const createDto = NewsMapper.toCreateDto(domainPartial);
@@ -105,6 +106,7 @@ describe('NewsMapper', () => {
     expect(createDto.isStickyPost).toBe(true);
     expect(createDto.post_name).toBeUndefined();
     expect(createDto.post_type).toBeUndefined();
+    expect(createDto.sendNotification).toBe(true);
   });
 
   it('should preserve isWebPost and postUrl when set to true in CreateNewsPostDto and UpdateNewsPostDto', () => {

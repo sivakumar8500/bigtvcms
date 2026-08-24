@@ -886,6 +886,7 @@ export default function DashboardPage() {
       location_ids: Array.from(new Set((data.locationIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       aitag_ids: Array.from(new Set((data.aitagIds || data.aitag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       isWebPost: isWebPostVal,
+      sendNotification: Boolean(data.sendNotification),
     };
 
     let createdId = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 820700;

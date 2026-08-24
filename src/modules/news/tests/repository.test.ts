@@ -80,6 +80,7 @@ describe('NewsRepository', () => {
       category_ids: [1],
       location_ids: [1],
       post_type: 'Standard',
+      sendNotification: true,
     };
     const createdResponse = { ...createDto, id: 10, createdAt: '2026-07-22T05:01:00.000Z', updatedAt: '2026-07-22T05:01:00.000Z' };
     (apiClient.post as jest.Mock).mockResolvedValue(createdResponse);
@@ -88,7 +89,7 @@ describe('NewsRepository', () => {
 
     expect(apiClient.post).toHaveBeenCalledWith(
       '/news-posts',
-      expect.not.objectContaining({ post_name: expect.anything(), post_type: expect.anything() })
+      expect.not.objectContaining({ post_name: expect.anything(), post_type: expect.anything(), sendNotification: expect.anything() })
     );
     expect(NotificationRepository.sendNotification).toHaveBeenCalledWith({
       title: 'New Notification Title',
@@ -100,6 +101,54 @@ describe('NewsRepository', () => {
       brandLogo: 'www.logo.com',
       lan: 'en',
     });
+    expect(result).toEqual(createdResponse);
+  });
+
+  it('should create a new news post and NOT trigger notification if sendNotification is false or omitted', async () => {
+    const createDto = {
+      title: 'New Title 2',
+      notificationtitle: 'New Notification Title 2',
+      imagetitel: 'New Title 2',
+      content: 'New Content 2',
+      created: '2026-07-22T05:00:00.000Z',
+      totalLikes: 0,
+      totalViews: 0,
+      totalComments: 0,
+      image_url: 'http://example.com/img.jpg',
+      video_url: '',
+      video_platform: '',
+      gallery: [],
+      type: 'Standard',
+      totalShares: 0,
+      isReporter: false,
+      reportedBy: '',
+      categoryName: ['General'],
+      postUrl: 'myapp://post/11',
+      subType: '',
+      isStickyPost: false,
+      linkURLAndroid: '',
+      linkURLIos: '',
+      links: '',
+      isBookmarked: [],
+      postOrder: 0,
+      draft: false,
+      trash: false,
+      schedule: '2026-07-22T05:00:00.000Z',
+      language_id: 1,
+      category_ids: [1],
+      location_ids: [1],
+      sendNotification: false,
+    };
+    const createdResponse = { ...createDto, id: 11, createdAt: '2026-07-22T05:01:00.000Z', updatedAt: '2026-07-22T05:01:00.000Z' };
+    (apiClient.post as jest.Mock).mockResolvedValue(createdResponse);
+
+    const result = await NewsRepository.create(createDto);
+
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/news-posts',
+      expect.not.objectContaining({ sendNotification: expect.anything() })
+    );
+    expect(NotificationRepository.sendNotification).not.toHaveBeenCalled();
     expect(result).toEqual(createdResponse);
   });
 
