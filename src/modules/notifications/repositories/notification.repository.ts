@@ -9,7 +9,7 @@ import {
 export class NotificationRepository {
   private static readonly NOTIFICATION_API_URL =
     process.env.NEXT_PUBLIC_NOTIFICATION_API_URL ||
-    'https://api.pravasamedia.com/api/v1/sendNotification/3e05643c-286a-4356-bdb6-be1805a39293/stats';
+    'https://api.pravasamedia.com/api/v1/sendNotification';
 
   static async sendNotification(payload: SendNotificationDto): Promise<SendNotificationResponse> {
     const response = await axios.post<SendNotificationResponse>(this.NOTIFICATION_API_URL, payload, {

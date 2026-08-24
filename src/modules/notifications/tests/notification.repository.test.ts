@@ -52,7 +52,7 @@ describe('NotificationRepository', () => {
     const res = await NotificationRepository.sendNotification(payload);
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      'https://api.pravasamedia.com/api/v1/sendNotification/3e05643c-286a-4356-bdb6-be1805a39293/stats',
+      'https://api.pravasamedia.com/api/v1/sendNotification',
       payload,
       { headers: { 'Content-Type': 'application/json' } }
     );
@@ -87,7 +87,7 @@ describe('NotificationRepository', () => {
       const res = await NotificationRepository.getNotifications(0, 20);
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://api.pravasamedia.com/api/v1/sendNotification/3e05643c-286a-4356-bdb6-be1805a39293/stats',
+        'https://api.pravasamedia.com/api/v1/sendNotification',
         {
           params: { skip: 0, take: 20 },
           headers: { 'Content-Type': 'application/json' },
