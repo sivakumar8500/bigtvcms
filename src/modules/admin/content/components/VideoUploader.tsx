@@ -55,7 +55,7 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
           folder,
         });
       } catch (localErr) {
-        presignedRes = await axios.post('https://apidev.chotanews.com/movies/upload-url', {
+        presignedRes = await axios.post('https://api.chotanews.com/movies/upload-url', {
           file_name: file.name,
           content_type: file.type || 'video/mp4',
           folder,

@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://apidev.chotanews.com/:path*',
+        destination: 'https://api.chotanews.com/:path*',
       },
       {
         source: '/s3-proxy/:path*',

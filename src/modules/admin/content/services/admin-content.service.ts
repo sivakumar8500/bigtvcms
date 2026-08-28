@@ -94,7 +94,7 @@ export class AdminContentService {
       };
 
       const headers = this.getAuthHeaders();
-      const trailerUrl = 'https://apidev.chotanews.com/api/admin/content/trailer';
+      const trailerUrl = 'https://api.chotanews.com/api/admin/content/trailer';
 
       try {
         const response = await axios.post(trailerUrl, dto, { headers });
@@ -147,7 +147,7 @@ export class AdminContentService {
   }
 
   private static getSeriesTargetUrl(id?: string): string {
-    const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://apidev.chotanews.com/api';
+    const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.chotanews.com/api';
     const cleanBase = envBase.replace(/\/$/, '');
     let baseUrl = cleanBase.endsWith('/api')
       ? `${cleanBase}/admin/content/series`
@@ -198,7 +198,7 @@ export class AdminContentService {
   }
 
   private static getPublicSeriesTargetUrl(id?: string): string {
-    const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://apidev.chotanews.com/api';
+    const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.chotanews.com/api';
     const cleanBase = envBase.replace(/\/$/, '');
     let baseUrl = cleanBase.endsWith('/api')
       ? `${cleanBase}/content`
@@ -351,7 +351,7 @@ export class AdminContentService {
     // 3. Try fetching from remote API episode endpoints
     const headers = this.getAuthHeaders();
     for (const url of [
-      `https://apidev.chotanews.com/api/content?type=episode&series_id=${targetId}`,
+      `https://api.chotanews.com/api/content?type=episode&series_id=${targetId}`,
       `/api/content?type=episode&series_id=${targetId}`,
     ]) {
       try {
@@ -391,7 +391,7 @@ export class AdminContentService {
   }): Promise<EpisodeItem> {
     const targetSeriesId = payload.seriesId || payload.seasonId || 'series-101';
     const headers = this.getAuthHeaders();
-    const primaryUrl = `https://apidev.chotanews.com/api/admin/series/${targetSeriesId}/episodes`;
+    const primaryUrl = `https://api.chotanews.com/api/admin/series/${targetSeriesId}/episodes`;
 
     const dto = {
       episodeNumber: Number(payload.episodeNumber) || 0,
