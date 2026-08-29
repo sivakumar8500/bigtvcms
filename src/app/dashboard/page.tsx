@@ -372,13 +372,94 @@ export default function DashboardPage() {
   const [selectedAiTag, setSelectedAiTag] = React.useState('All');
   const [selectedStatus, setSelectedStatus] = React.useState('All');
   const [page, setPage] = React.useState(1);
-  const recordsPerPage = 10;
+  const [serverTotalPages, setServerTotalPages] = React.useState(1);
+  const recordsPerPage = 100;
 
   // API Data States
   const [apiCategories, setApiCategories] = React.useState<string[]>([]);
   const [apiPostTypes, setApiPostTypes] = React.useState<string[]>([]);
   const [apiLocations, setApiLocations] = React.useState<string[]>([]);
   const [apiAiTags, setApiAiTags] = React.useState<string[]>([]);
+
+  // Fetch News Posts for a specific page (100 items per API batch)
+  const fetchNewsPosts = React.useCallback((pageNumber: number = 1) => {
+    setLoading(true);
+    const skip = Math.max(0, pageNumber - 1) * 100;
+    NewsRepository.getAll(skip, 100)
+      .then((dtos) => {
+        if (Array.isArray(dtos)) {
+          const langMap: Record<number, string> = {
+            1: 'English',
+            2: 'Telugu',
+            3: 'Hindi',
+            4: 'Malayalam',
+          };
+          const mapped = dtos.map((item: any) => {
+            const postLang = item.language_id && langMap[item.language_id]
+              ? langMap[item.language_id]
+              : (language === 'te' ? 'Telugu' : language === 'hi' ? 'Hindi' : language === 'ml' ? 'Malayalam' : 'English');
+
+            // Extract categories properly (string, array of strings, or array of objects)
+            let catList: string[] = [];
+            const rawCat = item.categoryName || item.category_name || item.categories || item.category;
+            if (Array.isArray(rawCat)) {
+              catList = rawCat.map((c: any) => typeof c === 'object' ? (c.name || c.englishName || c.categoryName || String(c)) : String(c)).filter(Boolean);
+            } else if (typeof rawCat === 'string' && rawCat.trim()) {
+              catList = [rawCat.trim()];
+            }
+            if (catList.length === 0) catList = ['General'];
+
+            // Extract location name
+            const locName = item.state_name || item.location || item.stateName || item.statename || item.cityName || item.locationName || '';
+
+            // Extract AI tags / tags
+            const rawTags = item.aiTags || item.aitag_names || item.aitag_ids || item.aitagIds || item.aitags || item.tags || [];
+            let tagList: string[] = [];
+            if (Array.isArray(rawTags)) {
+              tagList = rawTags.map((t: any) => typeof t === 'object' ? (t.name || String(t)) : String(t)).filter(Boolean);
+            } else if (typeof rawTags === 'string' && rawTags.trim()) {
+              tagList = [rawTags.trim()];
+            }
+
+            return {
+              id: item.id || Math.floor(Math.random() * 100000),
+              title: item.title || 'Untitled',
+              content: item.content || '',
+              categories: catList,
+              language: postLang,
+              type: item.post_type || item.type || 'Standard',
+              views: item.totalViews || 0,
+              likes: item.totalLikes || 0,
+              image: item.image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=400',
+              date: item.schedule ? String(item.schedule).slice(0, 10) : (item.createdAt ? String(item.createdAt).slice(0, 10) : new Date().toISOString().slice(0, 10)),
+              time: item.schedule && String(item.schedule).includes('T') ? String(item.schedule).split('T')[1].slice(0, 5) : '12:00 PM',
+              location: locName,
+              aitag_ids: tagList,
+              aitagIds: tagList,
+              aiTags: tagList,
+              tags: tagList,
+              status: item.status || 'publish',
+              notificationTitle: item.notificationtitle || item.title || '',
+              imageTitle: item.imagetitel || item.title || '',
+            };
+          });
+
+          // Sort mapped API items by ID descending so newest posts appear first
+          mapped.sort((a: any, b: any) => b.id - a.id);
+          setPosts(mapped);
+
+          if (dtos.length === 100) {
+            setServerTotalPages((prev) => Math.max(prev, pageNumber + 1));
+          } else {
+            setServerTotalPages(pageNumber);
+          }
+        }
+      })
+      .catch((err) => console.error('Failed to fetch news posts:', err))
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [language]);
 
   // Fetch fresh API data matching current language
   React.useEffect(() => {
@@ -467,58 +548,12 @@ export default function DashboardPage() {
       .catch(() => {});
 
     // 5. Fetch News Posts API
-    NewsRepository.getAll(0, 100)
-      .then((dtos) => {
-        if (isMounted && Array.isArray(dtos)) {
-          const langMap: Record<number, string> = {
-            1: 'English',
-            2: 'Telugu',
-            3: 'Hindi',
-            4: 'Malayalam',
-          };
-          const mapped = dtos.map((item: any) => {
-            const postLang = item.language_id && langMap[item.language_id]
-              ? langMap[item.language_id]
-              : (language === 'te' ? 'Telugu' : language === 'hi' ? 'Hindi' : language === 'ml' ? 'Malayalam' : 'English');
-
-            const aitagIds = item.aitag_ids || item.aitagIds || item.aitags || [];
-            return {
-              id: item.id || Math.floor(Math.random() * 100000),
-              title: item.title || 'Untitled',
-              content: item.content || '',
-              categories: Array.isArray(item.categoryName) && item.categoryName.length > 0 ? item.categoryName : ['General'],
-              language: postLang,
-              type: item.post_type || item.type || 'Standard',
-              views: item.totalViews || 0,
-              likes: item.totalLikes || 0,
-              image: item.image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=400',
-              date: item.schedule ? String(item.schedule).slice(0, 10) : (item.createdAt ? String(item.createdAt).slice(0, 10) : new Date().toISOString().slice(0, 10)),
-              time: item.schedule && String(item.schedule).includes('T') ? String(item.schedule).split('T')[1].slice(0, 5) : '12:00 PM',
-              location: '',
-              aitag_ids: aitagIds,
-              aitagIds: aitagIds,
-              aiTags: aitagIds,
-              tags: item.tags || aitagIds,
-              notificationTitle: item.notificationtitle || item.title || '',
-              imageTitle: item.imagetitel || item.title || '',
-            };
-          });
-
-          // Sort mapped API items by ID descending so newest posts appear first
-          mapped.sort((a: any, b: any) => b.id - a.id);
-
-          setPosts(mapped);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+    fetchNewsPosts(1);
 
     return () => {
       isMounted = false;
     };
-  }, [language]);
+  }, [language, fetchNewsPosts]);
 
   // Date helper — returns YYYY-MM-DD string for offset days from today
   const dateOffset = (days: number) => {
@@ -578,57 +613,60 @@ export default function DashboardPage() {
   // Filter logic
   const filteredData = React.useMemo(() => {
     return posts.filter((post) => {
+      const q = searchQuery.toLowerCase().trim();
+      const cleanTitle = (post.title || '').toLowerCase();
+      const cleanContent = stripHtml(post.content || '').toLowerCase();
+      const rawContent = (post.content || '').toLowerCase();
+      const idStr = String(post.id || '');
+      const catStr = (post.categories || []).join(' ').toLowerCase();
+
       const matchesSearch =
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        cleanTitle.includes(q) ||
+        cleanContent.includes(q) ||
+        rawContent.includes(q) ||
+        idStr.includes(q) ||
+        catStr.includes(q);
 
       const matchesCategory =
         selectedCategory === 'All' ||
-        post.categories.some((cat: string) => cat.includes(selectedCategory) || selectedCategory.includes(cat));
+        (post.categories || []).some((cat: string) => {
+          const catStrVal = String(cat).toLowerCase().trim();
+          const selStrVal = selectedCategory.toLowerCase().trim();
+          return catStrVal === selStrVal || catStrVal.includes(selStrVal) || selStrVal.includes(catStrVal);
+        });
 
       const matchesType =
         selectedType === 'All' ||
-        post.type.toLowerCase() === selectedType.toLowerCase();
+        (post.type || '').toLowerCase().includes(selectedType.toLowerCase()) ||
+        selectedType.toLowerCase().includes((post.type || '').toLowerCase());
 
-      // Date range filter
-      const postDate = post.date; // YYYY-MM-DD
-      let matchesDate = true;
-      if (selectedDateRange !== 'All') {
-        switch (selectedDateRange) {
-          case 'today':        matchesDate = postDate === todayStr; break;
-          case 'yesterday':   matchesDate = postDate === dateOffset(1); break;
-          case 'last3':       matchesDate = postDate >= dateOffset(3); break;
-          case 'last7':       matchesDate = postDate >= dateOffset(7); break;
-          case 'last15':      matchesDate = postDate >= dateOffset(15); break;
-          case 'last30':      matchesDate = postDate >= dateOffset(30); break;
-          case 'lastMonth2026': {
-            const d = new Date(postDate);
-            matchesDate = d.getFullYear() === 2026 && d.getMonth() === new Date().getMonth() - 1;
-            break;
-          }
-          case 'before2026':  matchesDate = postDate < '2026-01-01'; break;
-        }
-      }
-
-      // Location filter (posts with location field)
+      // Location filter
       const matchesLocation =
-        selectedLocation === 'All' || (post as any).location === selectedLocation;
+        selectedLocation === 'All' ||
+        !post.location ||
+        String(post.location).toLowerCase().includes(selectedLocation.toLowerCase()) ||
+        selectedLocation.toLowerCase().includes(String(post.location).toLowerCase());
 
       // AI Tag filter
       const matchesAiTag =
         selectedAiTag === 'All' ||
-        ((post as any).aiTags ?? []).includes(selectedAiTag);
+        ((post as any).aiTags ?? []).length === 0 ||
+        ((post as any).aiTags ?? []).some((tag: any) =>
+          String(tag).toLowerCase().includes(selectedAiTag.toLowerCase()) ||
+          selectedAiTag.toLowerCase().includes(String(tag).toLowerCase())
+        );
 
       // Status filter
       const postStatus = (post as any).status ?? 'publish';
       const matchesStatus =
-        selectedStatus === 'All' || postStatus === selectedStatus;
+        selectedStatus === 'All' ||
+        postStatus.toLowerCase() === selectedStatus.toLowerCase();
 
       return matchesSearch && matchesCategory && matchesType &&
-             matchesDate && matchesLocation && matchesAiTag && matchesStatus;
+             matchesLocation && matchesAiTag && matchesStatus;
     });
-  }, [searchQuery, selectedCategory, selectedType, selectedDateRange,
-      selectedLocation, selectedAiTag, selectedStatus, posts, todayStr]);
+  }, [searchQuery, selectedCategory, selectedType, selectedLocation, selectedAiTag, selectedStatus, posts]);
 
   // Reset page index on any filter change
   React.useEffect(() => {
@@ -650,15 +688,15 @@ export default function DashboardPage() {
     selectedType !== 'All' || selectedDateRange !== 'All' || selectedLocation !== 'All' ||
     selectedAiTag !== 'All' || selectedStatus !== 'All';
   
-  // Calculate index ranges
-  const totalPages = Math.ceil(filteredData.length / recordsPerPage) || 1;
+  // Calculate total pages and paginated data
+  const totalPages = Math.max(1, serverTotalPages);
   const paginatedData = React.useMemo(() => {
-    const startIdx = (page - 1) * recordsPerPage;
-    return filteredData.slice(startIdx, startIdx + recordsPerPage);
-  }, [page, filteredData]);
+    return filteredData;
+  }, [filteredData]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
+    fetchNewsPosts(value);
   };
 
   // ── Selection helpers ──
@@ -1622,35 +1660,7 @@ export default function DashboardPage() {
                   ))}
                 </TextField>
 
-                {/* 4. Date Range Filter */}
-                <TextField
-                  select
-                  value={selectedDateRange}
-                  onChange={(e) => setSelectedDateRange(e.target.value)}
-                  size="small"
-                  sx={{
-                    width: '125px',
-                    flexShrink: 0,
-                    '& .MuiOutlinedInput-root': {
-                      color: isDark ? '#ffffff' : '#1c1445',
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                      borderRadius: '10px',
-                      fontSize: '0.75rem',
-                      height: '34px',
-                    },
-                    '& .MuiSelect-select': { py: 0.6, px: 1, fontSize: '0.75rem' },
-                  }}
-                >
-                  <MenuItem value="All" sx={{ fontSize: '0.75rem' }}>{(t as any).dateAll}</MenuItem>
-                  <MenuItem value="today" sx={{ fontSize: '0.75rem' }}>{(t as any).dateToday}</MenuItem>
-                  <MenuItem value="yesterday" sx={{ fontSize: '0.75rem' }}>{(t as any).dateYesterday}</MenuItem>
-                  <MenuItem value="last3" sx={{ fontSize: '0.75rem' }}>{(t as any).dateLast3}</MenuItem>
-                  <MenuItem value="last7" sx={{ fontSize: '0.75rem' }}>{(t as any).dateLast7}</MenuItem>
-                  <MenuItem value="last15" sx={{ fontSize: '0.75rem' }}>{(t as any).dateLast15}</MenuItem>
-                  <MenuItem value="last30" sx={{ fontSize: '0.75rem' }}>{(t as any).dateLast30}</MenuItem>
-                  <MenuItem value="lastMonth2026" sx={{ fontSize: '0.75rem' }}>{(t as any).dateLastMonth2026}</MenuItem>
-                  <MenuItem value="before2026" sx={{ fontSize: '0.75rem' }}>{(t as any).dateBefore2026}</MenuItem>
-                </TextField>
+
 
                 {/* 5. Location Filter (API Data) */}
                 <TextField

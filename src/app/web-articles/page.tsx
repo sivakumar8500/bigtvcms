@@ -245,7 +245,8 @@ export default function WebArticlesPage() {
   // Selection
   const [selectedPostIds, setSelectedPostIds] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
-  const itemsPerPage = 10;
+  const [serverTotalPages, setServerTotalPages] = useState<number>(1);
+  const itemsPerPage = 100;
 
   // Snackbar feedback
   const [toastMessage, setToastMessage] = useState<string>('');
@@ -259,13 +260,18 @@ export default function WebArticlesPage() {
   };
 
   // Load articles & metadata
-  const fetchData = async () => {
+  const fetchData = async (pageNumber: number = 1) => {
     setLoading(true);
     try {
-      const wpPosts = await WpRepository.getPosts(1, 100);
+      const wpPosts = await WpRepository.getPosts(pageNumber, 100);
       setPosts(wpPosts);
       const uniqueCats = Array.from(new Set(wpPosts.map(p => p.categoryName || 'Uncategorized')));
-      setCategoriesList(uniqueCats);
+      setCategoriesList((prev) => Array.from(new Set([...prev, ...uniqueCats])));
+      if (wpPosts.length === 100) {
+        setServerTotalPages((prev) => Math.max(prev, pageNumber + 1));
+      } else {
+        setServerTotalPages(pageNumber);
+      }
     } catch (err: any) {
       console.error('Failed to load web articles:', err);
     } finally {
@@ -274,44 +280,64 @@ export default function WebArticlesPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(1);
   }, []);
 
   // Filtering logic
   const filteredPosts = useMemo(() => {
     return posts.filter((post) => {
-      const titleMatch = (post.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (post.content || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const q = searchTerm.toLowerCase().trim();
+      const cleanTitle = (post.title || '').toLowerCase();
+      const cleanContent = stripHtml(post.content || '').toLowerCase();
+      const rawContent = (post.content || '').toLowerCase();
+      const idStr = String(post.id || '');
+      const catStr = (post.categoryName || '').toLowerCase();
+
+      const titleMatch = !q ||
+        cleanTitle.includes(q) ||
+        cleanContent.includes(q) ||
+        rawContent.includes(q) ||
+        idStr.includes(q) ||
+        catStr.includes(q);
       
       const catMatch = selectedCategory === 'All' ||
-        (Array.isArray(post.categories) && post.categories.includes(selectedCategory)) ||
-        (post.categoryName && post.categoryName.includes(selectedCategory));
+        (Array.isArray(post.categories) && post.categories.some((c: any) => String(c).toLowerCase().includes(selectedCategory.toLowerCase()))) ||
+        (post.categoryName && String(post.categoryName).toLowerCase().trim() === selectedCategory.toLowerCase().trim()) ||
+        (post.categoryName && String(post.categoryName).toLowerCase().includes(selectedCategory.toLowerCase())) ||
+        (post.categoryName && selectedCategory.toLowerCase().includes(String(post.categoryName).toLowerCase()));
 
       const typeMatch = selectedType === 'All' ||
-        post.type === selectedType ||
-        post.typename === selectedType;
+        !post.type ||
+        String(post.type).toLowerCase().includes(selectedType.toLowerCase()) ||
+        String(post.typename || '').toLowerCase().includes(selectedType.toLowerCase());
 
       const locMatch = selectedLocation === 'All' ||
-        (Array.isArray(post.location) && post.location.includes(selectedLocation)) ||
-        post.state_name === selectedLocation;
+        !post.location ||
+        (Array.isArray(post.location) && post.location.some((l: any) => String(l).toLowerCase().includes(selectedLocation.toLowerCase()))) ||
+        (post.state_name && String(post.state_name).toLowerCase().includes(selectedLocation.toLowerCase()));
 
       const tagMatch = selectedAiTag === 'All' ||
-        (Array.isArray(post.tags) && post.tags.includes(selectedAiTag)) ||
-        (Array.isArray(post.aiTags) && post.aiTags.includes(selectedAiTag));
+        (!post.tags && !post.aiTags) ||
+        (Array.isArray(post.tags) && post.tags.some((t: any) => String(t).toLowerCase().includes(selectedAiTag.toLowerCase()))) ||
+        (Array.isArray(post.aiTags) && post.aiTags.some((t: any) => String(t).toLowerCase().includes(selectedAiTag.toLowerCase())));
 
       const statusMatch = selectedStatus === 'All' ||
-        (selectedStatus === 'Published' && (post.status === 'Published' || post.status === 'publish')) ||
+        (selectedStatus === 'Published' && (!post.status || post.status === 'Published' || post.status === 'publish')) ||
         (selectedStatus === 'Draft' && (post.status === 'Draft' || post.status === 'draft'));
 
       return titleMatch && catMatch && typeMatch && locMatch && tagMatch && statusMatch;
     });
   }, [posts, searchTerm, selectedCategory, selectedType, selectedLocation, selectedAiTag, selectedStatus]);
 
-  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage) || 1;
+  const totalPages = Math.max(1, serverTotalPages);
   const paginatedPosts = useMemo(() => {
-    const start = (page - 1) * itemsPerPage;
-    return filteredPosts.slice(start, start + itemsPerPage);
-  }, [filteredPosts, page]);
+    return filteredPosts;
+  }, [filteredPosts]);
+
+  const handlePageChange = (_: React.ChangeEvent<unknown>, p: number) => {
+    setPage(p);
+    fetchData(p);
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -726,7 +752,7 @@ export default function WebArticlesPage() {
                       <Pagination
                         count={totalPages}
                         page={page}
-                        onChange={(_, p) => setPage(p)}
+                        onChange={handlePageChange}
                         color="primary"
                       />
                     </Box>

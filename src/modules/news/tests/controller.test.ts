@@ -36,6 +36,22 @@ describe('useNewsController', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('should fetch specific page using fetchPage', async () => {
+    const mockDtos = Array.from({ length: 100 }, (_, i) => ({ id: i + 1, title: `Post ${i + 1}`, content: 'Content' }));
+    (NewsRepository.getAll as jest.Mock).mockResolvedValue(mockDtos);
+
+    const { result } = renderHook(() => useNewsController());
+
+    await act(async () => {
+      await result.current.fetchPage(2, 100);
+    });
+
+    expect(NewsRepository.getAll).toHaveBeenCalledWith(100, 100);
+    expect(result.current.page).toBe(2);
+    expect(result.current.hasMore).toBe(true);
+    expect(result.current.totalPages).toBeGreaterThanOrEqual(3);
+  });
+
   it('should handle fetch posts error', async () => {
     (NewsRepository.getAll as jest.Mock).mockRejectedValue(new Error('Network error'));
 

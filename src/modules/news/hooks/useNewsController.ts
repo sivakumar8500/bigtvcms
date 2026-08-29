@@ -8,6 +8,9 @@ export function useNewsController() {
   const [posts, setPosts] = useState<NewsPost[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const fetchPosts = useCallback(async (skip: number = 0, limit: number = 100) => {
     setLoading(true);
@@ -16,6 +19,15 @@ export function useNewsController() {
       const dtos = await NewsRepository.getAll(skip, limit);
       const mapped = (dtos || []).map((dto) => NewsMapper.toDomain(dto));
       setPosts(mapped);
+      const isFullBatch = (dtos || []).length === limit;
+      setHasMore(isFullBatch);
+      const currentPageNum = Math.floor(skip / limit) + 1;
+      setPage(currentPageNum);
+      if (isFullBatch) {
+        setTotalPages((prev) => Math.max(prev, currentPageNum + 1));
+      } else {
+        setTotalPages(currentPageNum);
+      }
       return mapped;
     } catch (err: any) {
       const errMsg = err?.message || 'Failed to fetch news posts';
@@ -25,6 +37,11 @@ export function useNewsController() {
       setLoading(false);
     }
   }, []);
+
+  const fetchPage = useCallback(async (pageNumber: number = 1, limit: number = 100) => {
+    const skip = Math.max(0, pageNumber - 1) * limit;
+    return fetchPosts(skip, limit);
+  }, [fetchPosts]);
 
   const getPostById = useCallback(async (id: number) => {
     setLoading(true);
@@ -99,7 +116,12 @@ export function useNewsController() {
     setPosts,
     loading,
     error,
+    page,
+    setPage,
+    totalPages,
+    hasMore,
     fetchPosts,
+    fetchPage,
     getPostById,
     createPost,
     updatePost,

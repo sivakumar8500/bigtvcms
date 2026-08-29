@@ -5,10 +5,17 @@ import { useLanguageStore } from '@/core/storage/language-store';
 import { useUserStore } from '@/core/storage/user-store';
 import { ThemeProvider } from '@/shared/providers/ThemeProvider';
 import { NewsRepository } from '@/modules/news/repositories/news.repository';
+import { WpRepository } from '@/modules/news/repositories/wp.repository';
 
 jest.mock('next/navigation', () => ({
   usePathname: () => '/web-articles',
   useRouter: () => ({ push: jest.fn() }),
+}));
+
+jest.mock('@/modules/news/repositories/wp.repository', () => ({
+  WpRepository: {
+    getPosts: jest.fn(),
+  },
 }));
 
 jest.mock('@/modules/news/repositories/news.repository', () => ({
@@ -56,6 +63,19 @@ describe('WebArticlesPage Component', () => {
       },
     });
 
+    (WpRepository.getPosts as jest.Mock).mockResolvedValue([
+      {
+        id: 101,
+        title: 'Sample Web Article 1',
+        content: 'Content for article 1',
+        categoryName: 'Technology',
+        categories: ['Technology'],
+        is_web_post: true,
+        web_post_url: 'https://example.com/article-1',
+        date: '2026-07-31',
+      },
+    ]);
+
     (NewsRepository.getAllNews as jest.Mock).mockResolvedValue([
       {
         id: 101,
@@ -73,7 +93,7 @@ describe('WebArticlesPage Component', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Web Articles page title and Create Web Article button', async () => {
+  it('renders Web Articles page title', async () => {
     render(
       <ThemeProvider>
         <WebArticlesPage />
@@ -83,8 +103,6 @@ describe('WebArticlesPage Component', () => {
     await waitFor(() => {
       expect(screen.getAllByText(/Web Articles/i).length).toBeGreaterThan(0);
     });
-
-    expect(screen.getByText('Create Web Article')).toBeInTheDocument();
   });
 
   it('renders web article list item', async () => {
@@ -129,7 +147,5 @@ describe('WebArticlesPage Component', () => {
     await waitFor(() => {
       expect(screen.getAllByText(/వెబ్ వ్యాసాలు/i).length).toBeGreaterThan(0);
     });
-
-    expect(screen.getByText('వెబ్ వ్యాసాన్ని సృష్టించండి')).toBeInTheDocument();
   });
 });
