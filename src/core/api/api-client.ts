@@ -143,7 +143,7 @@ export class ApiClient {
               config.params?.skip_lang_param;
             if (!isBypassLangApi) {
               // Determine active language from params or localStorage
-              let lang = config.params?.lang || config.params?.language;
+              let lang = config.params?.language_code || config.params?.lang || config.params?.language;
               if (!lang) {
                 const langStoreRaw = localStorage.getItem('bigtv-language-store');
                 if (langStoreRaw) {
@@ -156,13 +156,15 @@ export class ApiClient {
                 if (config.headers) {
                   config.headers['Accept-Language'] = lang;
                 }
-                if (config.method?.toLowerCase() === 'get' && !config.params?.lang) {
-                  config.params = { lang, ...config.params };
+                if (config.method?.toLowerCase() === 'get') {
+                  const activeLang = config.params?.language_code || config.params?.lang || lang;
+                  config.params = { language_code: activeLang, lang: activeLang, ...config.params };
                 }
               }
             } else if (config.params) {
               delete config.params.lang;
               delete config.params.language;
+              delete config.params.language_code;
               if ('skip_lang_param' in config.params) {
                 delete config.params.skip_lang_param;
               }
