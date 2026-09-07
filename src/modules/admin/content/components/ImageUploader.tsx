@@ -46,7 +46,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setError(null);
 
     try {
-      // Step 1: Request presigned upload URL from endpoint (try local backend first if available, or apidev)
+      // Step 1: Request presigned upload URL from endpoint (try local backend first if available, or api.chotanews.com)
       let presignedRes;
       try {
         presignedRes = await axios.post('http://127.0.0.1:8000/movies/upload-url', {
