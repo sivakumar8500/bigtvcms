@@ -44,7 +44,7 @@ jobs:
         run: pnpm build
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL || 'https://apidev.chotanews.com' }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL || 'https://api.chotanews.com' }}
           NEXT_PUBLIC_APP_NAME: BigTV CMS
 
       - name: Sync and Replace S3 Bucket
