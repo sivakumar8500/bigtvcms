@@ -34,6 +34,8 @@ import { TagsRepository } from '@/modules/tags/repositories/tags.repository';
 import { LocationRepository } from '@/modules/location/repositories/location.repository';
 import { PostTypeRepository } from '@/modules/post-types/repositories/post-type.repository';
 import { LanguageRepository } from '@/modules/language/repositories/language.repository';
+import { MoreFollowRepository } from '@/modules/more-follow/repositories/more-follow.repository';
+import { MoreFollowItem } from '@/modules/more-follow/domain/more-follow.model';
 import { HtmlEditor } from './HtmlEditor';
 import { Loader } from '@/shared/components/Loader';
 import { stripHtml, stripAllTagsExceptLinkTags } from '@/shared/utils/html.utils';
@@ -81,6 +83,7 @@ const translations = {
     lblType: 'Post Type',
     lblCategories: 'Categories *',
     lblTags: 'AI Mapped Tags *',
+    lblMoreFollow: 'More Follow Tags',
     btnCancel: 'Cancel',
     btnSubmit: 'Create News',
     phTitle: 'Enter news headline... (max 10 words)',
@@ -108,6 +111,9 @@ const translations = {
     uploadFailed: 'Image upload failed. Please try again.',
     lblIsWebPost: 'Web Post',
     lblIsSticky: 'Sticky Post',
+    lblIsHomePost: 'Home Post',
+    lblColorCode: 'Special Post Color',
+    phColorCode: 'e.g. #FF5722',
     lblWebUrl: 'Web URL',
     phWebUrl: 'https://example.com/article...',
     errWebUrlInvalid: 'Please enter a valid URL (starting with http:// or https://)',
@@ -126,6 +132,11 @@ const translations = {
     phImageAdUrl: 'https://example.com/ad-landing-page...',
     errImageAdUrlRequired: 'Image Ad URL is required',
     errImageAdUrlInvalid: 'Please enter a valid URL (starting with http:// or https://)',
+    lblBulletins: 'Bulletins',
+    phAddBullet: 'Enter bulletin point text...',
+    btnAddBullet: 'Add',
+    errBulletMin: 'Add at least one bulletin point',
+    errBulletMax: 'Maximum 10 bulletins allowed',
   },
   te: {
     tabEn: 'ఇంగ్లీష్',
@@ -141,6 +152,7 @@ const translations = {
     lblType: 'పోస్ట్ రకం',
     lblCategories: 'విభాగాలు *',
     lblTags: 'AI మ్యాప్ చేసిన ట్యాగ్‌లు *',
+    lblMoreFollow: 'మరిన్ని ఫాలో ట్యాగ్‌లు',
     btnCancel: 'రద్దు చేయి',
     btnSubmit: 'వార్తను సృష్టించండి',
     phTitle: 'వార్త శీర్షికను ఎంటర్ చేయండి... (గరిష్టంగా 10 పదాలు)',
@@ -168,6 +180,9 @@ const translations = {
     uploadFailed: 'చిత్ర అప్‌లోడ్ విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.',
     lblIsWebPost: 'వెబ్ పోస్ట్',
     lblIsSticky: 'స్టిక్కీ పోస్ట్',
+    lblIsHomePost: 'హోమ్ పోస్ట్',
+    lblColorCode: 'స్పెషల్ పోస్ట్ రంగు',
+    phColorCode: 'ఉదా. #FF5722',
     lblWebUrl: 'వెబ్ URL',
     phWebUrl: 'https://example.com/article...',
     errWebUrlInvalid: 'దయచేసి చెల్లుబాటు అయ్యే URL ఎంటర్ చేయండి (http:// లేదా https:// తో ప్రారంభం)',
@@ -186,6 +201,11 @@ const translations = {
     phImageAdUrl: 'https://example.com/ad-landing-page...',
     errImageAdUrlRequired: 'ఇమేజ్ ప్రకటన URL అవసరం',
     errImageAdUrlInvalid: 'దయచేసి చెల్లుబాటు అయ్యే URL ఎంటర్ చేయండి (http:// లేదా https:// తో ప్రారంభం)',
+    lblBulletins: 'బులెటిన్లు (Bulletins)',
+    phAddBullet: 'బులెటిన్ పాయింట్ ఎంటర్ చేయండి...',
+    btnAddBullet: 'జోడించు',
+    errBulletMin: 'కనీసం ఒక బులెటిన్ పాయింట్‌ను జోడించండి',
+    errBulletMax: 'గరిష్టంగా 10 బులెటిన్లు మాత్రమే అనుమతించబడతాయి',
   },
   hi: {
     tabEn: 'अंग्रेज़ी',
@@ -201,6 +221,7 @@ const translations = {
     lblType: 'पोस्ट प्रकार',
     lblCategories: 'श्रेणियां *',
     lblTags: 'AI मैप्ड टैग्स *',
+    lblMoreFollow: 'अधिक फ़ॉलो टैग',
     btnCancel: 'रद्द करें',
     btnSubmit: 'समाचार बनाएं',
     phTitle: 'समाचार शीर्षक दर्ज करें... (अधिकतम 10 शब्द)',
@@ -228,6 +249,9 @@ const translations = {
     uploadFailed: 'चित्र अपलोड विफल रहा। कृपया पुनः प्रयास करें।',
     lblIsWebPost: 'वेब पोस्ट',
     lblIsSticky: 'स्टिकी पोस्ट',
+    lblIsHomePost: 'होम पोस्ट',
+    lblColorCode: 'स्पेशल पोस्ट रंग',
+    phColorCode: 'उदा. #FF5722',
     lblWebUrl: 'वेब URL',
     phWebUrl: 'https://example.com/article...',
     errWebUrlInvalid: 'कृपया एक वैध URL दर्ज करें (http:// या https:// से शुरू)',
@@ -246,6 +270,11 @@ const translations = {
     phImageAdUrl: 'https://example.com/ad-landing-page...',
     errImageAdUrlRequired: 'इमेज विज्ञापन URL आवश्यक है',
     errImageAdUrlInvalid: 'कृपया एक वैध URL दर्ज करें (http:// या https:// से शुरू)',
+    lblBulletins: 'बुलेटिन (Bulletins)',
+    phAddBullet: 'बुलेटिन बिंदु दर्ज करें...',
+    btnAddBullet: 'जोड़ें',
+    errBulletMin: 'कम से कम एक बुलेटिन बिंदु जोड़ें',
+    errBulletMax: 'अधिकतम 10 बुलेटिनों की अनुमति है',
   },
   ml: {
     tabEn: 'ഇംഗ്ലീഷ്',
@@ -261,6 +290,7 @@ const translations = {
     lblType: 'പോസ്റ്റ് തരം',
     lblCategories: 'വിഭാഗങ്ങൾ *',
     lblTags: 'AI ടാഗുകൾ *',
+    lblMoreFollow: 'കൂടുതൽ ഫോളോ ടാഗുകൾ',
     btnCancel: 'റദ്ദാക്കുക',
     btnSubmit: 'വാർത്ത സൃഷ്ടിക്കുക',
     phTitle: 'വാർത്താ തലക്കെട്ട് നൽകുക... (പരമാവധി 10 വാക്കുകൾ)',
@@ -288,6 +318,9 @@ const translations = {
     uploadFailed: 'ചിത്രം അപ്‌ലോഡ് പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
     lblIsWebPost: 'വെബ് പോസ്റ്റ്',
     lblIsSticky: 'സ്റ്റിക്കി പോസ്റ്റ്',
+    lblIsHomePost: 'ഹോം പോസ്റ്റ്',
+    lblColorCode: 'സ്പെഷ്യൽ പോസ്റ്റ് നിറം',
+    phColorCode: 'ഉദാ. #FF5722',
     lblWebUrl: 'വെബ് URL',
     phWebUrl: 'https://example.com/article...',
     errWebUrlInvalid: 'ദയവായി ഒരു സാധുവായ URL നൽകുക (http:// അല്ലെങ്കിൽ https:// യിൽ തുടങ്ങുന്നത്)',
@@ -306,6 +339,11 @@ const translations = {
     phImageAdUrl: 'https://example.com/ad-landing-page...',
     errImageAdUrlRequired: 'ഇമേജ് പരസ്യ URL ആവശ്യമാണ്',
     errImageAdUrlInvalid: 'ദയവായി ഒരു സാധുവായ URL നൽകുക (http:// അല്ലെങ്കിൽ https:// യിൽ തുടങ്ങുന്നത്)',
+    lblBulletins: 'ബുള്ളറ്റിനുകൾ (Bulletins)',
+    phAddBullet: 'ബുള്ളറ്റിൻ പോയിന്റ് നൽകുക...',
+    btnAddBullet: 'ചേർക്കുക',
+    errBulletMin: 'കുറഞ്ഞത് ഒരു ബുള്ളറ്റിൻ പോയിന്റെങ്കിലും ചേർക്കുക',
+    errBulletMax: 'പരമാവധി 10 ബുള്ളറ്റിനുകൾ മാത്രം അനുവദിനീയമാണ്',
   },
 };
 
@@ -334,10 +372,14 @@ export interface CreateNewsFormData {
   location_ids?: (number | string)[];
   aitagIds?: number[];
   aitag_ids?: number[];
+  morefollowTagIds?: number[];
+  morefollow_tag_ids?: number[];
   postType?: string;
   isSticky?: boolean;
   isStickyPost?: boolean;
   isWebPost?: boolean;
+  isHomePost?: boolean;
+  colorCode?: string;
   notificationTitle: string;
   sendNotification?: boolean;
   isNotification?: boolean;
@@ -385,6 +427,18 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [postLanguage, setPostLanguage] = useState<'en' | 'te' | 'hi' | 'ml'>(initialData?.postLanguage || language || 'en');
   const [apiPostTypes, setApiPostTypes] = useState<Array<{ id: number; name: string }>>([]);
   const [apiLanguages, setApiLanguages] = useState<Array<{ code: string; name: string }>>([]);
+  const [apiMoreFollowItems, setApiMoreFollowItems] = useState<MoreFollowItem[]>([]);
+
+  // Fetch More Follow API on mount
+  useEffect(() => {
+    MoreFollowRepository.getAll()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setApiMoreFollowItems(data);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch More Follow items in form', err));
+  }, []);
 
   // Fetch Languages API on mount
   useEffect(() => {
@@ -557,6 +611,25 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         };
       })
     : locationsList.map((l) => ({ ...l, id: l.key }));
+
+  const dynamicMoreFollow = apiMoreFollowItems.length > 0
+    ? apiMoreFollowItems.map((item) => {
+        const trans = item.morefollowNameTranslations || {};
+        const id = item.morefollowId || item.id;
+        const labelTe = trans.te || item.morefollowName || '';
+        const labelEn = trans.en || item.morefollowName || labelTe;
+        const labelHi = trans.hi || labelEn;
+        const labelMl = trans.ml || labelEn;
+        return {
+          id,
+          key: String(id),
+          labelEn,
+          labelTe,
+          labelHi,
+          labelMl,
+        };
+      })
+    : [];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -648,6 +721,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     ];
     return Array.from(new Set(raw.map(String).filter(Boolean)));
   });
+  const [selectedMoreFollowTags, setSelectedMoreFollowTags] = useState<string[]>(() => {
+    if (!initialData) return [];
+    const raw = [
+      ...((initialData as any).morefollowTagIds || []),
+      ...((initialData as any).morefollow_tag_ids || []),
+    ];
+    return Array.from(new Set(raw.map(String).filter(Boolean)));
+  });
   const [type, setType] = useState(() => {
     const validTypes = ['Standard', 'Video', 'Reel', 'Podcast', 'BulletPost'];
     const rawSubType = (initialData as any)?.subType || (initialData as any)?.sub_type;
@@ -668,6 +749,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     return imgs.map((url) => ({ url }));
   });
   const [isSticky, setIsSticky] = useState<boolean>((initialData as any)?.isStickyPost ?? initialData?.isSticky ?? false);
+  const [isHomePost, setIsHomePost] = useState<boolean>(Boolean((initialData as any)?.isHomePost || (initialData as any)?.is_home_post || false));
+  const [colorCode, setColorCode] = useState<string>((initialData as any)?.colorCode || (initialData as any)?.color_code || '#FF5722');
   const [isWebPost, setIsWebPost] = useState<boolean>(Boolean((initialData as any)?.isWebPost || (initialData as any)?.is_web_post || (initialData as any)?.isWebpost || false));
   const [webUrl, setWebUrl] = useState<string>((initialData as any)?.webUrl || (initialData as any)?.web_post_url || (initialData as any)?.webPostUrl || (initialData as any)?.postUrl || '');
   const [postUrl, setPostUrl] = useState<string>((initialData as any)?.postUrl || (initialData as any)?.webUrl || '');
@@ -705,6 +788,15 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const [publishMode, setPublishMode] = useState<'now' | 'draft' | 'schedule'>('now');
   const [scheduleTime, setScheduleTime] = useState<string>('');
 
+  const [bulletPoints, setBulletPoints] = useState<string[]>(() => {
+    if (!initialData) return [];
+    const bullets = (initialData as any).bulletPoints || (initialData as any).bullet_points || [];
+    return Array.isArray(bullets)
+      ? bullets.map((b: any) => String(b).replace(/[\[\]]/g, '').trim()).filter(Boolean)
+      : [];
+  });
+  const [bulletInputText, setBulletInputText] = useState<string>('');
+
   const isImageOrGalleryType =
     ['image', 'image ad', 'gallery', 'video'].includes(type.toLowerCase().trim()) ||
     type.toLowerCase().includes('image') ||
@@ -715,6 +807,136 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     type.toLowerCase().trim() === 'imagead' ||
     type.toLowerCase().trim() === 'image ad' ||
     type.toLowerCase().replace(/\s+/g, '') === 'imagead';
+
+  const isBigTvSpecial =
+    type.toLowerCase().replace(/[\s_]+/g, '') === 'bigtvspecial' ||
+    String((initialData as any)?.subType || (initialData as any)?.sub_type || '').toLowerCase().replace(/[\s_]+/g, '') === 'bigtvspecial';
+
+  const isBulletPost =
+    type.toLowerCase().includes('bullet') ||
+    type.toLowerCase().includes('bulletin') ||
+    String((initialData as any)?.subType || (initialData as any)?.sub_type || '').toLowerCase().includes('bullet');
+
+  const handleAddBulletPoint = () => {
+    const trimmed = bulletInputText.trim();
+    if (!trimmed) return;
+    if (bulletPoints.length >= 10) {
+      setErrors((prev) => ({ ...prev, bulletPoints: t.errBulletMax }));
+      return;
+    }
+    setBulletPoints((prev) => [...prev, trimmed]);
+    setBulletInputText('');
+    if (errors.bulletPoints) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.bulletPoints;
+        return next;
+      });
+    }
+  };
+
+  const handleRemoveBulletPoint = (index: number) => {
+    setBulletPoints((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const labels: Record<string, string> = { now: '🚀 Publish Now', draft: '💾 Save as Draft', schedule: '🕒 Schedule' };
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  const handleReset = () => {
+    setTitle('');
+    setBody('');
+    setSelectedCategories([]);
+    setSelectedTags([]);
+    setLocation([]);
+    setSelectedMoreFollowTags([]);
+    setImageUrl(null);
+    setImageFile(null);
+    setGalleryItems([]);
+    setNotificationTitle('');
+    setSendNotification(false);
+    setImageTitle('');
+    setBulletPoints([]);
+    setBulletInputText('');
+    setErrors({});
+    setShowPreviewScreen(false);
+  };
+
+  const handleTagsChange = (val: string[]) => {
+    if (val.includes('all')) {
+      if (selectedTags.length === dynamicTags.length) {
+        setSelectedTags([]);
+      } else {
+        setSelectedTags(dynamicTags.map((t) => t.key));
+      }
+    } else {
+      setSelectedTags(val);
+    }
+    if (errors.tags) setErrors((prev) => { const n = { ...prev }; delete n.tags; return n; });
+  };
+
+  const isLocationChecked = (loc: { id: number | string; key: string; labelEn: string; labelTe: string; labelHi: string; labelMl: string }) => {
+    return (
+      location.includes(loc.key) ||
+      location.includes(String(loc.id)) ||
+      location.includes(loc.labelEn) ||
+      location.includes(loc.labelTe)
+    );
+  };
+
+  const handleLocationChange = (val: string[]) => {
+    if (val.includes('all')) {
+      if (dynamicLocations.length > 0 && dynamicLocations.every((loc) => isLocationChecked(loc))) {
+        setLocation([]);
+      } else {
+        setLocation(dynamicLocations.map((l) => l.key));
+      }
+    } else {
+      setLocation(val);
+    }
+    if (errors.location) setErrors((prev) => { const n = { ...prev }; delete n.location; return n; });
+  };
+
+  const handleMoreFollowChange = (val: string[]) => {
+    if (val.includes('all')) {
+      if (dynamicMoreFollow.length > 0 && selectedMoreFollowTags.length === dynamicMoreFollow.length) {
+        setSelectedMoreFollowTags([]);
+      } else {
+        setSelectedMoreFollowTags(dynamicMoreFollow.map((m) => m.key));
+      }
+    } else {
+      setSelectedMoreFollowTags(val);
+    }
+  };
+
+  const isCategoryChecked = (cat: { id: number | string; key: string; labelEn: string; labelTe: string; labelHi: string; labelMl: string }) => {
+    return (
+      selectedCategories.includes(cat.key) ||
+      selectedCategories.includes(String(cat.id)) ||
+      selectedCategories.includes(cat.labelEn) ||
+      selectedCategories.includes(cat.labelTe)
+    );
+  };
+
+  const handleCategoryToggleObj = (cat: { id: number | string; key: string; labelEn: string; labelTe: string; labelHi: string; labelMl: string }) => {
+    setSelectedCategories((prev) => {
+      const isChecked = isCategoryChecked(cat);
+      if (isChecked) {
+        return prev.filter(
+          (k) =>
+            k !== cat.key &&
+            k !== String(cat.id) &&
+            k !== cat.labelEn &&
+            k !== cat.labelTe
+        );
+      } else {
+        return [...prev, cat.key];
+      }
+    });
+    if (errors.categories) setErrors((prev) => { const n = { ...prev }; delete n.categories; return n; });
+  };
 
   const langIdMap: Record<string, number> = { en: 1, te: 2, hi: 3, ml: 4 };
 
@@ -873,6 +1095,41 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     }
   }, [initialData, dynamicLocations.map((l) => `${l.id}:${l.key}`).join(',')]);
 
+  // Map initial More Follow tags to dynamicMoreFollow keys in edit mode
+  useEffect(() => {
+    if (initialData) {
+      const rawMoreFollow: Array<string | number> = [
+        ...((initialData as any).morefollowTagIds || []),
+        ...((initialData as any).morefollow_tag_ids || []),
+      ];
+      if (rawMoreFollow.length > 0 && dynamicMoreFollow.length > 0) {
+        const resolvedKeys: string[] = [];
+        rawMoreFollow.forEach((raw) => {
+          if (raw === undefined || raw === null || raw === '') return;
+          const match = dynamicMoreFollow.find((mf) => {
+            if (mf.key === raw || String(mf.key) === String(raw)) return true;
+            if (mf.id === raw || String(mf.id) === String(raw)) return true;
+            if (mf.labelEn && mf.labelEn.toLowerCase() === String(raw).toLowerCase()) return true;
+            if (mf.labelTe && mf.labelTe === String(raw)) return true;
+            return false;
+          });
+          if (match) {
+            resolvedKeys.push(match.key);
+          } else if (typeof raw === 'string' || typeof raw === 'number') {
+            resolvedKeys.push(String(raw));
+          }
+        });
+        if (resolvedKeys.length > 0) {
+          const newSet = Array.from(new Set(resolvedKeys));
+          setSelectedMoreFollowTags((prev) => {
+            if (prev.length === newSet.length && prev.every((v, i) => v === newSet[i])) return prev;
+            return newSet;
+          });
+        }
+      }
+    }
+  }, [initialData, dynamicMoreFollow.map((m) => `${m.id}:${m.key}`).join(',')]);
+
   // Sync form state when initialData updates (e.g. after async detail fetch in edit mode)
   useEffect(() => {
     if (initialData) {
@@ -1009,160 +1266,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     initialData?.location?.join(','),
     (initialData as any)?.isWebPost,
     (initialData as any)?.is_web_post,
-    (initialData as any)?.isWebpost,
-    (initialData as any)?.webUrl,
-    (initialData as any)?.web_post_url,
-    (initialData as any)?.webPostUrl,
-    (initialData as any)?.postUrl,
     (initialData as any)?.post_url,
     (initialData as any)?.type,
-    (initialData as any)?.post_type,
-    (initialData as any)?.typename,
-    (initialData as any)?.videoUrl,
-    (initialData as any)?.video_url,
-    (initialData as any)?.videoSource,
-    (initialData as any)?.video_platform,
   ]);
-
-  const prevTypeRef = useRef<string>(type);
-
-  // Reset video/gallery fields when switching post types manually
-  useEffect(() => {
-    if (prevTypeRef.current !== type) {
-      // Reset video fields when switching away from video types
-      if (!type.toLowerCase().includes('video')) {
-        setVideoSource('');
-        setVideoUrl('');
-      }
-      // Reset gallery images when switching away from gallery type
-      if (!type.toLowerCase().includes('gallery')) {
-        setGalleryItems([]);
-      }
-      prevTypeRef.current = type;
-    }
-  }, [type]);
-
-  const handleReset = () => {
-    setTitle('');
-    setBody('');
-    setPostLanguage(language || 'en');
-    setSelectedCategories([]);
-    setSelectedTags([]);
-    setLocation([]);
-    setType('Standard');
-    setImageUrl(null);
-    setGalleryItems([]);
-    setImageFile(null);
-    setIsUploading(false);
-    setUploadError(null);
-    setIsSticky(false);
-    setIsWebPost(false);
-    setWebUrl('');
-    setPostUrl('');
-    setVideoSource('');
-    setVideoUrl('');
-    setSendNotification(false);
-    setNotificationTitle('');
-    setImageTitle('');
-    setErrors({});
-    setShowPreviewScreen(false);
-  };
-
-  const handleClose = () => {
-    handleReset();
-    onClose();
-  };
-
-  const isCategoryChecked = (cat: { id?: string | number; key: string; labelEn?: string; labelTe?: string; labelHi?: string; labelMl?: string }) => {
-    if (!selectedCategories || selectedCategories.length === 0) return false;
-    const catIdentifiers = [
-      cat.key,
-      String(cat.key),
-      cat.id !== undefined && cat.id !== null ? String(cat.id) : '',
-      cat.id !== undefined && cat.id !== null ? cat.id : '',
-      cat.labelEn || '',
-      cat.labelTe || '',
-      cat.labelHi || '',
-      cat.labelMl || '',
-      teluguToEnglishCategoryMap[cat.labelTe || ''] || '',
-      mapCategoryToKey(cat.key),
-    ].filter(Boolean);
-
-    return selectedCategories.some((s) => catIdentifiers.includes(s) || catIdentifiers.includes(String(s)));
-  };
-
-  const handleCategoryToggleObj = (cat: { id?: string | number; key: string; labelEn?: string; labelTe?: string }) => {
-    const isChecked = isCategoryChecked(cat);
-    const catIdentifiers = [
-      cat.key,
-      String(cat.key),
-      cat.id !== undefined && cat.id !== null ? String(cat.id) : '',
-      cat.id !== undefined && cat.id !== null ? cat.id : '',
-      cat.labelEn || '',
-      cat.labelTe || '',
-    ].filter(Boolean);
-
-    setSelectedCategories((prev) => {
-      if (isChecked) {
-        return prev.filter((c) => !catIdentifiers.includes(c) && !catIdentifiers.includes(String(c)));
-      } else {
-        return [...prev, cat.key];
-      }
-    });
-  };
-
-  const handleCategoryToggle = (categoryKey: string) => {
-    const found = dynamicCategories.find((c) => c.key === categoryKey || String(c.id) === String(categoryKey));
-    if (found) {
-      handleCategoryToggleObj(found);
-    } else {
-      setSelectedCategories((prev) =>
-        prev.includes(categoryKey) ? prev.filter((c) => c !== categoryKey) : [...prev, categoryKey]
-      );
-    }
-  };
-
-  const isLocationChecked = (loc: { id?: string | number; key: string; labelEn?: string; labelTe?: string; labelHi?: string; labelMl?: string }) => {
-    if (!location || location.length === 0) return false;
-    const locIdentifiers = [
-      loc.key,
-      String(loc.key),
-      loc.id !== undefined && loc.id !== null ? String(loc.id) : '',
-      loc.id !== undefined && loc.id !== null ? loc.id : '',
-      loc.labelEn || '',
-      loc.labelTe || '',
-      loc.labelHi || '',
-      loc.labelMl || '',
-    ].filter(Boolean);
-
-    return location.some((l) => locIdentifiers.includes(l) || locIdentifiers.includes(String(l)));
-  };
-
-  const handleTagsChange = (selected: string[] | string) => {
-    const selectedArr = Array.isArray(selected) ? selected : typeof selected === 'string' ? selected.split(',').filter(Boolean) : [];
-    if (selectedArr.includes('all')) {
-      if (selectedTags.length === dynamicTags.length) {
-        setSelectedTags([]);
-      } else {
-        setSelectedTags(dynamicTags.map((t) => t.key));
-      }
-    } else {
-      setSelectedTags(selectedArr);
-    }
-  };
-
-  const handleLocationChange = (selected: string[] | string) => {
-    const selectedArr = Array.isArray(selected) ? selected : typeof selected === 'string' ? selected.split(',').filter(Boolean) : [];
-    if (selectedArr.includes('all')) {
-      if (location.length === dynamicLocations.length) {
-        setLocation([]);
-      } else {
-        setLocation(dynamicLocations.map((l) => l.key));
-      }
-    } else {
-      setLocation(selectedArr);
-    }
-  };
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -1195,7 +1301,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       tLower === 'imagead' ||
       tLower === 'image ad' ||
       tLower === 'video' ||
-      tLower === 'gallery'
+      tLower === 'gallery' ||
+      tLower === 'bulletin' ||
+      tLower === 'bulletpost' ||
+      tLower === 'bullet post' ||
+      tLower.includes('bullet')
     );
   };
 
@@ -1255,15 +1365,21 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       }
     }
 
-    // Content
-    if (!body.trim()) {
-      errMap.body = 'Content/Body is required';
-    } else if (countWords(body) > BODY_WORD_LIMIT) {
-      errMap.body = t.errBodyWordLimit;
+    // Content / Bulletins
+    if (isBulletPost) {
+      if (bulletPoints.length === 0) {
+        errMap.bulletPoints = t.errBulletMin;
+      }
+    } else {
+      if (!body.trim()) {
+        errMap.body = 'Content/Body is required';
+      } else if (countWords(body) > BODY_WORD_LIMIT) {
+        errMap.body = t.errBodyWordLimit;
+      }
     }
 
     // Image �� skip for gallery type (gallery has its own validation)
-    if (!type.toLowerCase().includes('gallery') && !imageUrl) {
+    if (!type.toLowerCase().includes('gallery') && !isBulletPost && !imageUrl) {
       errMap.image = t.errImageRequired;
     }
 
@@ -1395,11 +1511,51 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
 
     const aitagIds = parsedAitagIds;
 
+    const parsedMorefollowTagIds = Array.from(
+      new Set(
+        selectedMoreFollowTags
+          .map((tagKey) => {
+            const found = dynamicMoreFollow.find(
+              (dm) =>
+                dm.key === tagKey ||
+                String(dm.id) === String(tagKey) ||
+                dm.labelEn === tagKey ||
+                dm.labelTe === tagKey ||
+                dm.labelHi === tagKey ||
+                dm.labelMl === tagKey
+            );
+            const rawId = found?.id ?? (typeof tagKey === 'number' ? tagKey : parseInt(String(tagKey), 10));
+            return typeof rawId === 'number' && !isNaN(rawId) ? rawId : null;
+          })
+          .filter((id): id is number => id !== null)
+      )
+    );
+
+    const morefollowTagIds = parsedMorefollowTagIds.length > 0 ? parsedMorefollowTagIds : [0];
+
     const cleanTitle = stripHtml(title);
-    const cleanBody = body;
+    const cleanBody = isBulletPost && bulletPoints.length > 0
+      ? `<ul>${bulletPoints.map((b) => `<li>${b}</li>`).join('')}</ul>`
+      : body;
     const cleanNotifTitle = sendNotification ? stripHtml(notificationTitle) : '';
     const cleanImgTitle = isImageAd || !showImageTitle ? '' : stripHtml(imageTitle);
     const finalPostUrl = isImageAd ? imageAdUrl.trim() : webUrl;
+
+    let finalBullets = isBulletPost ? [...bulletPoints] : [];
+    if (isBulletPost && finalBullets.length === 0) {
+      const extracted = formatBulletPostContentAndBullets(cleanBody || body).bulletPoints;
+      if (extracted.length > 0) {
+        finalBullets = extracted;
+      } else if (cleanBody || body) {
+        finalBullets = stripHtml(cleanBody || body)
+          .split(/\r?\n/)
+          .map((s) => s.replace(/^[•\>\*\.\_\s\-]+/, '').trim())
+          .filter(Boolean);
+      }
+      if (finalBullets.length === 0 && cleanTitle) {
+        finalBullets = [cleanTitle];
+      }
+    }
 
     onSubmit({
       titleEn: postLanguage === 'en' ? cleanTitle : '',
@@ -1413,7 +1569,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       categories: selectedCategories,
       tags: selectedTags,
       location,
-      type,
+      type: isBulletPost ? 'Bulletin' : type,
       imageUrl: finalImageUrl || (finalGalleryUrls.length > 0 ? finalGalleryUrls[0] : null),
       galleryImages: finalGalleryUrls,
       postLanguage,
@@ -1425,10 +1581,16 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       locationIds,
       aitagIds,
       aitag_ids: aitagIds,
-      postType: type,
+      morefollowTagIds,
+      morefollow_tag_ids: morefollowTagIds,
+      subType: isBulletPost ? 'Bulletin' : '',
+      sub_type: isBulletPost ? 'Bulletin' : '',
+      postType: isBulletPost ? 'Bulletin' : type,
       isSticky,
       isStickyPost: isSticky,
       isWebPost,
+      isHomePost,
+      colorCode: isBigTvSpecial ? colorCode : '',
       webUrl: isImageAd ? finalPostUrl : webUrl,
       postUrl: finalPostUrl,
       imageAdUrl: imageAdUrl.trim(),
@@ -1440,6 +1602,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       sendNotification,
       isNotification: sendNotification,
       imageTitle: cleanImgTitle,
+      bulletPoints: isBulletPost ? finalBullets : [],
+      bullet_points: isBulletPost ? finalBullets : [],
     });
     setIsUploading(false);
     handleReset();
@@ -1645,7 +1809,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                           </Box>
                           <Typography variant="caption" sx={{ color: '#333333', fontSize: '0.68rem', lineHeight: 1.6, display: 'block' }} dangerouslySetInnerHTML={{ __html: body || 'News Body Content' }} />
                           <Typography variant="caption" sx={{ color: '#777777', fontSize: '0.58rem', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
-                            ⏱ {publishMode === 'schedule' && scheduleTime ? `Scheduled ${scheduleTime}` : 'Just now'}
+              : publishMode === 'schedule'
                           </Typography>
                         </Box>
                       </>
@@ -1695,9 +1859,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
             }}
           >
             {publishMode === 'draft'
-              ? '=� Save as Draft'
+              ? 'Save as Draft'
               : publishMode === 'schedule'
-                ? (scheduleTime ? `=P嚙� Schedule for ${scheduleTime}` : '=P嚙� Select a time first')
+                ? (scheduleTime ? `Schedule for ${scheduleTime}` : 'Select a time first')
                 : (isEditMode ? 'Save Changes' : t.btnPublish)}
           </Button>
           </Box>
@@ -1942,6 +2106,88 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
             </TextField>
           </Grid>
 
+          {/* More Follow Tags Multiselect Dropdown */}
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select
+              fullWidth
+              size="small"
+              label={t.lblMoreFollow}
+              SelectProps={{
+                multiple: true,
+                value: selectedMoreFollowTags,
+                onChange: (e) => handleMoreFollowChange(e.target.value as string[]),
+                renderValue: (selected) => {
+                  const selectedArr = (selected as string[]) || [];
+                  if (selectedArr.length === dynamicMoreFollow.length && dynamicMoreFollow.length > 0) {
+                    return <Chip label="All More Follow" size="small" sx={{ borderRadius: '6px' }} />;
+                  }
+                  const resolvedItems: Array<{ key: string; label: string }> = [];
+                  selectedArr.forEach((val) => {
+                    if (!val) return;
+                    const item = dynamicMoreFollow.find(
+                      (m) =>
+                        m.key === val ||
+                        String(m.id) === String(val) ||
+                        m.labelEn === val ||
+                        m.labelTe === val ||
+                        m.labelHi === val ||
+                        m.labelMl === val
+                    );
+                    const label = (language === 'te' ? item?.labelTe : language === 'hi' ? item?.labelHi : language === 'ml' ? item?.labelMl : item?.labelEn) || item?.labelEn || item?.key || (typeof val === 'string' && isNaN(Number(val)) ? val : '');
+                    const key = item?.key || String(val);
+                    if (label && !resolvedItems.some((it) => it.key === key || it.label === label)) {
+                      resolvedItems.push({ key, label });
+                    }
+                  });
+                  return (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {resolvedItems.map((item, idx) => (
+                        <Chip
+                          key={`${item.key}-${idx}`}
+                          label={item.label}
+                          size="small"
+                          sx={{
+                            borderRadius: '6px',
+                            height: '20px',
+                            fontSize: '0.72rem',
+                            backgroundColor: isDark ? 'rgba(166,226,245,0.25)' : 'rgba(28,20,69,0.1)',
+                            color: isDark ? '#a6e2f5' : '#1c1445',
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  );
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                  borderRadius: '10px',
+                  '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)' },
+                  '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                  '&.Mui-focused fieldset': { borderColor: isDark ? '#a6e2f5' : '#1c1445' },
+                },
+                '& .MuiInputLabel-root': { color: isDark ? '#d0caeb' : '#5c548a' },
+              }}
+            >
+              <MenuItem value="all">
+                <Checkbox checked={dynamicMoreFollow.length > 0 && selectedMoreFollowTags.length === dynamicMoreFollow.length} size="small" />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>Select All</Typography>
+              </MenuItem>
+              {dynamicMoreFollow.map((item, idx) => {
+                const label = language === 'te' ? item.labelTe : language === 'hi' ? item.labelHi : language === 'ml' ? item.labelMl : item.labelEn;
+                return (
+                  <MenuItem key={`morefollow-${item.id ?? item.key}-${idx}`} value={item.key}>
+                    <Checkbox checked={selectedMoreFollowTags.includes(item.key)} size="small" />
+                    {label}
+                  </MenuItem>
+                );
+              })}
+            </TextField>
+          </Grid>
+
           {/* Post Type Select Dropdown (Single Select) + Top Right Close button */}
           <Grid item xs={12} sm={6} md={3}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -1971,7 +2217,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     </MenuItem>
                   ))
                 ) : (
-                  ['Standard', 'Image', 'Image Ad', 'Gallery', 'Video', 'Reel', 'Podcast'].map((ptName) => (
+                  ['Standard', 'Image', 'Image Ad', 'Gallery', 'Video', 'Reel', 'Podcast', 'BigTvSpecial'].map((ptName) => (
                     <MenuItem key={`ptName-${ptName}`} value={ptName}>
                       {ptName}
                     </MenuItem>
@@ -2082,6 +2328,73 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </FormGroup>
               </Box>
 
+              {/* Theme Color Picker - Shown ONLY for BigTvSpecial post type */}
+              {isBigTvSpecial && (
+                <Box sx={{ mt: 2 }}>
+                  <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
+                  <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                    🎨 {t.lblColorCode}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Box
+                      component="input"
+                      type="color"
+                      value={colorCode || '#FF5722'}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setColorCode(e.target.value.toUpperCase())}
+                      sx={{
+                        width: '38px',
+                        height: '38px',
+                        padding: 0,
+                        border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.2)',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        backgroundColor: 'transparent',
+                        '&::-webkit-color-swatch-wrapper': { padding: 0 },
+                        '&::-webkit-color-swatch': { borderRadius: '7px', border: 'none' },
+                      }}
+                    />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder={t.phColorCode}
+                      value={colorCode}
+                      onChange={(e) => setColorCode(e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem',
+                          fontFamily: 'monospace',
+                          '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                          '&.Mui-focused fieldset': { borderColor: isDark ? '#a6e2f5' : '#1c1445' },
+                        },
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap' }}>
+                    {['#FF5722', '#E91E63', '#9C27B0', '#2196F3', '#009688', '#4CAF50', '#FFC107', '#1C1445'].map((preset) => (
+                      <Box
+                        key={preset}
+                        onClick={() => setColorCode(preset)}
+                        sx={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          backgroundColor: preset,
+                          cursor: 'pointer',
+                          border: colorCode?.toUpperCase() === preset ? '2px solid #ffffff' : '1px solid rgba(0,0,0,0.2)',
+                          boxShadow: colorCode?.toUpperCase() === preset ? '0 0 0 2px #a6e2f5' : 'none',
+                          transition: 'transform 0.15s ease',
+                          '&:hover': { transform: 'scale(1.15)' },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
               {/*    Publish Mode Selector    */}
               <Box sx={{ mt: 2 }}>
                 <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
@@ -2090,7 +2403,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
                   {(['now', 'draft', 'schedule'] as const).map((mode) => {
-                    const labels = { now: '🚀 Publish Now', draft: '💾 Save as Draft', schedule: '🕒 Schedule' };
                     const isSelected = publishMode === mode;
                     return (
                       <Box
@@ -2185,6 +2497,46 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   <Switch
                     checked={isSticky}
                     onChange={(e) => setIsSticky(e.target.checked)}
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: isDark ? '#a6e2f5' : '#1c1445',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Is Home Post Toggle */}
+              <Box sx={{ mt: 2 }}>
+                <Divider sx={{ mb: 1.5, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 1.2,
+                    borderRadius: '10px',
+                    backgroundColor: isHomePost
+                      ? (isDark ? 'rgba(166,226,245,0.08)' : 'rgba(28,20,69,0.06)')
+                      : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'),
+                    border: isHomePost
+                      ? (isDark ? '1px solid rgba(166,226,245,0.25)' : '1px solid rgba(28,20,69,0.2)')
+                      : (isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.07)'),
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: 600, color: isDark ? '#d0caeb' : '#1c1445' }}>
+                      🏠 {t.lblIsHomePost}
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={isHomePost}
+                    onChange={(e) => setIsHomePost(e.target.checked)}
                     size="small"
                     sx={{
                       '& .MuiSwitch-switchBase.Mui-checked': {
@@ -2666,212 +3018,325 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   </Box>
                 )}
 
-                <HtmlEditor
-                  label={t.lblBody}
-                  placeholder={t.phBody}
-                  value={body}
-                  onChange={(val) => {
-                    setBody(val);
-                    if (errors.body) setErrors((prev) => { const n = { ...prev }; delete n.body; return n; });
-                  }}
-                  error={errors.body}
-                  isDark={isDark}
-                  minHeight="220px"
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    disabled={isSummarizing || !stripHtml(body).trim()}
-                    onClick={async () => {
-                      setIsSummarizing(true);
-                      try {
-                        const res = await fetch('https://api.chotanews.com/summarize', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ content: stripHtml(body) })
-                        });
-                        if (res.ok) {
-                          const data = await res.json();
-                          if (data && (data.summary || data.content)) {
-                            const newContent = data.summary || data.content;
-                            // Ensure the new content is formatted as HTML paragraph
-                            const htmlContent = newContent.startsWith('<') ? newContent : `<p>${newContent}</p>`;
-                            setBody(htmlContent);
+                {isBulletPost ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: isDark ? '#a6e2f5' : '#1c1445', fontSize: '0.85rem' }}>
+                      📋 {t.lblBulletins}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder={t.phAddBullet}
+                        value={bulletInputText}
+                        onChange={(e) => {
+                          setBulletInputText(e.target.value);
+                          if (errors.bulletPoints) setErrors((prev) => { const n = { ...prev }; delete n.bulletPoints; return n; });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddBulletPoint();
                           }
-                        }
-                      } catch (e) {
-                        console.error('Summarize error:', e);
-                      } finally {
-                        setIsSummarizing(false);
-                      }
-                    }}
-                    startIcon={<AutoAwesome fontSize="small" />}
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: '0.75rem',
-                      py: 0.3,
-                      borderColor: '#a6e2f5',
-                      color: '#a6e2f5',
-                      '&:hover': { borderColor: '#8cd5ed', backgroundColor: 'rgba(166,226,245,0.1)' },
-                      '&.Mui-disabled': { borderColor: 'rgba(166,226,245,0.3)', color: 'rgba(166,226,245,0.3)' }
-                    }}
-                  >
-                    {isSummarizing ? 'Generating...' : 'Regenerate (AI)'}
-                  </Button>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                      fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
-                    }}
-                  >
-                    {t.wordCount(countWords(body), 50)}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Image Uploader �� single for regular types, gallery grid for Gallery type */}
-              <Box>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); e.target.value = ''; }}
-                />
-
-                {type.toLowerCase().includes('gallery') ? (
-                  /* ===== GALLERY MULTI-IMAGE UPLOADER ===== */
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700, color: errors.galleryImages ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445'), fontSize: '0.82rem' }}>
-                        �䲰儭� {t.lblGalleryImages}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: galleryItems.length < 3 ? '#f44336' : galleryItems.length >= 10 ? '#ff9800' : (isDark ? '#a6e2f5' : '#1c1445'), fontWeight: 600, fontSize: '0.72rem' }}>
-                        {galleryItems.length}/10 &bull; {t.hintGallery}
-                      </Typography>
+                        }}
+                        error={!!errors.bulletPoints}
+                        helperText={errors.bulletPoints || ''}
+                        disabled={bulletPoints.length >= 10}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            color: isDark ? '#ffffff' : '#1c1445',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                            borderRadius: '10px',
+                            '& fieldset': { borderColor: errors.bulletPoints ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
+                            '&.Mui-focused fieldset': { borderColor: errors.bulletPoints ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                          },
+                          '& .MuiInputLabel-root': { color: errors.bulletPoints ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
+                          '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        onClick={handleAddBulletPoint}
+                        disabled={!bulletInputText.trim() || bulletPoints.length >= 10}
+                        sx={{
+                          borderRadius: '10px',
+                          textTransform: 'none',
+                          fontWeight: 700,
+                          px: 3,
+                          backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                          color: isDark ? '#1c1445' : '#ffffff',
+                          boxShadow: 'none',
+                          '&:hover': { backgroundColor: isDark ? '#8cd5ed' : '#2d2270', boxShadow: 'none' },
+                        }}
+                      >
+                        {t.btnAddBullet}
+                      </Button>
                     </Box>
 
-                    {/* Gallery Grid */}
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 1 }}>
-                      {galleryItems.map((item, idx) => (
-                        <Box key={`gallery-item-${idx}`} sx={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', aspectRatio: '1' }}>
-                          <Box component="img" src={item.url} alt={`gallery-${idx}`} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          <IconButton
-                            size="small"
-                            onClick={() => setGalleryItems((prev) => prev.filter((_, i) => i !== idx))}
-                            sx={{ position: 'absolute', top: 2, right: 2, backgroundColor: 'rgba(244,67,54,0.85)', color: '#fff', p: 0.3, '&:hover': { backgroundColor: '#f44336' } }}
+                    {/* Bulletin List View */}
+                    {bulletPoints.length > 0 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                        {bulletPoints.map((bp, idx) => (
+                          <Box
+                            key={`bullet-${idx}`}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              p: 1.2,
+                              px: 1.8,
+                              borderRadius: '10px',
+                              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(28,20,69,0.03)',
+                              border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                            }}
                           >
-                            <DeleteOutline sx={{ fontSize: '0.8rem' }} />
-                          </IconButton>
-                          {idx < 3 && (
-                            <Box sx={{ position: 'absolute', bottom: 2, left: 2, backgroundColor: 'rgba(28,20,69,0.75)', borderRadius: '4px', px: 0.5, py: 0.1 }}>
-                              <Typography sx={{ color: '#fff', fontSize: '0.55rem', fontWeight: 700 }}>{idx + 1}</Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 22,
+                                  height: 22,
+                                  borderRadius: '50%',
+                                  backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                                  color: isDark ? '#1c1445' : '#ffffff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {idx + 1}
+                              </Box>
+                              <Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 500, fontSize: '0.85rem' }}>
+                                {bp}
+                              </Typography>
                             </Box>
-                          )}
-                        </Box>
-                      ))}
-
-                      {/* Add button �� shown until max 10 */}
-                      {galleryItems.length < 10 && (
-                        <Box
-                          onClick={() => {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'image/*';
-                            input.multiple = true;
-                            input.onchange = (e: any) => {
-                              const files: File[] = Array.from(e.target.files || []);
-                              const remaining = 10 - galleryItems.length;
-                              const toProcess = files.slice(0, remaining);
-                              toProcess.forEach((file) => {
-                                const reader = new FileReader();
-                                reader.onload = (ev) => {
-                                  const dataUrl = ev.target?.result as string;
-                                  setGalleryItems((prev) => {
-                                    if (prev.length >= 10) return prev;
-                                    return [...prev, { url: dataUrl, file }];
-                                  });
-                                };
-                                reader.readAsDataURL(file);
-                              });
-                            };
-                            input.click();
-                          }}
-                          sx={{
-                            borderRadius: '8px', border: `2px dashed ${errors.galleryImages ? '#f44336' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')}`,
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', aspectRatio: '1', minHeight: '90px',
-                            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(28,20,69,0.02)',
-                            '&:hover': { borderColor: isDark ? '#a6e2f5' : '#1c1445', backgroundColor: isDark ? 'rgba(166,226,245,0.05)' : 'rgba(28,20,69,0.04)' },
-                          }}
-                        >
-                          <AddPhotoAlternate sx={{ fontSize: '1.6rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 0.3 }} />
-                          <Typography variant="caption" sx={{ fontSize: '0.6rem', color: isDark ? '#d0caeb' : '#9e9e9e', textAlign: 'center' }}>Add Photo</Typography>
-                        </Box>
-                      )}
-                    </Box>
-
-                    {errors.galleryImages && (
-                      <Typography variant="caption" sx={{ color: '#f44336', fontWeight: 600, display: 'block', mt: 1 }}>
-                        {errors.galleryImages}
-                      </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRemoveBulletPoint(idx)}
+                              sx={{ color: isDark ? '#ff7875' : '#f44336', '&:hover': { backgroundColor: 'rgba(244,67,54,0.1)' } }}
+                            >
+                              <DeleteOutline fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ))}
+                      </Box>
                     )}
                   </Box>
-                ) : imageUrl ? (
-                  <Box sx={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)' }}>
-                    <Box
-                      component="img"
-                      src={imageUrl}
-                      alt="Banner Preview"
-                      sx={{ width: '100%', maxHeight: '260px', objectFit: 'cover', display: 'block' }}
-                    />
-                    <Box sx={{
-                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2,
-                    }}>
-                      <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>
-                        �� Banner Uploaded
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setImageUrl(null);
-                          setImageFile(null);
-                        }}
-                        sx={{ color: '#fff', backgroundColor: 'rgba(244,67,54,0.8)', '&:hover': { backgroundColor: '#f44336' }, p: 0.4 }}
-                      >
-                        <DeleteOutline sx={{ fontSize: '0.9rem' }} />
-                      </IconButton>
-                    </Box>
-                  </Box>
                 ) : (
-                  <Box
-                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={{
-                      border: `2px dashed ${errors.image ? '#f44336' : (dragOver ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'))}`,
-                      borderRadius: '10px', p: 5, textAlign: 'center', cursor: 'pointer',
-                      backgroundColor: dragOver ? 'rgba(166,226,245,0.06)' : 'rgba(28,20,69,0.02)',
-                      '&:hover': { borderColor: errors.image ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
-                    }}
-                  >
-                    <CloudUpload sx={{ fontSize: '3rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 1 }} />
-                    <Typography variant="caption" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600, display: 'block', fontSize: '0.85rem' }}>
-                      Drag and drop banner photo or click to upload
-                    </Typography>
-                  </Box>
-                )}
-                {errors.image && (
-                  <Typography variant="caption" sx={{ color: '#f44336', fontWeight: 600, display: 'block', mt: 1 }}>
-                    {errors.image}
-                  </Typography>
+                  <>
+                    <HtmlEditor
+                      label={t.lblBody}
+                      placeholder={t.phBody}
+                      value={body}
+                      onChange={(val) => {
+                        setBody(val);
+                        if (errors.body) setErrors((prev) => { const n = { ...prev }; delete n.body; return n; });
+                      }}
+                      error={errors.body}
+                      isDark={isDark}
+                      minHeight="220px"
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={isSummarizing || !stripHtml(body).trim()}
+                        onClick={async () => {
+                          setIsSummarizing(true);
+                          try {
+                            const res = await fetch('https://apidev.chotanews.com/summarize', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ content: stripHtml(body) })
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              if (data && (data.summary || data.content)) {
+                                const newContent = data.summary || data.content;
+                                const htmlContent = newContent.startsWith('<') ? newContent : `<p>${newContent}</p>`;
+                                setBody(htmlContent);
+                              }
+                            }
+                          } catch (e) {
+                            console.error('Summarize error:', e);
+                          } finally {
+                            setIsSummarizing(false);
+                          }
+                        }}
+                        startIcon={<AutoAwesome fontSize="small" />}
+                        sx={{
+                          textTransform: 'none',
+                          fontSize: '0.75rem',
+                          py: 0.3,
+                          borderColor: '#a6e2f5',
+                          color: '#a6e2f5',
+                          '&:hover': { borderColor: '#8cd5ed', backgroundColor: 'rgba(166,226,245,0.1)' },
+                          '&.Mui-disabled': { borderColor: 'rgba(166,226,245,0.3)', color: 'rgba(166,226,245,0.3)' }
+                        }}
+                      >
+                        {isSummarizing ? 'Generating...' : 'Regenerate (AI)'}
+                      </Button>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                          fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
+                        }}
+                      >
+                        {t.wordCount(countWords(body), 50)}
+                      </Typography>
+                    </Box>
+                  </>
                 )}
               </Box>
+
+              {/* Image Uploader -- hidden for BulletPost */}
+              {!isBulletPost && (
+                <Box>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); e.target.value = ''; }}
+                  />
+
+                  {type.toLowerCase().includes('gallery') ? (
+                    /* ===== GALLERY MULTI-IMAGE UPLOADER ===== */
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: errors.galleryImages ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445'), fontSize: '0.82rem' }}>
+                          📷 {t.lblGalleryImages}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: galleryItems.length < 3 ? '#f44336' : galleryItems.length >= 10 ? '#ff9800' : (isDark ? '#a6e2f5' : '#1c1445'), fontWeight: 600, fontSize: '0.72rem' }}>
+                          {galleryItems.length}/10 &bull; {t.hintGallery}
+                        </Typography>
+                      </Box>
+
+                      {/* Gallery Grid */}
+                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 1 }}>
+                        {galleryItems.map((item, idx) => (
+                          <Box key={`gallery-item-${idx}`} sx={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', aspectRatio: '1' }}>
+                            <Box component="img" src={item.url} alt={`gallery-${idx}`} sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            <IconButton
+                              size="small"
+                              onClick={() => setGalleryItems((prev) => prev.filter((_, i) => i !== idx))}
+                              sx={{ position: 'absolute', top: 2, right: 2, backgroundColor: 'rgba(244,67,54,0.85)', color: '#fff', p: 0.3, '&:hover': { backgroundColor: '#f44336' } }}
+                            >
+                              <DeleteOutline sx={{ fontSize: '0.8rem' }} />
+                            </IconButton>
+                            {idx < 3 && (
+                              <Box sx={{ position: 'absolute', bottom: 2, left: 2, backgroundColor: 'rgba(28,20,69,0.75)', borderRadius: '4px', px: 0.5, py: 0.1 }}>
+                                <Typography sx={{ color: '#fff', fontSize: '0.55rem', fontWeight: 700 }}>{idx + 1}</Typography>
+                              </Box>
+                            )}
+                          </Box>
+                        ))}
+
+                        {/* Add button  shown until max 10 */}
+                        {galleryItems.length < 10 && (
+                          <Box
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.multiple = true;
+                              input.onchange = (e: any) => {
+                                const files: File[] = Array.from(e.target.files || []);
+                                const remaining = 10 - galleryItems.length;
+                                const toProcess = files.slice(0, remaining);
+                                toProcess.forEach((file) => {
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const dataUrl = ev.target?.result as string;
+                                    setGalleryItems((prev) => {
+                                      if (prev.length >= 10) return prev;
+                                      return [...prev, { url: dataUrl, file }];
+                                    });
+                                  };
+                                  reader.readAsDataURL(file);
+                                });
+                              };
+                              input.click();
+                            }}
+                            sx={{
+                              borderRadius: '8px', border: `2px dashed ${errors.galleryImages ? '#f44336' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')}`,
+                              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                              cursor: 'pointer', aspectRatio: '1', minHeight: '90px',
+                              backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(28,20,69,0.02)',
+                              '&:hover': { borderColor: isDark ? '#a6e2f5' : '#1c1445', backgroundColor: isDark ? 'rgba(166,226,245,0.05)' : 'rgba(28,20,69,0.04)' },
+                            }}
+                          >
+                            <AddPhotoAlternate sx={{ fontSize: '1.6rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 0.3 }} />
+                            <Typography variant="caption" sx={{ fontSize: '0.6rem', color: isDark ? '#d0caeb' : '#9e9e9e', textAlign: 'center' }}>Add Photo</Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {errors.galleryImages && (
+                        <Typography variant="caption" sx={{ color: '#f44336', fontWeight: 600, display: 'block', mt: 1 }}>
+                          {errors.galleryImages}
+                        </Typography>
+                      )}
+                    </Box>
+                  ) : imageUrl ? (
+                    <Box sx={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)' }}>
+                      <Box
+                        component="img"
+                        src={imageUrl}
+                        alt="Banner Preview"
+                        sx={{ width: '100%', maxHeight: '260px', objectFit: 'cover', display: 'block' }}
+                      />
+                      <Box sx={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2,
+                      }}>
+                        <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>
+                          🖼 Banner Uploaded
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setImageUrl(null);
+                            setImageFile(null);
+                          }}
+                          sx={{ color: '#fff', backgroundColor: 'rgba(244,67,54,0.8)', '&:hover': { backgroundColor: '#f44336' }, p: 0.4 }}
+                        >
+                          <DeleteOutline sx={{ fontSize: '0.9rem' }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      sx={{
+                        border: `2px dashed ${errors.image ? '#f44336' : (dragOver ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'))}`,
+                        borderRadius: '10px', p: 5, textAlign: 'center', cursor: 'pointer',
+                        backgroundColor: dragOver ? 'rgba(166,226,245,0.06)' : 'rgba(28,20,69,0.02)',
+                        '&:hover': { borderColor: errors.image ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
+                      }}
+                    >
+                      <CloudUpload sx={{ fontSize: '3rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 1 }} />
+                      <Typography variant="caption" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600, display: 'block', fontSize: '0.85rem' }}>
+                        Drag and drop banner photo or click to upload
+                      </Typography>
+                    </Box>
+                  )}
+                  {errors.image && (
+                    <Typography variant="caption" sx={{ color: '#f44336', fontWeight: 600, display: 'block', mt: 1 }}>
+                      {errors.image}
+                    </Typography>
+                  )}
+                </Box>
+              )}
             </Box>
           </Grid>
         </Grid>

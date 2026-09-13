@@ -38,6 +38,9 @@ export interface NewsPost {
   isSticky?: boolean;
   isWebPost?: boolean;
   is_web_post?: boolean;
+  isHomePost?: boolean;
+  is_home_post?: boolean;
+  colorCode?: string;
   web_post_url?: string;
   createdAt?: string;
   updatedAt?: string;

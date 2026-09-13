@@ -46,7 +46,7 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
     setError(null);
 
     try {
-      // Step 1: Request presigned upload URL from endpoint (try local backend first if available, or api.chotanews.com)
+      // Step 1: Request presigned upload URL from endpoint (try local backend first if available, or apidev.chotanews.com)
       let presignedRes;
       try {
         presignedRes = await axios.post('http://127.0.0.1:8000/movies/upload-url', {
@@ -55,7 +55,7 @@ export const VideoUploader: React.FC<VideoUploaderProps> = ({
           folder,
         });
       } catch (localErr) {
-        presignedRes = await axios.post('https://api.chotanews.com/movies/upload-url', {
+        presignedRes = await axios.post('https://apidev.chotanews.com/movies/upload-url', {
           file_name: file.name,
           content_type: file.type || 'video/mp4',
           folder,

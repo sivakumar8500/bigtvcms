@@ -23,6 +23,8 @@ export const commonNewsPostSchema = z.object({
   draft: z.boolean().default(false),
   trash: z.boolean().default(false),
   isWebPost: z.boolean().default(false),
+  isHomePost: z.boolean().default(false),
+  colorCode: z.string().optional().default(''),
   video_platform: z.string().default(''),
   video_url: z.string().default(''),
   postUrl: z.string().default(''),
@@ -57,6 +59,8 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
   if (input.category_ids === undefined && input.categoryIds !== undefined) input.category_ids = input.categoryIds;
   if (input.is_sticky !== undefined && input.isStickyPost === undefined) input.isStickyPost = input.is_sticky;
   if (input.is_web_post !== undefined && input.isWebPost === undefined) input.isWebPost = input.is_web_post;
+  if (input.is_home_post !== undefined && input.isHomePost === undefined) input.isHomePost = input.is_home_post;
+  if (input.color_code !== undefined && input.colorCode === undefined) input.colorCode = input.color_code;
   if (input.imageUrl !== undefined && input.image_url === undefined) input.image_url = input.imageUrl;
   if (input.videoUrl !== undefined && input.video_url === undefined) input.video_url = input.videoUrl;
   if (input.videoPlatform !== undefined && input.video_platform === undefined) input.video_platform = input.videoPlatform;

@@ -25,6 +25,7 @@ export interface NewsPostDto {
   linkURLIos?: string;
   links?: string | string[] | Array<{ id: string; value: string }>;
   bulletPoints?: string[];
+  bullet_points?: string[];
   isBookmarked?: string[];
   postOrder?: number;
   draft?: boolean;
@@ -37,9 +38,13 @@ export interface NewsPostDto {
   is_sticky?: boolean;
   isWebPost?: boolean;
   is_web_post?: boolean;
+  isHomePost?: boolean;
+  is_home_post?: boolean;
+  colorCode?: string;
   web_post_url?: string;
   device_id?: string;
   aitag_ids?: number[];
+  morefollow_tag_ids?: number[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -70,6 +75,7 @@ export interface CreateNewsPostDto {
   linkURLIos: string;
   links: string | string[] | Array<{ id: string; value: string }>;
   bulletPoints?: string[];
+  bullet_points?: string[];
   isBookmarked: string[];
   postOrder: number;
   draft: boolean;
@@ -83,9 +89,13 @@ export interface CreateNewsPostDto {
   is_sticky?: boolean;
   isWebPost?: boolean;
   is_web_post?: boolean;
+  isHomePost?: boolean;
+  is_home_post?: boolean;
+  colorCode?: string;
   web_post_url?: string;
   device_id?: string;
   aitag_ids?: number[];
+  morefollow_tag_ids?: number[];
   sendNotification?: boolean;
 }
 
@@ -116,6 +126,7 @@ export interface UpdateNewsPostDto {
   linkURLIos?: string;
   links?: string | string[] | Array<{ id: string; value: string }>;
   bulletPoints?: string[];
+  bullet_points?: string[];
   isBookmarked?: string[];
   postOrder?: number;
   draft?: boolean;
@@ -128,9 +139,13 @@ export interface UpdateNewsPostDto {
   is_sticky?: boolean;
   isWebPost?: boolean;
   is_web_post?: boolean;
+  isHomePost?: boolean;
+  is_home_post?: boolean;
+  colorCode?: string;
   web_post_url?: string;
   device_id?: string;
   aitag_ids?: number[];
+  morefollow_tag_ids?: number[];
 }
 
 export interface GetNewsPostsParams {

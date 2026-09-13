@@ -435,6 +435,59 @@ describe('CreateNewsForm component', () => {
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 
+  it('should pass isHomePost as true when enabled in form or initialData', async () => {
+    const initialDataHomePost = {
+      titleEn: 'Home Post Title',
+      bodyEn: 'Home Post Body',
+      categories: ['Entertainment'],
+      tags: [],
+      location: ['Telangana'],
+      type: 'Standard',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c',
+      postLanguage: 'en' as const,
+      isHomePost: true,
+    };
+
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={initialDataHomePost as any}
+      />
+    );
+
+    expect(screen.getByText('🏠 Home Post')).toBeInTheDocument();
+  });
+
+  it('should render Special Post Color field ONLY when BigTvSpecial post type is selected', async () => {
+    const initialDataSpecial = {
+      titleEn: 'Special Title',
+      bodyEn: 'Special Body',
+      categories: ['Entertainment'],
+      tags: [],
+      location: ['Telangana'],
+      type: 'BigTvSpecial',
+      imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c',
+      postLanguage: 'en' as const,
+      colorCode: '#FF5722',
+    };
+
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={initialDataSpecial as any}
+      />
+    );
+
+    expect(screen.getByText('🎨 Special Post Color')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. #FF5722')).toHaveValue('#FF5722');
+  });
+
   it('should not require notificationTitle when submitting form (notification title is optional)', async () => {
     render(
       <CreateNewsForm
@@ -598,6 +651,140 @@ describe('CreateNewsForm component', () => {
     fireEvent.click(submitBtn);
 
     expect(screen.getByText(/Please enter a valid URL/i)).toBeInTheDocument();
+  });
+
+  it('should render More Follow Tags multiselect dropdown and support item selection', async () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+      />
+    );
+
+    const moreFollowSelect = screen.getByLabelText(/More Follow Tags/i);
+    expect(moreFollowSelect).toBeInTheDocument();
+
+    fireEvent.mouseDown(moreFollowSelect);
+
+    await waitFor(() => {
+      expect(screen.getByText('DSC')).toBeInTheDocument();
+    });
+
+    const option = screen.getByText('DSC');
+    fireEvent.click(option);
+
+    fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape', keyCode: 27 });
+  });
+
+  it('should include selected More Follow IDs in onSubmit payload', async () => {
+    const { container } = render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          titleEn: 'Test Headline',
+          bodyEn: 'Test content body',
+          categories: ['Entertainment'],
+          tags: ['Trending'],
+          location: ['Telangana'],
+          type: 'Standard',
+          imageUrl: 'https://example.com/banner.jpg',
+          postLanguage: 'en',
+          morefollowTagIds: [1, 2],
+        }}
+      />
+    );
+
+    const submitBtn = screen.getByRole('button', { name: 'Update News' });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/News Preview/i)).toBeInTheDocument();
+    });
+
+    const confirmBtn = screen.getByRole('button', { name: 'Save Changes' });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          morefollowTagIds: [1, 2],
+          morefollow_tag_ids: [1, 2],
+        })
+      );
+    });
+  });
+
+  it('should render Bulletins input section and hide HtmlEditor/Banner upload when BulletPost post type is selected', () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          type: 'BulletPost',
+        }}
+      />
+    );
+
+    expect(screen.getByText(/Bulletins/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Enter bulletin point text/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+    expect(screen.queryByText(/Drag and drop banner photo/i)).toBeNull();
+  });
+
+  it('should allow adding bullet points and include bulletPoints in onSubmit payload for BulletPost', async () => {
+    render(
+      <CreateNewsForm
+        onClose={mockOnClose}
+        onSubmit={mockOnSubmit}
+        isDark={false}
+        language="en"
+        initialData={{
+          titleEn: 'Bulletin Headline',
+          categories: ['General'],
+          tags: ['Trending'],
+          location: ['Telangana'],
+          type: 'BulletPost',
+          postLanguage: 'en',
+          bulletPoints: ['First bulletin point', 'Second bulletin point'],
+        }}
+      />
+    );
+
+    expect(screen.getByText('First bulletin point')).toBeInTheDocument();
+    expect(screen.getByText('Second bulletin point')).toBeInTheDocument();
+
+    const bulletInput = screen.getByPlaceholderText(/Enter bulletin point text/i);
+    fireEvent.change(bulletInput, { target: { value: 'Third bulletin point' } });
+    const addBtn = screen.getByRole('button', { name: 'Add' });
+    fireEvent.click(addBtn);
+
+    expect(screen.getByText('Third bulletin point')).toBeInTheDocument();
+
+    const submitBtn = screen.getByRole('button', { name: 'Update News' });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/News Preview/i)).toBeInTheDocument();
+    });
+
+    const confirmBtn = screen.getByRole('button', { name: 'Save Changes' });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bulletPoints: ['First bulletin point', 'Second bulletin point', 'Third bulletin point'],
+          bullet_points: ['First bulletin point', 'Second bulletin point', 'Third bulletin point'],
+        })
+      );
+    });
   });
 });
 
