@@ -154,7 +154,7 @@ export const useEventsController = () => {
     } else {
       await eventsRepository.createEvent(input as CreateEventInput);
     }
-    handleCloseModal();
+    handleCloseDrawer();
     fetchAllData();
   };
 

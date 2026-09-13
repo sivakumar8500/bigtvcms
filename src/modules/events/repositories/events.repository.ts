@@ -5,8 +5,10 @@ import {
   UpdateEventInput,
   TicketTypeItem,
   CreateTicketTypeInput,
+  UpdateTicketTypeInput,
   CouponItem,
   CreateCouponInput,
+  UpdateCouponInput,
   AppConfigItem,
 } from '../domain/event.types';
 import { eventsApiClient, apiClient } from '@/core/api/api-client';

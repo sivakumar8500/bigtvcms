@@ -21,6 +21,8 @@ export interface CreateMoreFollowDto {
     ml?: string;
   };
   image_url: string;
+  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface UpdateMoreFollowDto {

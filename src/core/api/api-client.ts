@@ -286,6 +286,10 @@ export class ApiClient {
     return this.request<T>({ method: 'put', url, data });
   }
 
+  public async patch<T, R = unknown>(url: string, data: R): Promise<T> {
+    return this.request<T>({ method: 'patch', url, data });
+  }
+
   public async delete<T>(url: string): Promise<T> {
     return this.request<T>({ method: 'delete', url });
   }

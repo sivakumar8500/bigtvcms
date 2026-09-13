@@ -1,7 +1,7 @@
 import { apiClient } from '@/core/api/api-client';
 import axios from 'axios';
 import { MoreFollowItem } from '../domain/more-follow.model';
-import { CreateMoreFollowDto, CreateMoreFollowResponse, UpdateMoreFollowDto } from '../dto/more-follow.dto';
+import { CreateMoreFollowDto, CreateMoreFollowResponse, UpdateMoreFollowDto, UpdateMoreFollowResponse } from '../dto/more-follow.dto';
 
 const MOCK_API_RESPONSE: MoreFollowItem[] = [
   {

@@ -395,6 +395,7 @@ export interface CreateNewsFormData {
   bulletPoints?: string[];
   bullet_points?: string[];
   subType?: string;
+  sub_type?: string;
 }
 
 interface CreateNewsFormProps {
