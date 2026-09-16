@@ -132,6 +132,18 @@ export function useLiveTvVideosController() {
     setPlayerModalOpen(true);
   };
 
+  const handleDeleteVideo = async (fileName: string) => {
+    if (!selectedTagSlug) return;
+    setActionError(null);
+    try {
+      await liveTvVideosRepository.deleteVideoFromTag(selectedTagSlug, fileName);
+      setVideos((prev) => prev.filter((v) => v.fileName !== fileName));
+      setActionSuccess('Video deleted successfully');
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to delete video');
+    }
+  };
+
   const handleOpenEditTagModal = (tag: VideoTag) => {
     setActiveTagForEdit(tag);
     setEditTagModalOpen(true);
@@ -168,6 +180,7 @@ export function useLiveTvVideosController() {
     handleUpdateTag,
     handleDeleteTag,
     handlePlayVideo,
+    handleDeleteVideo,
     handleOpenEditTagModal,
   };
 }

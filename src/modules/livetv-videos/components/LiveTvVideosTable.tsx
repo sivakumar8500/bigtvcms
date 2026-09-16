@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, IconButton, Tooltip } from '@mui/material';
-import { PlayCircleOutline, LiveTv } from '@mui/icons-material';
+import { PlayCircleOutline, LiveTv, DeleteOutline } from '@mui/icons-material';
 import { TagVideo } from '../domain/LiveTvVideo';
 
 interface LiveTvVideosTableProps {
@@ -10,6 +10,7 @@ interface LiveTvVideosTableProps {
   t: Record<string, string>;
   isDark: boolean;
   onPlay: (video: TagVideo) => void;
+  onDeleteVideo?: (fileName: string) => void;
 }
 
 export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
@@ -17,6 +18,7 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
   t,
   isDark,
   onPlay,
+  onDeleteVideo,
 }) => {
   const colStyle = (flex: number) => ({
     flex,
@@ -134,6 +136,21 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
                       <PlayCircleOutline fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  {onDeleteVideo && (
+                    <Tooltip title={t.deleteVideo || 'Delete Video'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (window.confirm(t.confirmDeleteVideo || 'Are you sure you want to delete this video?')) {
+                            onDeleteVideo(item.fileName);
+                          }
+                        }}
+                        sx={{ color: '#ef4444' }}
+                      >
+                        <DeleteOutline fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </Box>
               </Box>
             </Box>

@@ -137,6 +137,23 @@ export class LiveTvVideosRepository {
     }
     return [];
   }
+
+  /**
+   * DELETE /video-tags/:slug/videos/:fileName
+   */
+  public async deleteVideoFromTag(slug: string, fileName: string): Promise<boolean> {
+    if (isTestEnv) return true;
+
+    try {
+      await videoApiClient.delete<{ success: boolean; message: string }>(`/video-tags/${slug}/videos/${fileName}`);
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.message) {
+        throw new Error(err.response.data.message);
+      }
+      throw new Error('Failed to delete video');
+    }
+  }
 }
 
 export const liveTvVideosRepository = new LiveTvVideosRepository();

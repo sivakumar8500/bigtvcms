@@ -139,6 +139,7 @@ export const LiveTvVideosPage: React.FC = () => {
     handleUpdateTag,
     handleDeleteTag,
     handlePlayVideo,
+    handleDeleteVideo,
     handleOpenEditTagModal,
   } = useLiveTvVideosController();
 
@@ -401,6 +402,7 @@ export const LiveTvVideosPage: React.FC = () => {
                   t={t}
                   isDark={isDark}
                   onPlay={handlePlayVideo}
+                  onDeleteVideo={handleDeleteVideo}
                 />
               )}
 
