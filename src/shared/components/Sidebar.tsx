@@ -19,6 +19,7 @@ import {
   Campaign as CampaignIcon,
   RssFeed,
   Event as EventIcon,
+  LiveTv,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,6 +35,7 @@ const sidebarTranslations = {
     menuReels: 'Reels',
     menuMovies: 'Movies',
     menuEvents: 'Events',
+    menuLiveTvVideos: 'Live TV Videos',
     menuWebArticles: 'Web Articles',
     menuEpapers: 'Epapers',
     menuLocations: 'Locations',
@@ -53,6 +55,7 @@ const sidebarTranslations = {
     menuReels: 'రీల్స్',
     menuMovies: 'సినిమాలు',
     menuEvents: 'ఈవెంట్లు',
+    menuLiveTvVideos: 'లైవ్ టీవీ వీడియోలు',
     menuWebArticles: 'వెబ్ వ్యాసాలు',
     menuEpapers: 'ఈ-పేపర్లు',
     menuLocations: 'ప్రాంతాలు',
@@ -72,6 +75,7 @@ const sidebarTranslations = {
     menuReels: 'रील्स',
     menuMovies: 'मूवीज',
     menuEvents: 'इवेंट्स',
+    menuLiveTvVideos: 'लाइव टीवी वीडियो',
     menuWebArticles: 'वेब लेख',
     menuEpapers: 'ई-पेपर',
     menuLocations: 'स्थान',
@@ -91,6 +95,7 @@ const sidebarTranslations = {
     menuReels: 'റീലുകൾ',
     menuMovies: 'സിനിമകൾ',
     menuEvents: 'ഇവന്റുകൾ',
+    menuLiveTvVideos: 'ലൈവ് ടിവി വീഡിയോകൾ',
     menuWebArticles: 'വെബ് ലേഖനങ്ങൾ',
     menuEpapers: 'ഇ-പേപ്പറുകൾ',
     menuLocations: 'സ്ഥലങ്ങൾ',
@@ -126,6 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuMovies, icon: <LocalMoviesIcon />, href: '/movies' },
     { text: t.menuEvents, icon: <EventIcon />, href: '/events' },
+    { text: t.menuLiveTvVideos, icon: <LiveTv />, href: '/livetvvideos' },
     { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
     { text: t.menuEpapers, icon: <NewspaperIcon />, href: '/epapers' },
     { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
@@ -154,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     userRole === 'adsdynapix_creator' ||
     userRole === 'ads_dynapix_creator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/events', '/web-articles', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/events', '/livetvvideos', '/web-articles', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
@@ -166,6 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/reels',
     '/movies',
     '/events',
+    '/livetvvideos',
     '/web-articles',
     '/epapers',
     '/aitags',

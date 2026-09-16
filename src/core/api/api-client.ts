@@ -310,3 +310,11 @@ export const eventsApiClient = new ApiClient(
   ).replace(/\/$/, '')
 );
 
+export const videoApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_VIDEO_API_BASE_URL ||
+    'http://localhost:1100/api/v1'
+  ).replace(/\/$/, '')
+);
+
+

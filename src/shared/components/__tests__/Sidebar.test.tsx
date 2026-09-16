@@ -66,6 +66,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.getByText('Movies')).toBeInTheDocument();
     expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Live TV Videos')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
     expect(screen.getByText('Epapers')).toBeInTheDocument();
