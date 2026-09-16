@@ -143,6 +143,7 @@ export class ApiClient {
               config.url?.includes('/states') ||
               config.url?.includes('/locations') ||
               config.url?.includes('/creators') ||
+              config.url?.includes('/video-tags') ||
               config.params?.skip_lang_param;
 
             if (isBypassLangApi) {
