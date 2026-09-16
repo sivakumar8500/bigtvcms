@@ -314,7 +314,7 @@ export const eventsApiClient = new ApiClient(
 export const videoApiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_VIDEO_API_BASE_URL ||
-    'http://localhost:1100/api/v1'
+    'https://api.pravasamedia.com/api/v1'
   ).replace(/\/$/, '')
 );
 
