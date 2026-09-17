@@ -249,7 +249,7 @@ export class ApiClient {
     return axios.post(`${this.axiosInstance.defaults.baseURL}/auth/refresh`, { refreshToken });
   }
 
-  private async request<T>(config: { method: string; url: string; data?: unknown; params?: Record<string, unknown> }): Promise<T> {
+  private async request<T>(config: { method: string; url: string; data?: unknown; params?: Record<string, unknown>; headers?: any }): Promise<T> {
     const response = await this.axiosInstance.request<T>(config);
     return response.data;
   }
@@ -279,16 +279,16 @@ export class ApiClient {
     return promise;
   }
 
-  public async post<T, R = unknown>(url: string, data: R): Promise<T> {
-    return this.request<T>({ method: 'post', url, data });
+  public async post<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'post', url, data, ...config });
   }
 
-  public async put<T, R = unknown>(url: string, data: R): Promise<T> {
-    return this.request<T>({ method: 'put', url, data });
+  public async put<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'put', url, data, ...config });
   }
 
-  public async patch<T, R = unknown>(url: string, data: R): Promise<T> {
-    return this.request<T>({ method: 'patch', url, data });
+  public async patch<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'patch', url, data, ...config });
   }
 
   public async delete<T>(url: string): Promise<T> {
