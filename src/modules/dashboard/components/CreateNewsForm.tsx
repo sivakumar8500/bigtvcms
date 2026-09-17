@@ -798,6 +798,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   });
   const [bulletInputText, setBulletInputText] = useState<string>('');
 
+  const engTranslation = isEditMode ? (initialData as any)?.translations?.english || (initialData as any)?.translations?.en : null;
+
   const isImageOrGalleryType =
     ['image', 'image ad', 'gallery', 'video'].includes(type.toLowerCase().trim()) ||
     type.toLowerCase().includes('image') ||
@@ -2805,6 +2807,16 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   >
                     {t.wordCount(countWords(title), 10)}
                   </Typography>
+                  {engTranslation?.title && (
+                    <Box sx={{ mt: 1, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                      <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        English Translation (Read-Only)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+                        {engTranslation.title}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
                 {/* Notification Title with Send Notification Switch beside it */}
@@ -2845,6 +2857,16 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     >
                       {t.wordCount(countWords(notificationTitle), 10)}
                     </Typography>
+                    {engTranslation?.notificationtitle && (
+                      <Box sx={{ mt: 1, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                        <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                          English Translation (Read-Only)
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+                          {engTranslation.notificationtitle}
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
 
                   <Box
@@ -2966,6 +2988,16 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       >
                         {t.wordCount(countWords(imageTitle), 10)}
                       </Typography>
+                      {engTranslation?.imagetitel && (
+                        <Box sx={{ mt: 1, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                          <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                            English Translation (Read-Only)
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+                            {engTranslation.imagetitel}
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
 
                     <Box
@@ -3126,6 +3158,20 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         ))}
                       </Box>
                     )}
+                    {engTranslation?.bulletPoints && Array.isArray(engTranslation.bulletPoints) && engTranslation.bulletPoints.length > 0 && (
+                      <Box sx={{ mt: 1, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                        <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                          English Translation (Read-Only)
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                          {engTranslation.bulletPoints.map((bp: string, idx: number) => (
+                            <Typography key={`eng-bullet-${idx}`} variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+                              • {bp}
+                            </Typography>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 ) : (
                   <>
@@ -3191,6 +3237,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                         {t.wordCount(countWords(body), 50)}
                       </Typography>
                     </Box>
+                    {engTranslation?.content && (
+                      <Box sx={{ mt: 2, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                        <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                          English Translation (Read-Only)
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }} dangerouslySetInnerHTML={{ __html: engTranslation.content }} />
+                      </Box>
+                    )}
                   </>
                 )}
               </Box>
