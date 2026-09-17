@@ -298,76 +298,100 @@ export const LiveTvVideosPage: React.FC = () => {
                 </Tabs>
               </Box>
 
-              {/* Tag Controls Bar */}
-              {selectedTag && (
+              {/* Unified Header, Stats, and Search */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2.5,
+                  p: 3,
+                  borderRadius: '20px',
+                  backgroundColor: isDark ? 'rgba(38,28,86,0.4)' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+                  boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.2)' : '0 8px 32px rgba(0,0,0,0.04)',
+                }}
+              >
                 <Box
                   sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
                     justifyContent: 'space-between',
-                    alignItems: { xs: 'stretch', md: 'center' },
-                    gap: 2,
-                    p: 2.5,
-                    borderRadius: '16px',
-                    backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                    gap: 3,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      {selectedTag.name}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+                    {selectedTag && (
+                      <>
+                        <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                          {selectedTag.name}
+                        </Typography>
+                        <Box sx={{ width: '1px', height: '32px', backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)' }} />
+                      </>
+                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 40,
+                          height: 40,
+                          borderRadius: '10px',
+                          backgroundColor: isDark ? 'rgba(147,197,253,0.15)' : 'rgba(37,99,235,0.1)',
+                          color: isDark ? '#93c5fd' : '#2563eb',
+                        }}
+                      >
+                        <LiveTv fontSize="small" />
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>
+                          {t.totalVideos}
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1, mt: 0.3 }}>
+                          {stats.total}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Edit />}
-                      onClick={() => handleOpenEditTagModal(selectedTag)}
-                      sx={{
-                        borderRadius: '12px',
-                        textTransform: 'none',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {t.editTag}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      startIcon={<DeleteSweep />}
-                      onClick={() => setDeleteConfirmOpen(true)}
-                      sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 700 }}
-                    >
-                      {t.deleteTag}
-                    </Button>
-                  </Box>
+                  {selectedTag && (
+                    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                      <Button
+                        variant="outlined"
+                        startIcon={<Edit />}
+                        onClick={() => handleOpenEditTagModal(selectedTag)}
+                        sx={{
+                          borderRadius: '12px',
+                          textTransform: 'none',
+                          fontWeight: 700,
+                          borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                          color: isDark ? '#ffffff' : '#1c1445',
+                          '&:hover': {
+                            borderColor: isDark ? '#ffffff' : '#1c1445',
+                            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                          },
+                        }}
+                      >
+                        {t.editTag}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<DeleteSweep />}
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        sx={{
+                          borderRadius: '12px',
+                          textTransform: 'none',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {t.deleteTag}
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
-              )}
 
-              {/* Stats Counters */}
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: '16px',
-                      backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
-                      border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}>
-                      {t.totalVideos}
-                    </Typography>
-                    <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5 }}>
-                      {stats.total}
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              {/* Search Bar */}
-              <Box>
                 <TextField
                   fullWidth
                   placeholder={t.searchPlaceholder}
@@ -383,10 +407,16 @@ export const LiveTvVideosPage: React.FC = () => {
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '14px',
-                      backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
+                      backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#f8fafc',
                       color: isDark ? '#ffffff' : '#1c1445',
                       '& fieldset': {
-                        borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+                        borderColor: 'transparent',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#2563eb',
                       },
                     },
                   }}

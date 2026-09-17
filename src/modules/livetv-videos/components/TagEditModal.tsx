@@ -20,7 +20,7 @@ interface TagEditModalProps {
   open: boolean;
   onClose: () => void;
   tag: VideoTag | null;
-  onSave: (slug: string, name: string) => Promise<void>;
+  onSave: (slug: string, name: string, file?: File | null) => Promise<void>;
   isDark: boolean;
   t: Record<string, string>;
 }
@@ -34,17 +34,39 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
   t,
 }) => {
   const [name, setName] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      const objectUrl = URL.createObjectURL(selectedFile);
+      setPreview(objectUrl);
+    }
+  };
 
   useEffect(() => {
     if (tag) {
       setName(tag.name);
+      // If tag has a thumbnailUrl, set it as preview initially
+      setPreview(tag.thumbnailUrl || null);
     } else {
       setName('');
+      setPreview(null);
     }
+    setFile(null);
     setError(null);
   }, [tag, open]);
+
+  useEffect(() => {
+    // Cleanup object URL
+    if (!open) {
+      if (preview && preview.startsWith('blob:')) URL.revokeObjectURL(preview);
+    }
+  }, [open, preview]);
 
   const handleSubmit = async () => {
     if (!tag) return;
@@ -55,7 +77,8 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      await onSave(tag.slug, name.trim());
+      await onSave(tag.slug, name.trim(), file);
+      setFile(null);
     } catch (err: any) {
       setError(err.message || 'Failed to edit tag');
     } finally {
@@ -120,6 +143,31 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
               },
             }}
           />
+          
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1, color: isDark ? '#94a3b8' : undefined }}>
+              {t.tagImageLabel || 'Thumbnail Image (Optional)'}
+            </Typography>
+            <Button variant="outlined" component="label" disabled={isSubmitting}>
+              {t.uploadImage || 'Upload Image'}
+              <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+            </Button>
+            {preview && (
+              <Box sx={{ mt: 2, position: 'relative', width: 100, height: 100 }}>
+                <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setFile(null);
+                    setPreview(null);
+                  }}
+                  sx={{ position: 'absolute', top: -8, right: -8, backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' } }}
+                >
+                  <Close fontSize="small" />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
           {error && (
             <Typography variant="body2" color="error">
               {error}

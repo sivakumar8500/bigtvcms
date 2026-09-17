@@ -85,10 +85,10 @@ export function useLiveTvVideosController() {
     setPage(1);
   };
 
-  const handleCreateTag = async (name: string, slug: string) => {
+  const handleCreateTag = async (name: string, slug: string, file?: File | null) => {
     setActionError(null);
     try {
-      const newTag = await liveTvVideosRepository.createVideoTag(name, slug);
+      const newTag = await liveTvVideosRepository.createVideoTag(name, slug, file);
       setTags((prev) => [...prev, newTag]);
       setSelectedTagSlug(newTag.slug); // Auto-select new tag
       setActionSuccess('Video tag created successfully');
@@ -99,10 +99,10 @@ export function useLiveTvVideosController() {
     }
   };
 
-  const handleUpdateTag = async (slug: string, name: string) => {
+  const handleUpdateTag = async (slug: string, name: string, file?: File | null) => {
     setActionError(null);
     try {
-      const updatedTag = await liveTvVideosRepository.updateVideoTag(slug, name);
+      const updatedTag = await liveTvVideosRepository.updateVideoTag(slug, name, file);
       setTags((prev) => prev.map((t) => (t.slug === slug ? updatedTag : t)));
       setActionSuccess('Video tag updated successfully');
       setEditTagModalOpen(false);

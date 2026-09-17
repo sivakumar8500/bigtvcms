@@ -2,6 +2,7 @@ export interface VideoTag {
   id: string;
   name: string;
   slug: string;
+  thumbnailUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

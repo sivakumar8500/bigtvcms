@@ -34,7 +34,7 @@ export class LiveTvVideosRepository {
   /**
    * POST /video-tags
    */
-  public async createVideoTag(name: string, slug: string): Promise<VideoTag> {
+  public async createVideoTag(name: string, slug: string, thumbnail?: File | null): Promise<VideoTag> {
     if (isTestEnv) {
       return {
         id: 'test-id-new',
@@ -46,10 +46,21 @@ export class LiveTvVideosRepository {
     }
 
     try {
-      const res = await videoApiClient.post<{ success: boolean; data: VideoTag }>('/video-tags', {
-        name,
-        slug,
-      });
+      let data: any;
+      let headers: any = {};
+      
+      if (thumbnail) {
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('slug', slug);
+        formData.append('thumbnail', thumbnail);
+        data = formData;
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        data = { name, slug };
+      }
+
+      const res = await videoApiClient.post<{ success: boolean; data: VideoTag }>('/video-tags', data, { headers });
       if (res && res.data) {
         return res.data;
       }
@@ -65,7 +76,7 @@ export class LiveTvVideosRepository {
   /**
    * PATCH /video-tags/:slug
    */
-  public async updateVideoTag(slug: string, name: string): Promise<VideoTag> {
+  public async updateVideoTag(slug: string, name: string, thumbnail?: File | null): Promise<VideoTag> {
     if (isTestEnv) {
       return {
         id: 'test-id-update',
@@ -77,9 +88,23 @@ export class LiveTvVideosRepository {
     }
 
     try {
+      let data: any;
+      let headers: any = {};
+      
+      if (thumbnail) {
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('thumbnail', thumbnail);
+        data = formData;
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        data = { name };
+      }
+
       const res = await videoApiClient.patch<{ success: boolean; data: VideoTag }>(
         `/video-tags/${slug}`,
-        { name }
+        data,
+        { headers }
       );
       if (res && res.data) {
         return res.data;
