@@ -45,5 +45,6 @@ export interface NewsPost {
   createdAt?: string;
   updatedAt?: string;
   sendNotification?: boolean;
+  translations?: any;
 }
 

@@ -51,6 +51,7 @@ export class NewsMapper {
       web_post_url: dto.web_post_url || (dto as any).webPostUrl || (dto as any).webUrl || dto.postUrl || '',
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      translations: dto.translations,
     };
   }
 
@@ -194,6 +195,7 @@ export class NewsMapper {
       is_home_post: Boolean((domain as any).isHomePost ?? (domain as any).is_home_post ?? false),
       colorCode: (domain as any).colorCode || (domain as any).color_code || '',
       sendNotification: domain.sendNotification ?? (domain as any).sendNotification,
+      translations: domain.translations,
     };
   }
 

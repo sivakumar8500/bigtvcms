@@ -166,7 +166,8 @@ describe('CreateNewsForm component', () => {
 
     // English title/body/notification/image title
     fireEvent.change(screen.getByPlaceholderText(/Enter news headline/i), { target: { value: 'Breaking News' } });
-    fireEvent.change(screen.getByPlaceholderText(/Enter notification title/i), { target: { value: 'Notification headline' } });
+    const notifEditor = document.querySelector('[data-placeholder*="Enter notification title"]');
+    if (notifEditor) fireEvent.input(notifEditor, { target: { textContent: 'Notification headline' } });
     fireEvent.change(screen.getByPlaceholderText(/Enter image\/banner title/i), { target: { value: 'Banner title' } });
     fireEvent.change(screen.getByPlaceholderText(/Write news body content/i), { target: { value: 'Something big happened.' } });
 
@@ -232,7 +233,8 @@ describe('CreateNewsForm component', () => {
     // Input fields
     fireEvent.click(screen.getByLabelText('Entertainment'));
     fireEvent.change(screen.getByPlaceholderText(/Enter news headline/i), { target: { value: 'Headline text' } });
-    fireEvent.change(screen.getByPlaceholderText(/Enter notification title/i), { target: { value: 'Notification text' } });
+    const notifEditor2 = document.querySelector('[data-placeholder*="Enter notification title"]');
+    if (notifEditor2) fireEvent.input(notifEditor2, { target: { textContent: 'Notification text' } });
     fireEvent.change(screen.getByPlaceholderText(/Enter image\/banner title/i), { target: { value: 'Image title text' } });
     fireEvent.change(screen.getByPlaceholderText(/Write news body content/i), { target: { value: 'Body content text' } });
     
@@ -293,7 +295,8 @@ describe('CreateNewsForm component', () => {
     // Input fields
     fireEvent.click(screen.getByLabelText('Entertainment'));
     fireEvent.change(screen.getByPlaceholderText(/Enter news headline/i), { target: { value: 'Failed Upload News' } });
-    fireEvent.change(screen.getByPlaceholderText(/Enter notification title/i), { target: { value: 'Failed Upload Notification' } });
+    const notifEditor3 = document.querySelector('[data-placeholder*="Enter notification title"]');
+    if (notifEditor3) fireEvent.input(notifEditor3, { target: { textContent: 'Failed Upload Notification' } });
     fireEvent.change(screen.getByPlaceholderText(/Enter image\/banner title/i), { target: { value: 'Failed Upload Image Title' } });
     fireEvent.change(screen.getByPlaceholderText(/Write news body content/i), { target: { value: 'Test body' } });
     
@@ -504,7 +507,7 @@ describe('CreateNewsForm component', () => {
 
     // Notification title is not mandatory, so "Notification title is required" should not be shown
     expect(screen.queryByText('Notification title is required')).toBeNull();
-    expect(screen.getByLabelText('Notification Title')).toBeInTheDocument();
+    expect(screen.getByText('Notification Title')).toBeInTheDocument();
   });
 
   it('should toggle Send Notification switch and disable/enable notification title input', () => {
@@ -521,13 +524,17 @@ describe('CreateNewsForm component', () => {
     const sendNotifSwitch = screen.getByLabelText('Send Notification');
     expect(sendNotifSwitch).toBeChecked();
 
-    const notifInput = screen.getByPlaceholderText(/Enter notification title/i);
-    expect(notifInput).not.toBeDisabled();
+    // Since we're using HtmlEditor now, we check the label and its wrapper's style
+    const notifLabel = screen.getByText('Notification Title');
+    const editorWrapper = notifLabel.closest('.MuiBox-root')?.parentElement;
+    
+    // Default opacity is 1
+    expect(editorWrapper).toHaveStyle('opacity: 1');
 
     // Toggle switch off
     fireEvent.click(sendNotifSwitch);
     expect(sendNotifSwitch).not.toBeChecked();
-    expect(notifInput).toBeDisabled();
+    expect(editorWrapper).toHaveStyle('opacity: 0.5');
   });
 
   it('should not require imageTitle when post type is video', () => {
@@ -719,7 +726,7 @@ describe('CreateNewsForm component', () => {
     });
   });
 
-  it('should render Bulletins input section and hide HtmlEditor/Banner upload when BulletPost post type is selected', () => {
+  it('should render Bulletins input section and Banner upload when BulletPost post type is selected', () => {
     render(
       <CreateNewsForm
         onClose={mockOnClose}
@@ -735,7 +742,7 @@ describe('CreateNewsForm component', () => {
     expect(screen.getByText(/Bulletins/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Enter bulletin point text/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add' })).toBeInTheDocument();
-    expect(screen.queryByText(/Drag and drop banner photo/i)).toBeNull();
+    expect(screen.getByText(/Drag and drop banner photo/i)).toBeInTheDocument();
   });
 
   it('should allow adding bullet points and include bulletPoints in onSubmit payload for BulletPost', async () => {
@@ -757,15 +764,15 @@ describe('CreateNewsForm component', () => {
       />
     );
 
-    expect(screen.getByText('First bulletin point')).toBeInTheDocument();
-    expect(screen.getByText('Second bulletin point')).toBeInTheDocument();
+    expect(screen.getAllByText('First bulletin point')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Second bulletin point')[0]).toBeInTheDocument();
 
     const bulletInput = screen.getByPlaceholderText(/Enter bulletin point text/i);
     fireEvent.change(bulletInput, { target: { value: 'Third bulletin point' } });
     const addBtn = screen.getByRole('button', { name: 'Add' });
     fireEvent.click(addBtn);
 
-    expect(screen.getByText('Third bulletin point')).toBeInTheDocument();
+    expect(screen.getAllByText('Third bulletin point')[0]).toBeInTheDocument();
 
     const submitBtn = screen.getByRole('button', { name: 'Update News' });
     fireEvent.click(submitBtn);

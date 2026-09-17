@@ -47,6 +47,7 @@ export interface NewsPostDto {
   morefollow_tag_ids?: number[];
   createdAt?: string;
   updatedAt?: string;
+  translations?: any;
 }
 
 export interface CreateNewsPostDto {
@@ -97,6 +98,7 @@ export interface CreateNewsPostDto {
   aitag_ids?: number[];
   morefollow_tag_ids?: number[];
   sendNotification?: boolean;
+  translations?: any;
 }
 
 export interface UpdateNewsPostDto {
@@ -146,6 +148,7 @@ export interface UpdateNewsPostDto {
   device_id?: string;
   aitag_ids?: number[];
   morefollow_tag_ids?: number[];
+  translations?: any;
 }
 
 export interface GetNewsPostsParams {

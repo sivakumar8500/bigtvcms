@@ -818,7 +818,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   const isBulletPost =
     type.toLowerCase() === 'bulletpost' ||
     type.toLowerCase() === 'bullet post' ||
-    type.toLowerCase() === 'bulite post';
+    type.toLowerCase() === 'bulite post' ||
+    type.toLowerCase() === 'bulletin';
 
   const handleAddBulletPoint = () => {
     const trimmed = bulletInputText.trim();
@@ -2822,32 +2823,24 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                 {/* Notification Title with Send Notification Switch beside it */}
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' }, gap: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      disabled={!sendNotification}
-                      label={t.lblNotificationTitle}
-                      placeholder={t.phNotificationTitle}
-                      value={notificationTitle}
-                      onChange={(e) => {
-                        setNotificationTitle(e.target.value);
-                        if (errors.notificationTitle) setErrors((prev) => { const n = { ...prev }; delete n.notificationTitle; return n; });
-                      }}
-                      error={!!errors.notificationTitle}
-                      helperText={errors.notificationTitle || ''}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          color: isDark ? '#ffffff' : '#1c1445',
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
-                          borderRadius: '10px',
-                          '& fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)') },
-                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(28,20,69,0.4)' },
-                          '&.Mui-focused fieldset': { borderColor: errors.notificationTitle ? '#f44336' : (isDark ? '#a6e2f5' : '#1c1445') },
-                        },
-                        '& .MuiInputLabel-root': { color: errors.notificationTitle ? '#f44336' : (isDark ? '#d0caeb' : '#5c548a') },
-                        '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
-                      }}
-                    />
+                    <Box sx={{ 
+                      opacity: sendNotification ? 1 : 0.5,
+                      pointerEvents: sendNotification ? 'auto' : 'none',
+                      transition: 'opacity 0.2s'
+                    }}>
+                      <HtmlEditor
+                        label={t.lblNotificationTitle}
+                        value={notificationTitle}
+                        onChange={(val) => {
+                          setNotificationTitle(val);
+                          if (errors.notificationTitle) setErrors((prev) => { const n = { ...prev }; delete n.notificationTitle; return n; });
+                        }}
+                        error={errors.notificationTitle}
+                        placeholder={t.phNotificationTitle}
+                        isDark={isDark}
+                        minHeight="120px"
+                      />
+                    </Box>
                     <Typography
                       variant="caption"
                       sx={{
@@ -3051,7 +3044,80 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                   </Box>
                 )}
 
-                {isBulletPost ? (
+                <Box sx={{ mb: isBulletPost ? 3 : 0 }}>
+                  <HtmlEditor
+                    label={t.lblBody}
+                    placeholder={t.phBody}
+                    value={body}
+                    onChange={(val) => {
+                      setBody(val);
+                      if (errors.body) setErrors((prev) => { const n = { ...prev }; delete n.body; return n; });
+                    }}
+                    error={errors.body}
+                    isDark={isDark}
+                    minHeight={isBulletPost ? "80px" : "220px"}
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={isSummarizing || !stripHtml(body).trim()}
+                      onClick={async () => {
+                        setIsSummarizing(true);
+                        try {
+                          const res = await fetch('https://apidev.chotanews.com/summarize', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ content: stripHtml(body) })
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            if (data && (data.summary || data.content)) {
+                              const newContent = data.summary || data.content;
+                              const htmlContent = newContent.startsWith('<') ? newContent : `<p>${newContent}</p>`;
+                              setBody(htmlContent);
+                            }
+                          }
+                        } catch (e) {
+                          console.error('Summarize error:', e);
+                        } finally {
+                          setIsSummarizing(false);
+                        }
+                      }}
+                      startIcon={<AutoAwesome fontSize="small" />}
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        py: 0.3,
+                        borderColor: '#a6e2f5',
+                        color: '#a6e2f5',
+                        '&:hover': { borderColor: '#8cd5ed', backgroundColor: 'rgba(166,226,245,0.1)' },
+                        '&.Mui-disabled': { borderColor: 'rgba(166,226,245,0.3)', color: 'rgba(166,226,245,0.3)' }
+                      }}
+                    >
+                      {isSummarizing ? 'Generating...' : 'Regenerate (AI)'}
+                    </Button>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
+                        fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
+                      }}
+                    >
+                      {t.wordCount(countWords(body), 50)}
+                    </Typography>
+                  </Box>
+                  {engTranslation?.content && (
+                    <Box sx={{ mt: 2, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
+                      <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        English Translation (Read-Only)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }} dangerouslySetInnerHTML={{ __html: engTranslation.content }} />
+                    </Box>
+                  )}
+                </Box>
+
+                {isBulletPost && (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                     <Typography variant="body2" sx={{ fontWeight: 700, color: isDark ? '#a6e2f5' : '#1c1445', fontSize: '0.85rem' }}>
                       📋 {t.lblBulletins}
@@ -3173,85 +3239,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       </Box>
                     )}
                   </Box>
-                ) : (
-                  <>
-                    <HtmlEditor
-                      label={t.lblBody}
-                      placeholder={t.phBody}
-                      value={body}
-                      onChange={(val) => {
-                        setBody(val);
-                        if (errors.body) setErrors((prev) => { const n = { ...prev }; delete n.body; return n; });
-                      }}
-                      error={errors.body}
-                      isDark={isDark}
-                      minHeight="220px"
-                    />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        disabled={isSummarizing || !stripHtml(body).trim()}
-                        onClick={async () => {
-                          setIsSummarizing(true);
-                          try {
-                            const res = await fetch('https://apidev.chotanews.com/summarize', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ content: stripHtml(body) })
-                            });
-                            if (res.ok) {
-                              const data = await res.json();
-                              if (data && (data.summary || data.content)) {
-                                const newContent = data.summary || data.content;
-                                const htmlContent = newContent.startsWith('<') ? newContent : `<p>${newContent}</p>`;
-                                setBody(htmlContent);
-                              }
-                            }
-                          } catch (e) {
-                            console.error('Summarize error:', e);
-                          } finally {
-                            setIsSummarizing(false);
-                          }
-                        }}
-                        startIcon={<AutoAwesome fontSize="small" />}
-                        sx={{
-                          textTransform: 'none',
-                          fontSize: '0.75rem',
-                          py: 0.3,
-                          borderColor: '#a6e2f5',
-                          color: '#a6e2f5',
-                          '&:hover': { borderColor: '#8cd5ed', backgroundColor: 'rgba(166,226,245,0.1)' },
-                          '&.Mui-disabled': { borderColor: 'rgba(166,226,245,0.3)', color: 'rgba(166,226,245,0.3)' }
-                        }}
-                      >
-                        {isSummarizing ? 'Generating...' : 'Regenerate (AI)'}
-                      </Button>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: countWords(body) > 50 ? '#f44336' : (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'),
-                          fontSize: '0.7rem', fontWeight: countWords(body) > 50 ? 700 : 400,
-                        }}
-                      >
-                        {t.wordCount(countWords(body), 50)}
-                      </Typography>
-                    </Box>
-                    {engTranslation?.content && (
-                      <Box sx={{ mt: 2, p: 1.5, borderRadius: '8px', backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f9f9f9', border: isDark ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }}>
-                        <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600, display: 'block', mb: 0.5 }}>
-                          English Translation (Read-Only)
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }} dangerouslySetInnerHTML={{ __html: engTranslation.content }} />
-                      </Box>
-                    )}
-                  </>
                 )}
               </Box>
 
-              {/* Image Uploader -- hidden for BulletPost */}
-              {!isBulletPost && (
-                <Box>
+              {/* Image Uploader */}
+              <Box sx={{ mt: 3 }}>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -3391,7 +3383,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                     </Typography>
                   )}
                 </Box>
-              )}
             </Box>
           </Grid>
         </Grid>
