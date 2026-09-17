@@ -814,9 +814,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     String((initialData as any)?.subType || (initialData as any)?.sub_type || '').toLowerCase().replace(/[\s_]+/g, '') === 'bigtvspecial';
 
   const isBulletPost =
-    type.toLowerCase().includes('bullet') ||
-    type.toLowerCase().includes('bulletin') ||
-    String((initialData as any)?.subType || (initialData as any)?.sub_type || '').toLowerCase().includes('bullet');
+    type.toLowerCase() === 'bulletpost' ||
+    type.toLowerCase() === 'bullet post' ||
+    type.toLowerCase() === 'bulite post';
 
   const handleAddBulletPoint = () => {
     const trimmed = bulletInputText.trim();
@@ -1570,7 +1570,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       categories: selectedCategories,
       tags: selectedTags,
       location,
-      type: isBulletPost ? 'Bulletin' : type,
+      type: type,
       imageUrl: finalImageUrl || (finalGalleryUrls.length > 0 ? finalGalleryUrls[0] : null),
       galleryImages: finalGalleryUrls,
       postLanguage,
@@ -1584,9 +1584,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       aitag_ids: aitagIds,
       morefollowTagIds,
       morefollow_tag_ids: morefollowTagIds,
-      subType: isBulletPost ? 'Bulletin' : '',
-      sub_type: isBulletPost ? 'Bulletin' : '',
-      postType: isBulletPost ? 'Bulletin' : type,
+      subType: initialData?.subType || '',
+      sub_type: (initialData as any)?.sub_type || '',
+      postType: type,
       isSticky,
       isStickyPost: isSticky,
       isWebPost,
