@@ -40,6 +40,7 @@ import { useLanguageStore, SupportedLanguage } from '@/core/storage/language-sto
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { GroqKeyCard } from '@/modules/settings/components/GroqKeyCard';
 import { AccountSettingsCard } from '@/modules/settings/components/AccountSettingsCard';
+import { AppConfigCard } from '@/modules/settings/components/AppConfigCard';
 
 // Translation dictionary matching localized keys
 const translations = {
@@ -398,6 +399,11 @@ export default function SettingsPage() {
                   </Box>
                 </CardContent>
               </Card>
+            </Grid>
+
+            {/* App Config Card */}
+            <Grid item xs={12} md={12}>
+              <AppConfigCard isDark={isDark} />
             </Grid>
 
             {/* Groq API Key Configuration Card */}

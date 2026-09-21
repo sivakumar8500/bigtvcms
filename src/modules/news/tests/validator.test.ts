@@ -47,6 +47,8 @@ describe('News Validator - Create Post Validation', () => {
       expect(validated.type).toBe('Standed');
       expect(validated.subType).toBe('');
       expect(validated.isWebPost).toBe(false);
+      expect(validated.isHomePost).toBe(false);
+      expect(validated.colorCode).toBe('');
       expect(validated.postUrl).toBe('');
       expect(validated.video_platform).toBe('');
       expect(validated.video_url).toBe('');

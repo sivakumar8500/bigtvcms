@@ -45,9 +45,13 @@ export class NewsMapper {
       isSticky: dto.is_sticky ?? dto.isStickyPost ?? false,
       isWebPost: Boolean(dto.is_web_post || dto.isWebPost),
       is_web_post: Boolean(dto.is_web_post || dto.isWebPost),
+      isHomePost: Boolean(dto.is_home_post ?? dto.isHomePost ?? false),
+      is_home_post: Boolean(dto.is_home_post ?? dto.isHomePost ?? false),
+      colorCode: dto.colorCode || (dto as any).color_code || '',
       web_post_url: dto.web_post_url || (dto as any).webPostUrl || (dto as any).webUrl || dto.postUrl || '',
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
+      translations: dto.translations,
     };
   }
 
@@ -62,9 +66,12 @@ export class NewsMapper {
     let rawType = domain.type || (domain as any).post_type || domain.postType || 'Standed';
     let subTypeVal = domain.subType || '';
 
-    if (rawType.toLowerCase() === 'bulletpost' || rawType.toLowerCase() === 'bullet post') {
+    if (rawType.toLowerCase() === 'bulletpost' || rawType.toLowerCase() === 'bullet post' || rawType.toLowerCase() === 'bulite post') {
       rawType = 'Standed';
       subTypeVal = 'BulletPost';
+    } else if (rawType.toLowerCase() === 'bulletin') {
+      rawType = 'Standed';
+      subTypeVal = 'Bulletin';
     } else if (rawType.toLowerCase() === 'standardlink' || rawType.toLowerCase() === 'standard link') {
       rawType = 'Standed';
       subTypeVal = 'StandardLink';
@@ -138,6 +145,7 @@ export class NewsMapper {
 
     const isWebPostVal = (
       subTypeVal === 'BulletPost' ||
+      subTypeVal === 'Bulletin' ||
       subTypeVal === 'StandardLink' ||
       subTypeVal === 'BigBlackStandard' ||
       subTypeVal === 'BigBlackStanded' ||
@@ -183,7 +191,11 @@ export class NewsMapper {
       location_ids: (domain.locationIds ?? (domain as any).location_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       aitag_ids: (domain.aitagIds ?? (domain as any).aitag_ids ?? []).filter((id: number) => typeof id === 'number' && id > 0),
       isWebPost: isWebPostVal,
+      isHomePost: Boolean((domain as any).isHomePost ?? (domain as any).is_home_post ?? false),
+      is_home_post: Boolean((domain as any).isHomePost ?? (domain as any).is_home_post ?? false),
+      colorCode: (domain as any).colorCode || (domain as any).color_code || '',
       sendNotification: domain.sendNotification ?? (domain as any).sendNotification,
+      translations: domain.translations,
     };
   }
 
@@ -200,6 +212,13 @@ export class NewsMapper {
     }
     if (rawDomain.is_web_post !== undefined || rawDomain.isWebPost !== undefined) {
       dto.is_web_post = rawDomain.is_web_post ?? rawDomain.isWebPost ?? fullDto.isWebPost;
+    }
+    if (rawDomain.is_home_post !== undefined || rawDomain.isHomePost !== undefined) {
+      dto.is_home_post = rawDomain.is_home_post ?? rawDomain.isHomePost ?? fullDto.isHomePost;
+      dto.isHomePost = rawDomain.is_home_post ?? rawDomain.isHomePost ?? fullDto.isHomePost;
+    }
+    if (rawDomain.colorCode !== undefined || rawDomain.color_code !== undefined) {
+      dto.colorCode = rawDomain.colorCode ?? rawDomain.color_code ?? fullDto.colorCode;
     }
     if (rawDomain.web_post_url !== undefined || rawDomain.webPostUrl !== undefined) {
       dto.web_post_url = rawDomain.web_post_url ?? rawDomain.webPostUrl ?? fullDto.postUrl;

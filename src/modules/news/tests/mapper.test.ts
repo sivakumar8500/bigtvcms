@@ -128,6 +128,34 @@ describe('NewsMapper', () => {
     expect(updateDto.web_post_url).toBe('https://example.com/news/1');
   });
 
+  it('should map isHomePost correctly in toCreateDto and toUpdateDto', () => {
+    const domainPartial = {
+      title: 'Home Post Title',
+      isHomePost: true,
+    };
+
+    const createDto = NewsMapper.toCreateDto(domainPartial as any);
+    expect(createDto.isHomePost).toBe(true);
+
+    const updateDto = NewsMapper.toUpdateDto(domainPartial as any);
+    expect(updateDto.isHomePost).toBe(true);
+    expect(updateDto.is_home_post).toBe(true);
+  });
+
+  it('should map colorCode correctly in toCreateDto and toUpdateDto', () => {
+    const domainPartial = {
+      title: 'BigTvSpecial Title',
+      type: 'BigTvSpecial',
+      colorCode: '#FF5722',
+    };
+
+    const createDto = NewsMapper.toCreateDto(domainPartial as any);
+    expect(createDto.colorCode).toBe('#FF5722');
+
+    const updateDto = NewsMapper.toUpdateDto(domainPartial as any);
+    expect(updateDto.colorCode).toBe('#FF5722');
+  });
+
   it('should map domain model to UpdateNewsPostDto with all properties', () => {
     const domainPartial = {
       title: 'Updated Title',

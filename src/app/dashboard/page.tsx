@@ -814,9 +814,15 @@ export default function DashboardPage() {
     const todayISO = new Date().toISOString();
     let resolvedType = data.type || 'Standed';
     let resolvedSubType = (data as any).subType || '';
-    if (resolvedType.toLowerCase() === 'bulletpost' || resolvedType.toLowerCase() === 'bullet post') {
-      resolvedType = 'Standed';
-      resolvedSubType = 'BulletPost';
+    if (
+      resolvedType.toLowerCase() === 'bulletin' ||
+      resolvedType.toLowerCase() === 'bulletpost' ||
+      resolvedType.toLowerCase() === 'bullet post' ||
+      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletpost'
+    ) {
+      resolvedType = 'Bulletin';
+      resolvedSubType = 'Bulletin';
     } else if (resolvedType.toLowerCase() === 'standardlink' || resolvedType.toLowerCase() === 'standard link') {
       resolvedType = 'Standed';
       resolvedSubType = 'StandardLink';
@@ -851,10 +857,31 @@ export default function DashboardPage() {
     let extractedBullets: string[] = [];
     let finalContent = resolvedContent;
 
-    if (resolvedSubType === 'BulletPost') {
-      const formatted = formatBulletPostContentAndBullets(resolvedContent, (data as any).bulletPoints);
-      extractedBullets = formatted.bulletPoints;
-      finalContent = formatted.content;
+    if (
+      resolvedType.toLowerCase() === 'bulletin' ||
+      resolvedType.toLowerCase() === 'bulletpost' ||
+      resolvedType.toLowerCase() === 'bullet post' ||
+      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletpost'
+    ) {
+      const explicit = Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
+        ? (data as any).bulletPoints
+        : Array.isArray((data as any).bullet_points) && (data as any).bullet_points.length > 0
+        ? (data as any).bullet_points
+        : [];
+      const formatted = formatBulletPostContentAndBullets(resolvedContent, explicit);
+      let bullets = explicit.length > 0 ? explicit : formatted.bulletPoints;
+      if (bullets.length === 0 && resolvedContent) {
+        bullets = stripHtml(resolvedContent)
+          .split(/\r?\n/)
+          .map((s) => s.replace(/^[•\>\*\.\_\s\-]+/, '').trim())
+          .filter(Boolean);
+      }
+      if (bullets.length === 0 && resolvedTitle) {
+        bullets = [resolvedTitle];
+      }
+      extractedBullets = bullets;
+      finalContent = formatted.content || resolvedContent;
     }
 
     let formattedLinks: any[] = [];
@@ -923,7 +950,12 @@ export default function DashboardPage() {
       category_ids: Array.from(new Set((data.categoryIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       location_ids: Array.from(new Set((data.locationIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       aitag_ids: Array.from(new Set((data.aitagIds || data.aitag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      morefollow_tag_ids: Array.from(new Set((data.morefollowTagIds || data.morefollow_tag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id)))).length > 0
+        ? Array.from(new Set((data.morefollowTagIds || data.morefollow_tag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id))))
+        : [0],
       isWebPost: isWebPostVal,
+      isHomePost: Boolean(data.isHomePost || (data as any).is_home_post),
+      colorCode: data.colorCode || (data as any).color_code || '',
       sendNotification: Boolean(data.sendNotification),
     };
 
@@ -965,12 +997,16 @@ export default function DashboardPage() {
     let resolvedSubType = (data as any).subType || (data as any).sub_type || '';
 
     if (
+      resolvedType === 'Bulletin' ||
       resolvedType === 'BulletPost' ||
+      resolvedType.toLowerCase() === 'bulletin' ||
       resolvedType.toLowerCase() === 'bulletpost' ||
-      resolvedType.toLowerCase() === 'bullet post'
+      resolvedType.toLowerCase() === 'bullet post' ||
+      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletpost'
     ) {
-      resolvedType = 'Standed';
-      resolvedSubType = 'BulletPost';
+      resolvedType = 'Bulletin';
+      resolvedSubType = 'Bulletin';
     } else if (
       resolvedType === 'StandardLink' ||
       resolvedType.toLowerCase() === 'standardlink' ||
@@ -1009,10 +1045,31 @@ export default function DashboardPage() {
     let extractedBullets: string[] = [];
     let finalContent = resolvedContent;
 
-    if (resolvedSubType === 'BulletPost') {
-      const formatted = formatBulletPostContentAndBullets(resolvedContent, (data as any).bulletPoints);
-      extractedBullets = formatted.bulletPoints;
-      finalContent = formatted.content;
+    if (
+      resolvedType.toLowerCase() === 'bulletin' ||
+      resolvedType.toLowerCase() === 'bulletpost' ||
+      resolvedType.toLowerCase() === 'bullet post' ||
+      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletpost'
+    ) {
+      const explicit = Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
+        ? (data as any).bulletPoints
+        : Array.isArray((data as any).bullet_points) && (data as any).bullet_points.length > 0
+        ? (data as any).bullet_points
+        : [];
+      const formatted = formatBulletPostContentAndBullets(resolvedContent, explicit);
+      let bullets = explicit.length > 0 ? explicit : formatted.bulletPoints;
+      if (bullets.length === 0 && resolvedContent) {
+        bullets = stripHtml(resolvedContent)
+          .split(/\r?\n/)
+          .map((s) => s.replace(/^[•\>\*\.\_\s\-]+/, '').trim())
+          .filter(Boolean);
+      }
+      if (bullets.length === 0 && resolvedTitle) {
+        bullets = [resolvedTitle];
+      }
+      extractedBullets = bullets;
+      finalContent = formatted.content || resolvedContent;
     }
 
     let formattedLinks: any[] = [];
@@ -1068,7 +1125,9 @@ export default function DashboardPage() {
       gallery: data.galleryImages || [],
       type: resolvedType,
       subType: resolvedSubType,
+      sub_type: resolvedSubType,
       bulletPoints: extractedBullets,
+      bullet_points: extractedBullets,
       links: formattedLinks,
       isStickyPost: data.isStickyPost ?? data.isSticky ?? false,
       linkURLAndroid: '',
@@ -1083,9 +1142,15 @@ export default function DashboardPage() {
       category_ids: Array.from(new Set((data.categoryIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       location_ids: Array.from(new Set((data.locationIds || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
       aitag_ids: Array.from(new Set((data.aitagIds || data.aitag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id) && id > 0))),
+      morefollow_tag_ids: Array.from(new Set((data.morefollowTagIds || data.morefollow_tag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id)))).length > 0
+        ? Array.from(new Set((data.morefollowTagIds || data.morefollow_tag_ids || []).map((id: any) => (typeof id === 'number' ? id : parseInt(String(id), 10))).filter((id: number) => !isNaN(id))))
+        : [0],
       post_type: resolvedType,
       isWebPost: isWebPostVal,
       is_web_post: isWebPostVal,
+      isHomePost: Boolean(data.isHomePost || (data as any).is_home_post),
+      is_home_post: Boolean(data.isHomePost || (data as any).is_home_post),
+      colorCode: data.colorCode || (data as any).color_code || '',
       postUrl: postUrlVal,
       web_post_url: postUrlVal,
     };

@@ -17,6 +17,9 @@ import {
   LocalMovies as LocalMoviesIcon,
   Notifications as NotificationsIcon,
   Campaign as CampaignIcon,
+  RssFeed,
+  Event as EventIcon,
+  LiveTv,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,7 +32,10 @@ const sidebarTranslations = {
   en: {
     menuCreate: 'Create News',
     menuNotifications: 'Notifications',
-    menuCategories: 'Categories',
+    menuReels: 'Reels',
+    menuMovies: 'Movies',
+    menuEvents: 'Events',
+    menuLiveTvVideos: 'Live TV Videos',
     menuWebArticles: 'Web Articles',
     menuEpapers: 'Epapers',
     menuLocations: 'Locations',
@@ -37,16 +43,19 @@ const sidebarTranslations = {
     menuPostTypes: 'Post Types',
     menuLanguages: 'Languages',
     menuAiTags: 'AiTags',
-    menuReels: 'Reels',
-    menuMovies: 'Movies',
+    menuCategories: 'Categories',
     menuAdsDynapix: 'Ads Dynapix',
+    menuMoreFollow: 'More Follow Menu',
     menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
   },
   te: {
     menuCreate: 'వార్తలను సృష్టించండి',
     menuNotifications: 'నోటిఫికేషన్లు',
-    menuCategories: 'విభాగాలు',
+    menuReels: 'రీల్స్',
+    menuMovies: 'సినిమాలు',
+    menuEvents: 'ఈవెంట్లు',
+    menuLiveTvVideos: 'లైవ్ టీవీ వీడియోలు',
     menuWebArticles: 'వెబ్ వ్యాసాలు',
     menuEpapers: 'ఈ-పేపర్లు',
     menuLocations: 'ప్రాంతాలు',
@@ -54,16 +63,19 @@ const sidebarTranslations = {
     menuPostTypes: 'పోస్ట్ రకాలు',
     menuLanguages: 'భాషలు',
     menuAiTags: 'AiTags',
-    menuReels: 'రీల్స్',
-    menuMovies: 'సినిమాలు',
+    menuCategories: 'విభాగాలు',
     menuAdsDynapix: 'యాడ్స్ డైనాపిక్స్',
+    menuMoreFollow: 'మరిన్ని ఫాలో మెనూ',
     menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
   },
   hi: {
     menuCreate: 'समाचार बनाएं',
     menuNotifications: 'सूचनाएं',
-    menuCategories: 'श्रेणियां',
+    menuReels: 'रील्स',
+    menuMovies: 'मूवीज',
+    menuEvents: 'इवेंट्स',
+    menuLiveTvVideos: 'लाइव टीवी वीडियो',
     menuWebArticles: 'वेब लेख',
     menuEpapers: 'ई-पेपर',
     menuLocations: 'स्थान',
@@ -71,16 +83,19 @@ const sidebarTranslations = {
     menuPostTypes: 'पोस्ट के प्रकार',
     menuLanguages: 'भाषाएँ',
     menuAiTags: 'AiTags',
-    menuReels: 'रील्स',
-    menuMovies: 'मूवीज',
+    menuCategories: 'श्रेणियां',
     menuAdsDynapix: 'ऐड्स डायनापिक्स',
+    menuMoreFollow: 'मोर फॉलो मेनू',
     menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
   },
   ml: {
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
     menuNotifications: 'അറിയിപ്പുകൾ',
-    menuCategories: 'വിഭാഗങ്ങൾ',
+    menuReels: 'റീലുകൾ',
+    menuMovies: 'സിനിമകൾ',
+    menuEvents: 'ഇവന്റുകൾ',
+    menuLiveTvVideos: 'ലൈവ് ടിവി വീഡിയോകൾ',
     menuWebArticles: 'വെബ് ലേഖനങ്ങൾ',
     menuEpapers: 'ഇ-പേപ്പറുകൾ',
     menuLocations: 'സ്ഥലങ്ങൾ',
@@ -88,9 +103,9 @@ const sidebarTranslations = {
     menuPostTypes: 'പോസ്റ്റ് തരങ്ങൾ',
     menuLanguages: 'ഭാഷകൾ',
     menuAiTags: 'AiTags',
-    menuReels: 'റീലുകൾ',
-    menuMovies: 'സിനിമകൾ',
+    menuCategories: 'വിഭാഗങ്ങൾ',
     menuAdsDynapix: 'ആഡ്സ് ഡൈനാപിക്സ്',
+    menuMoreFollow: 'കൂടുതൽ ഫോളോ മെനു',
     menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
   },
@@ -115,6 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuMovies, icon: <LocalMoviesIcon />, href: '/movies' },
+    { text: t.menuEvents, icon: <EventIcon />, href: '/events' },
+    { text: t.menuLiveTvVideos, icon: <LiveTv />, href: '/livetvvideos' },
     { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
     { text: t.menuEpapers, icon: <NewspaperIcon />, href: '/epapers' },
     { text: t.menuAiTags, icon: <AutoAwesome />, href: '/aitags' },
@@ -124,6 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuCreators, icon: <People />, href: '/creators' },
     { text: t.menuLanguages, icon: <LanguageIcon />, href: '/languages' },
     { text: t.menuAdsDynapix, icon: <CampaignIcon />, href: '/ads-dynapix' },
+    { text: t.menuMoreFollow, icon: <RssFeed />, href: '/more-follow' },
     { text: t.menuSettings, icon: <Settings />, href: '/settings' },
   ];
 
@@ -142,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     userRole === 'adsdynapix_creator' ||
     userRole === 'ads_dynapix_creator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/web-articles', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/events', '/livetvvideos', '/web-articles', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
@@ -153,6 +171,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/notifications',
     '/reels',
     '/movies',
+    '/events',
+    '/livetvvideos',
     '/web-articles',
     '/epapers',
     '/aitags',
@@ -162,6 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/creators',
     '/languages',
     '/ads-dynapix',
+    '/more-follow',
     '/settings',
   ];
 

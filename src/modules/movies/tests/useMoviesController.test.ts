@@ -10,7 +10,7 @@ const mockMovies = [
   {
     id: 1,
     movieId: 1,
-    contentType: 'movie',
+    contentType: 'movie' as const,
     title: 'Kalki 2898 AD',
     movieTitle: 'Kalki 2898 AD',
     titleEn: 'Kalki 2898 AD',
@@ -25,7 +25,7 @@ const mockMovies = [
   {
     id: 2,
     movieId: 2,
-    contentType: 'movie',
+    contentType: 'movie' as const,
     title: 'Pushpa 2',
     movieTitle: 'Pushpa 2',
     titleEn: 'Pushpa 2',

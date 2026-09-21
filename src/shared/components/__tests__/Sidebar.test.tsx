@@ -64,6 +64,9 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Create News')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
+    expect(screen.getByText('Movies')).toBeInTheDocument();
+    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Live TV Videos')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
     expect(screen.getByText('Epapers')).toBeInTheDocument();
@@ -73,10 +76,11 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.getByText('Languages')).toBeInTheDocument();
     expect(screen.getByText('AiTags')).toBeInTheDocument();
     expect(screen.getByText('Ads Dynapix')).toBeInTheDocument();
+    expect(screen.getByText('More Follow Menu')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 
-  it('renders all menu items for superadmin role including Ads Dynapix', () => {
+  it('renders all menu items for superadmin role including Ads Dynapix and More Follow Menu', () => {
     useUserStore.setState({
       user: {
         username: 'super_user',
@@ -103,6 +107,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.getByText('Languages')).toBeInTheDocument();
     expect(screen.getByText('AiTags')).toBeInTheDocument();
     expect(screen.getByText('Ads Dynapix')).toBeInTheDocument();
+    expect(screen.getByText('More Follow Menu')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 

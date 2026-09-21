@@ -132,16 +132,39 @@ export class ApiClient {
           }
 
           try {
-            // Bypass language filter for /post-types, /languages, /admin/states, /states, /locations, and /creators endpoints or when explicitly disabled
+            // Bypass language filter for /events, /ticket-types, /coupons, /categories, /post-types, /languages, /admin/states, /states, /locations, and /creators endpoints
             const isBypassLangApi =
+              config.url?.includes('/events') ||
+              config.url?.includes('/ticket-types') ||
+              config.url?.includes('/coupons') ||
               config.url?.includes('/categories') ||
               config.url?.includes('/post-types') ||
               config.url?.includes('/languages') ||
               config.url?.includes('/states') ||
               config.url?.includes('/locations') ||
               config.url?.includes('/creators') ||
+              config.url?.includes('/video-tags') ||
               config.params?.skip_lang_param;
-            if (!isBypassLangApi) {
+
+            if (isBypassLangApi) {
+              if (config.headers) {
+                delete config.headers['Accept-Language'];
+                delete config.headers['accept-language'];
+              }
+              if (config.params) {
+                delete config.params.lang;
+                delete config.params.language;
+                delete config.params.language_code;
+                if ('skip_lang_param' in config.params) {
+                  delete config.params.skip_lang_param;
+                }
+              }
+              if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
+                delete (config.data as any).language;
+                delete (config.data as any).language_code;
+                delete (config.data as any).lang;
+              }
+            } else {
               // Determine active language from params or localStorage
               let lang = config.params?.language_code || config.params?.lang || config.params?.language;
               if (!lang) {
@@ -160,13 +183,6 @@ export class ApiClient {
                   const activeLang = config.params?.language_code || config.params?.lang || lang;
                   config.params = { language_code: activeLang, lang: activeLang, ...config.params };
                 }
-              }
-            } else if (config.params) {
-              delete config.params.lang;
-              delete config.params.language;
-              delete config.params.language_code;
-              if ('skip_lang_param' in config.params) {
-                delete config.params.skip_lang_param;
               }
             }
           } catch (e) {
@@ -233,12 +249,23 @@ export class ApiClient {
     return axios.post(`${this.axiosInstance.defaults.baseURL}/auth/refresh`, { refreshToken });
   }
 
-  private async request<T>(config: { method: string; url: string; data?: unknown; params?: Record<string, unknown> }): Promise<T> {
+  private async request<T>(config: { method: string; url: string; data?: unknown; params?: Record<string, unknown>; headers?: any }): Promise<T> {
     const response = await this.axiosInstance.request<T>(config);
     return response.data;
   }
 
-  public async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
+  public async get<T>(url: string, paramsOrConfig?: Record<string, unknown>): Promise<T> {
+    let params = paramsOrConfig;
+    if (
+      paramsOrConfig &&
+      typeof paramsOrConfig === 'object' &&
+      'params' in paramsOrConfig &&
+      Object.keys(paramsOrConfig).length === 1 &&
+      typeof (paramsOrConfig as any).params === 'object'
+    ) {
+      params = (paramsOrConfig as any).params;
+    }
+
     const key = `${url}?${JSON.stringify(params || {})}`;
     if (this.inFlightGetRequests.has(key)) {
       return this.inFlightGetRequests.get(key) as Promise<T>;
@@ -252,12 +279,16 @@ export class ApiClient {
     return promise;
   }
 
-  public async post<T, R = unknown>(url: string, data: R): Promise<T> {
-    return this.request<T>({ method: 'post', url, data });
+  public async post<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'post', url, data, ...config });
   }
 
-  public async put<T, R = unknown>(url: string, data: R): Promise<T> {
-    return this.request<T>({ method: 'put', url, data });
+  public async put<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'put', url, data, ...config });
+  }
+
+  public async patch<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+    return this.request<T>({ method: 'patch', url, data, ...config });
   }
 
   public async delete<T>(url: string): Promise<T> {
@@ -269,7 +300,22 @@ export const apiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'https://api.chotanews.com'
+    'https://apidev.chotanews.com'
   ).replace(/\/$/, '')
 );
+
+export const eventsApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_EVENTS_API_BASE_URL ||
+    'https://api.pravasamedia.com/api/v1'
+  ).replace(/\/$/, '')
+);
+
+export const videoApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_VIDEO_API_BASE_URL ||
+    'https://api.pravasamedia.com/api/v1'
+  ).replace(/\/$/, '')
+);
+
 
