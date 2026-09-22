@@ -25,6 +25,9 @@ export function useLiveTvVideosController() {
   const [activeTagForEdit, setActiveTagForEdit] = useState<VideoTag | null>(null);
   const [activeVideoForPlayer, setActiveVideoForPlayer] = useState<TagVideo | null>(null);
 
+  const [editVideoModalOpen, setEditVideoModalOpen] = useState(false);
+  const [activeVideoForEdit, setActiveVideoForEdit] = useState<TagVideo | null>(null);
+
   // 1. Fetch tags on mount
   const fetchTags = useCallback(async () => {
     try {
@@ -149,6 +152,25 @@ export function useLiveTvVideosController() {
     setEditTagModalOpen(true);
   };
 
+  const handleOpenEditVideoModal = (video: TagVideo) => {
+    setActiveVideoForEdit(video);
+    setEditVideoModalOpen(true);
+  };
+
+  const handleUpdateVideo = async (videoId: string, fileName: string, viewCount: number) => {
+    if (!selectedTagSlug) return;
+    setActionError(null);
+    try {
+      const updatedVideo = await liveTvVideosRepository.updateVideoFromTag(selectedTagSlug, videoId, fileName, viewCount);
+      setVideos((prev) => prev.map((v) => (v.id === videoId ? updatedVideo : v)));
+      setActionSuccess('Video updated successfully');
+      setEditVideoModalOpen(false);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to update video');
+      throw err;
+    }
+  };
+
   return {
     tags,
     selectedTagSlug,
@@ -173,8 +195,11 @@ export function useLiveTvVideosController() {
     setEditTagModalOpen,
     playerModalOpen,
     setPlayerModalOpen,
+    editVideoModalOpen,
+    setEditVideoModalOpen,
     activeTagForEdit,
     activeVideoForPlayer,
+    activeVideoForEdit,
     // Handlers
     handleCreateTag,
     handleUpdateTag,
@@ -182,5 +207,7 @@ export function useLiveTvVideosController() {
     handlePlayVideo,
     handleDeleteVideo,
     handleOpenEditTagModal,
+    handleOpenEditVideoModal,
+    handleUpdateVideo,
   };
 }

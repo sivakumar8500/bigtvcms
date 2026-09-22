@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, IconButton, Tooltip } from '@mui/material';
-import { PlayCircleOutline, LiveTv, DeleteOutline } from '@mui/icons-material';
+import { PlayCircleOutline, LiveTv, DeleteOutline, Edit } from '@mui/icons-material';
 import { TagVideo } from '../domain/LiveTvVideo';
 
 interface LiveTvVideosTableProps {
@@ -10,6 +10,7 @@ interface LiveTvVideosTableProps {
   t: Record<string, string>;
   isDark: boolean;
   onPlay: (video: TagVideo) => void;
+  onEditVideo?: (video: TagVideo) => void;
   onDeleteVideo?: (fileName: string) => void;
 }
 
@@ -18,6 +19,7 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
   t,
   isDark,
   onPlay,
+  onEditVideo,
   onDeleteVideo,
 }) => {
   const colStyle = (flex: number) => ({
@@ -136,6 +138,17 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
                       <PlayCircleOutline fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  {onEditVideo && (
+                    <Tooltip title={t.editVideo || 'Edit Video'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => onEditVideo(item)}
+                        sx={{ color: isDark ? '#a5b4fc' : '#2563eb' }}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   {onDeleteVideo && (
                     <Tooltip title={t.deleteVideo || 'Delete Video'}>
                       <IconButton

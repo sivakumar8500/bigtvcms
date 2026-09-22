@@ -36,6 +36,7 @@ import { LiveTvVideosTable } from '../components/LiveTvVideosTable';
 import { VideoPlayerModal } from '../components/VideoPlayerModal';
 import { TagCreateModal } from '../components/TagCreateModal';
 import { TagEditModal } from '../components/TagEditModal';
+import { VideoEditModal } from '../components/VideoEditModal';
 import { Loader } from '@/shared/components/Loader';
 
 const translations = {
@@ -53,6 +54,7 @@ const translations = {
     deleteConfirmDesc: 'Are you sure you want to delete this tag? This will also permanently delete the associated physical folder and all videos inside it.',
     cancel: 'Cancel',
     delete: 'Delete',
+    editVideo: 'Edit Video',
   },
   te: {
     pageTitle: 'వీడియో ట్యాగ్‌లు & స్ట్రీమ్ నిర్వహణ',
@@ -68,6 +70,7 @@ const translations = {
     deleteConfirmDesc: 'ఈ ట్యాగ్‌ని ఖచ్చితంగా తొలగించాలనుకుంటున్నారా? ఇది సంబంధిత ఫిజికల్ ఫోల్డర్‌ను మరియు అందలి అన్ని వీడియోలను శాశ్వతంగా తొలగిస్తుంది.',
     cancel: 'రద్దు చేయి',
     delete: 'తొలగించు',
+    editVideo: 'వీడియోను సవరించండి',
   },
   hi: {
     pageTitle: 'वीडियो टैग और स्ट्रीम प्रबंधन',
@@ -83,6 +86,7 @@ const translations = {
     deleteConfirmDesc: 'क्या आप वाकई इस टैग को हटाना चाहते हैं? यह संबंधित भौतिक फ़ोल्डर और उसके अंदर के सभी वीडियो को भी स्थायी रूप से हटा देगा।',
     cancel: 'रद्द करें',
     delete: 'हटाएं',
+    editVideo: 'वीडियो संपादित करें',
   },
   ml: {
     pageTitle: 'വീഡിയോ ടാഗുകളും സ്ട്രീം മാനേജ്മെൻ്റും',
@@ -98,6 +102,7 @@ const translations = {
     deleteConfirmDesc: 'ഈ ടാഗ് തീർച്ചയായും ഡിലീറ്റ് ചെയ്യണോ? ഇത് ബന്ധപ്പെട്ട ഫിസിക്കൽ ഫോൾഡറും അതിലെ എല്ലാ വീഡിയോകളും ശാശ്വതമായി ഇല്ലാതാക്കും.',
     cancel: 'റദ്ദാക്കുക',
     delete: 'ഡിലീറ്റ് ചെയ്യുക',
+    editVideo: 'വീഡിയോ എഡിറ്റ് ചെയ്യുക',
   },
 };
 
@@ -132,8 +137,11 @@ export const LiveTvVideosPage: React.FC = () => {
     setEditTagModalOpen,
     playerModalOpen,
     setPlayerModalOpen,
+    editVideoModalOpen,
+    setEditVideoModalOpen,
     activeTagForEdit,
     activeVideoForPlayer,
+    activeVideoForEdit,
     // Handlers
     handleCreateTag,
     handleUpdateTag,
@@ -141,6 +149,8 @@ export const LiveTvVideosPage: React.FC = () => {
     handlePlayVideo,
     handleDeleteVideo,
     handleOpenEditTagModal,
+    handleOpenEditVideoModal,
+    handleUpdateVideo,
   } = useLiveTvVideosController();
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -432,6 +442,7 @@ export const LiveTvVideosPage: React.FC = () => {
                   t={t}
                   isDark={isDark}
                   onPlay={handlePlayVideo}
+                  onEditVideo={handleOpenEditVideoModal}
                   onDeleteVideo={handleDeleteVideo}
                 />
               )}
@@ -475,6 +486,15 @@ export const LiveTvVideosPage: React.FC = () => {
                 open={playerModalOpen}
                 onClose={() => setPlayerModalOpen(false)}
                 video={activeVideoForPlayer}
+                isDark={isDark}
+                t={t}
+              />
+
+              <VideoEditModal
+                open={editVideoModalOpen}
+                onClose={() => setEditVideoModalOpen(false)}
+                video={activeVideoForEdit}
+                onSave={handleUpdateVideo}
                 isDark={isDark}
                 t={t}
               />
