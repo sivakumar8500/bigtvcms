@@ -8,8 +8,10 @@ export interface VideoTag {
 }
 
 export interface TagVideo {
+  id?: string;
   fileName: string;
   sizeBytes: number;
+  viewCount?: number;
   createdAt: string;
   url: string;
 }

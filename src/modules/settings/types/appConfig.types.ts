@@ -11,6 +11,8 @@ export interface AppConfigData {
   videos: boolean;
   epaper: boolean;
   livetvvideos: boolean;
+  englishLanguage: boolean;
+  livetvcount: boolean;
   extraFlags: {
     betaSearch: boolean;
     maintenanceMode: boolean;

@@ -27,12 +27,14 @@ jest.mock('next/navigation', () => ({
 
 const sampleVideos: TagVideo[] = [
   {
+    id: 'vid-1',
     fileName: 'morning_bulletin.mp4',
     sizeBytes: 15432900,
     createdAt: '2026-09-15T10:00:00Z',
     url: 'http://localhost/videos/DNA/morning_bulletin.mp4',
   },
   {
+    id: 'vid-2',
     fileName: 'evening_bulletin.mov',
     sizeBytes: 25432900,
     createdAt: '2026-09-15T18:00:00Z',
@@ -218,6 +220,45 @@ describe('LiveTvVideos Module - Folder-Based Video Tags Integration', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Video tag deleted successfully')).toBeInTheDocument();
+    });
+  });
+
+  it('opens edit video modal, changes name/view count, and saves changes', async () => {
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('livetv-videos-table')).toBeInTheDocument();
+    });
+
+    const table = screen.getByTestId('livetv-videos-table');
+    const editBtns = table.querySelectorAll('[data-testid="EditIcon"]');
+    expect(editBtns.length).toBeGreaterThan(0);
+    fireEvent.click(editBtns[0].closest('button')!);
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit Video')).toBeInTheDocument();
+    });
+
+    const nameInput = screen.getByLabelText(/File Name/i);
+    fireEvent.change(nameInput, { target: { value: 'Updated Video Name' } });
+
+    const viewCountInput = screen.getByLabelText(/View Count/i);
+    fireEvent.change(viewCountInput, { target: { value: '100' } });
+
+    const saveBtn = screen.getByRole('button', { name: /Save/i });
+    
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Video updated successfully')).toBeInTheDocument();
     });
   });
 

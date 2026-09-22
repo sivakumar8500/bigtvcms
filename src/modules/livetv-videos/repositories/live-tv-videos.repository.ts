@@ -142,8 +142,10 @@ export class LiveTvVideosRepository {
     if (isTestEnv) {
       return [
         {
+          id: 'vid-mock-1',
           fileName: 'morning_bulletin.mp4',
           sizeBytes: 15432900,
+          viewCount: 100,
           createdAt: new Date().toISOString(),
           url: 'http://localhost:1100/uploads/videos/bigtvlive/DNA/morning_bulletin.mp4',
         },
@@ -178,6 +180,43 @@ export class LiveTvVideosRepository {
       }
       throw new Error('Failed to delete video');
     }
+  }
+  /**
+   * PATCH /video-tags/:slug/videos/:videoId
+   */
+  public async updateVideoFromTag(
+    slug: string,
+    videoId: string,
+    fileName: string,
+    viewCount: number
+  ): Promise<TagVideo> {
+    if (isTestEnv) {
+      return {
+        id: videoId,
+        fileName,
+        sizeBytes: 0,
+        viewCount,
+        createdAt: new Date().toISOString(),
+        url: 'http://localhost/test',
+      };
+    }
+
+    try {
+      const res = await videoApiClient.patch<{ success: boolean; data: TagVideo }>(
+        `/video-tags/${slug}/videos/${videoId}`,
+        { fileName, viewCount },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      if (res && res.data) {
+        return res.data;
+      }
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.message) {
+        throw new Error(err.response.data.message);
+      }
+      throw new Error('Failed to update video');
+    }
+    throw new Error('Unexpected response format');
   }
 }
 

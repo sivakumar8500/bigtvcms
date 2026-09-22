@@ -107,6 +107,16 @@ export const AppConfigCard: React.FC<AppConfigCardProps> = ({ isDark }) => {
                 }
                 label={<Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445' }}>Videos Module</Typography>}
               />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={config.englishLanguage}
+                    onChange={(e) => updateConfig('englishLanguage', e.target.checked)}
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: isDark ? '#a6e2f5' : '#1c1445' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: isDark ? '#a6e2f5' : '#1c1445' } }}
+                  />
+                }
+                label={<Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445' }}>English Language Setting</Typography>}
+              />
             </Box>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -130,6 +140,16 @@ export const AppConfigCard: React.FC<AppConfigCardProps> = ({ isDark }) => {
                   />
                 }
                 label={<Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445' }}>Live TV Videos</Typography>}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={config.livetvcount}
+                    onChange={(e) => updateConfig('livetvcount', e.target.checked)}
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: isDark ? '#a6e2f5' : '#1c1445' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: isDark ? '#a6e2f5' : '#1c1445' } }}
+                  />
+                }
+                label={<Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445' }}>Live TV Viewer Count</Typography>}
               />
               <FormControlLabel
                 control={
