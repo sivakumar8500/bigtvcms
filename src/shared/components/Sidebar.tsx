@@ -20,6 +20,7 @@ import {
   RssFeed,
   Event as EventIcon,
   LiveTv,
+  AssignmentInd,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -48,6 +49,7 @@ const sidebarTranslations = {
     menuMoreFollow: 'More Follow Menu',
     menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
+    menuReporters: 'Reporters',
   },
   te: {
     menuCreate: 'వార్తలను సృష్టించండి',
@@ -68,6 +70,7 @@ const sidebarTranslations = {
     menuMoreFollow: 'మరిన్ని ఫాలో మెనూ',
     menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
+    menuReporters: 'రిపోర్టర్లు',
   },
   hi: {
     menuCreate: 'समाचार बनाएं',
@@ -88,6 +91,7 @@ const sidebarTranslations = {
     menuMoreFollow: 'मोर फॉलो मेनू',
     menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
+    menuReporters: 'रिपोर्टर्स',
   },
   ml: {
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
@@ -108,6 +112,7 @@ const sidebarTranslations = {
     menuMoreFollow: 'കൂടുതൽ ഫോളോ മെനു',
     menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
+    menuReporters: 'റിപ്പോർട്ടർമാർ',
   },
 };
 
@@ -139,6 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuLocations, icon: <LocationOn />, href: '/locations' },
     { text: t.menuPostTypes, icon: <Article />, href: '/post-types' },
     { text: t.menuCreators, icon: <People />, href: '/creators' },
+    { text: t.menuReporters, icon: <AssignmentInd />, href: '/reporters' },
     { text: t.menuLanguages, icon: <LanguageIcon />, href: '/languages' },
     { text: t.menuAdsDynapix, icon: <CampaignIcon />, href: '/ads-dynapix' },
     { text: t.menuMoreFollow, icon: <RssFeed />, href: '/more-follow' },
@@ -180,6 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/locations',
     '/post-types',
     '/creators',
+    '/reporters',
     '/languages',
     '/ads-dynapix',
     '/more-follow',

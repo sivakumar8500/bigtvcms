@@ -96,3 +96,48 @@ export interface YouTubeVideoUpdateResponse {
   data: YouTubeShortItem;
 }
 
+export interface BrandInfo {
+  id: string;
+  name: string;
+  logoUrl?: string;
+}
+
+export interface PublishingInfo {
+  status: string;
+  isActive: boolean;
+  visibility: string;
+  scheduledAt: string | null;
+  publishedAt: string | null;
+}
+
+export interface AnalyticsInfo {
+  viewCount: number;
+  liveViewerCount: number;
+  likeCount: number;
+  shareCount: number;
+  commentCount: number;
+  saveCount: number;
+}
+
+export interface SettingsInfo {
+  allowComments: boolean;
+  allowSharing: boolean;
+  allowDownloads: boolean;
+}
+
+export interface UploadedReel {
+  id?: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  durationSeconds: number;
+  brand?: BrandInfo;
+  publishing?: PublishingInfo;
+  analytics?: AnalyticsInfo;
+  settings?: SettingsInfo;
+  hashtags?: string[];
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

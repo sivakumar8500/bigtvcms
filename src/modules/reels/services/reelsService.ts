@@ -3,6 +3,7 @@ import {
   YouTubeShortsResponse,
   YouTubeSyncParams,
   YouTubeSyncResponse,
+  UploadedReel,
 } from '../domain/reels.model';
 
 export class ReelsService {
@@ -60,5 +61,40 @@ export class ReelsService {
     return apiClient.put(`/youtube/videos/${id}`, {
       isPublish,
     });
+  }
+
+  /**
+   * Create a new custom uploaded reel
+   */
+  static async createUploadedReel(payload: UploadedReel): Promise<UploadedReel> {
+    return apiClient.post<UploadedReel, UploadedReel>('/reels', payload);
+  }
+
+  /**
+   * Fetch paginated custom uploaded reels
+   */
+  static async fetchUploadedReels(skip: number = 0, limit: number = 20): Promise<{ data: UploadedReel[]; total: number }> {
+    return apiClient.get('/reels', { skip, limit });
+  }
+
+  /**
+   * Get uploaded reel by ID
+   */
+  static async getUploadedReelById(id: string): Promise<UploadedReel> {
+    return apiClient.get<UploadedReel>(`/reels/${id}`);
+  }
+
+  /**
+   * Update an uploaded reel
+   */
+  static async updateUploadedReel(id: string, payload: Partial<UploadedReel>): Promise<UploadedReel> {
+    return apiClient.put<UploadedReel, Partial<UploadedReel>>(`/reels/${id}`, payload);
+  }
+
+  /**
+   * Delete an uploaded reel
+   */
+  static async deleteUploadedReel(id: string): Promise<{ status: string; message: string }> {
+    return apiClient.delete(`/reels/${id}`);
   }
 }
