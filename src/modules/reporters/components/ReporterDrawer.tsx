@@ -184,8 +184,28 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      alert('Name is required');
+    const requiredFields = [
+      'name', 'bio', 'mc_phone', 'mc_websiteUrl', 'mc_email',
+      'mc_addressLine1', 'mc_city', 'mc_district', 'mc_state', 'mc_country', 'mc_postalCode',
+      'emp_designation', 'emp_type', 'emp_status', 'emp_role', 'emp_department', 'emp_bureau',
+      'emp_joiningDate', 'emp_workEmail', 'emp_workPhone',
+      'social_instagram', 'social_facebook', 'social_twitter', 'social_youtube'
+    ];
+
+    for (const field of requiredFields) {
+      if (!String(formData[field as keyof typeof formData]).trim()) {
+        alert('All fields are required');
+        return;
+      }
+    }
+
+    if (!formData.profileImageUrl && !selectedFile) {
+      alert('Profile image is required');
+      return;
+    }
+
+    if (formData.languages.length === 0 || formData.specializations.length === 0) {
+      alert('All fields are required');
       return;
     }
 
@@ -307,7 +327,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         {/* Profile Image Uploader */}
         <Box>
           <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.8 }}>
-            <CloudUpload sx={{ fontSize: '1rem' }} /> Profile Image
+            <CloudUpload sx={{ fontSize: '1rem' }} /> Profile Image *
           </Typography>
 
           <input
@@ -381,7 +401,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           />
         </Box>
 
-        <TextField label="Bio" name="bio" value={formData.bio} onChange={handleChange} multiline rows={2} {...textFieldProps} />
+        <TextField label="Bio *" name="bio" value={formData.bio} onChange={handleChange} multiline rows={2} {...textFieldProps} />
         
         <Autocomplete
           multiple
@@ -398,7 +418,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Languages"
+              label="Languages *"
               placeholder="Select or type..."
               {...textFieldProps}
             />
@@ -420,7 +440,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Specializations"
+              label="Specializations *"
               placeholder="Select or type..."
               {...textFieldProps}
             />
@@ -432,29 +452,29 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Channel ID" name="mc_id" value="BIGTV0001" disabled {...textFieldProps} />
-          <TextField label="Channel Name" name="mc_name" value="BIGTV" disabled {...textFieldProps} />
+          <TextField label="Channel ID *" name="mc_id" value="BIGTV0001" disabled {...textFieldProps} />
+          <TextField label="Channel Name *" name="mc_name" value="BIGTV" disabled {...textFieldProps} />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Type" name="mc_type" value="News" disabled {...textFieldProps} />
-          <TextField label="Phone" name="mc_phone" value={formData.mc_phone} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Type *" name="mc_type" value="News" disabled {...textFieldProps} />
+          <TextField label="Phone *" name="mc_phone" value={formData.mc_phone} onChange={handleChange} {...textFieldProps} />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Logo URL" name="mc_logoUrl" value="https://api.pravasamedia.com/api/v1/files/3a93fda3-a973-4b3b-a56a-3dc3829a6bc7" disabled {...textFieldProps} />
-          <TextField label="Website URL" name="mc_websiteUrl" value={formData.mc_websiteUrl} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Logo URL *" name="mc_logoUrl" value="https://api.pravasamedia.com/api/v1/files/3a93fda3-a973-4b3b-a56a-3dc3829a6bc7" disabled {...textFieldProps} />
+          <TextField label="Website URL *" name="mc_websiteUrl" value={formData.mc_websiteUrl} onChange={handleChange} {...textFieldProps} />
         </Box>
-        <TextField label="Email" name="mc_email" value={formData.mc_email} onChange={handleChange} {...textFieldProps} />
+        <TextField label="Email *" name="mc_email" value={formData.mc_email} onChange={handleChange} {...textFieldProps} />
         
         <Typography variant="subtitle2" sx={{ mt: 1, color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>Reporter Address</Typography>
-        <TextField label="Address Line 1" name="mc_addressLine1" value={formData.mc_addressLine1} onChange={handleChange} {...textFieldProps} />
+        <TextField label="Address Line 1 *" name="mc_addressLine1" value={formData.mc_addressLine1} onChange={handleChange} {...textFieldProps} />
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="City" name="mc_city" value={formData.mc_city} onChange={handleChange} {...textFieldProps} />
-          <TextField label="District" name="mc_district" value={formData.mc_district} onChange={handleChange} {...textFieldProps} />
+          <TextField label="City *" name="mc_city" value={formData.mc_city} onChange={handleChange} {...textFieldProps} />
+          <TextField label="District *" name="mc_district" value={formData.mc_district} onChange={handleChange} {...textFieldProps} />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="State" name="mc_state" value={formData.mc_state} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Country" name="mc_country" value={formData.mc_country} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Postal Code" name="mc_postalCode" value={formData.mc_postalCode} onChange={handleChange} {...textFieldProps} />
+          <TextField label="State *" name="mc_state" value={formData.mc_state} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Country *" name="mc_country" value={formData.mc_country} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Postal Code *" name="mc_postalCode" value={formData.mc_postalCode} onChange={handleChange} {...textFieldProps} />
         </Box>
 
         <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
@@ -464,14 +484,14 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Employee ID" name="emp_employeeId" value="BIGTV0002" disabled {...textFieldProps} />
+          <TextField label="Employee ID *" name="emp_employeeId" value="BIGTV0002" disabled {...textFieldProps} />
           <Autocomplete
             freeSolo
             options={['Senior Reporter', 'Editor', 'MD', 'Digital Manager', 'Reporter', 'Anchor', 'Camera Operator', 'Producer']}
             value={formData.emp_designation}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_designation: newValue || '' }))}
             onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_designation: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Designation" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Designation *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -482,14 +502,14 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             value={formData.emp_type}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_type: newValue || '' }))}
             onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_type: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Type" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Type *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
           <Autocomplete
             options={['Active', 'Inactive']}
             value={formData.emp_status}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_status: newValue || '' }))}
-            renderInput={(params) => <TextField {...params} label="Status" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Status *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -500,7 +520,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             value={formData.emp_role}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_role: newValue || '' }))}
             onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_role: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Role" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Role *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
           <Autocomplete
@@ -509,7 +529,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             value={formData.emp_department}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_department: newValue || '' }))}
             onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_department: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Department" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Department *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -520,11 +540,11 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             value={formData.emp_bureau}
             onChange={(_, newValue) => setFormData(p => ({ ...p, emp_bureau: newValue || '' }))}
             onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_bureau: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Bureau" {...textFieldProps} />}
+            renderInput={(params) => <TextField {...params} label="Bureau *" {...textFieldProps} />}
             sx={{ flex: 1 }}
           />
           <TextField 
-            label="Joining Date" 
+            label="Joining Date *" 
             name="emp_joiningDate" 
             type="date"
             value={formData.emp_joiningDate} 
@@ -534,8 +554,8 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Work Email" name="emp_workEmail" value={formData.emp_workEmail} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Work Phone" name="emp_workPhone" value={formData.emp_workPhone} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Work Email *" name="emp_workEmail" value={formData.emp_workEmail} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Work Phone *" name="emp_workPhone" value={formData.emp_workPhone} onChange={handleChange} {...textFieldProps} />
         </Box>
 
         <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
@@ -545,12 +565,12 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Instagram URL" name="social_instagram" value={formData.social_instagram} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Facebook URL" name="social_facebook" value={formData.social_facebook} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Instagram URL *" name="social_instagram" value={formData.social_instagram} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Facebook URL *" name="social_facebook" value={formData.social_facebook} onChange={handleChange} {...textFieldProps} />
         </Box>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Twitter (X) URL" name="social_twitter" value={formData.social_twitter} onChange={handleChange} {...textFieldProps} />
-          <TextField label="YouTube URL" name="social_youtube" value={formData.social_youtube} onChange={handleChange} {...textFieldProps} />
+          <TextField label="Twitter (X) URL *" name="social_twitter" value={formData.social_twitter} onChange={handleChange} {...textFieldProps} />
+          <TextField label="YouTube URL *" name="social_youtube" value={formData.social_youtube} onChange={handleChange} {...textFieldProps} />
         </Box>
       </Box>
 

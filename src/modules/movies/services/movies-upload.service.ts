@@ -7,7 +7,7 @@ export interface PresignedUrlResponse {
   key: string;
 }
 
-const DIRECT_UPLOAD_URL = 'https://apidev.chotanews.com/movies/upload-url';
+const DIRECT_UPLOAD_URL = 'https://api.chotanews.com/movies/upload-url';
 const PROXY_UPLOAD_URL = '/api/movies/upload-url';
 
 export class MoviesUploadService {
@@ -15,7 +15,7 @@ export class MoviesUploadService {
    * Generates a presigned PUT URL for Cloudflare R2 bucket and uploads the movie file/poster.
    *
    * Flow:
-   * 1. POST /api/movies/upload-url (or direct https://apidev.chotanews.com/movies/upload-url)
+   * 1. POST /api/movies/upload-url (or direct https://api.chotanews.com/movies/upload-url)
    *    Body: { file_name, content_type, folder: "images" | "movies" }
    * 2. PUT upload_url with raw file payload & Content-Type header
    * 3. Returns { success, upload_url, file_url, key }

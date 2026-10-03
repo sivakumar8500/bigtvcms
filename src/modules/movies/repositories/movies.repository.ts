@@ -2,7 +2,7 @@ import axios from 'axios';
 import { MovieItem, CreateMovieDto, MovieApiData } from '../domain/movies.model';
 
 const LOCAL_BACKEND_URL = 'http://localhost:8000/api/admin/content/movie';
-const REMOTE_API_URL = 'https://apidev.chotanews.com/api/admin/content/movie';
+const REMOTE_API_URL = 'https://api.chotanews.com/api/admin/content/movie';
 const PROXY_API_URL = '/api/api/admin/content/movie';
 const LOCAL_STORAGE_KEY = 'bigtv_cms_movies_list';
 
@@ -382,7 +382,7 @@ export class MoviesRepository {
   }
 
   static async getAll(): Promise<MovieItem[]> {
-    const baseUrl = 'https://apidev.chotanews.com/api/content';
+    const baseUrl = 'https://api.chotanews.com/api/content';
 
     const getHeaders = () => {
       if (typeof window === 'undefined') return {};
@@ -555,7 +555,7 @@ export class MoviesRepository {
     let targetUrl = this.getTargetUrl(String(id));
 
     if (contentType === 'series') {
-      const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://apidev.chotanews.com/api';
+      const envBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.chotanews.com/api';
       targetUrl = `${envBase.replace(/\/$/, '')}/admin/content?type=series&id=${id}`;
     }
 
