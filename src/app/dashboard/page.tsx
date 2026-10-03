@@ -957,6 +957,14 @@ export default function DashboardPage() {
       isHomePost: Boolean(data.isHomePost || (data as any).is_home_post),
       colorCode: data.colorCode || (data as any).color_code || '',
       sendNotification: Boolean(data.sendNotification),
+      showTag: data.showTag || (data as any).show_tag,
+      show_tag: data.showTag || (data as any).show_tag,
+      showDay: data.showDay || (data as any).show_day,
+      show_day: data.showDay || (data as any).show_day,
+      showTime: data.showTime || (data as any).show_time,
+      show_time: data.showTime || (data as any).show_time,
+      reminderOptions: data.reminderOptions || (data as any).reminder_options,
+      reminder_options: data.reminderOptions || (data as any).reminder_options,
     };
 
     let createdId = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 820700;
@@ -1153,6 +1161,14 @@ export default function DashboardPage() {
       colorCode: data.colorCode || (data as any).color_code || '',
       postUrl: postUrlVal,
       web_post_url: postUrlVal,
+      showTag: data.showTag || (data as any).show_tag,
+      show_tag: data.showTag || (data as any).show_tag,
+      showDay: data.showDay || (data as any).show_day,
+      show_day: data.showDay || (data as any).show_day,
+      showTime: data.showTime || (data as any).show_time,
+      show_time: data.showTime || (data as any).show_time,
+      reminderOptions: data.reminderOptions || (data as any).reminder_options,
+      reminder_options: data.reminderOptions || (data as any).reminder_options,
     };
 
     try {

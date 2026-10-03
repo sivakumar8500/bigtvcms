@@ -396,6 +396,14 @@ export interface CreateNewsFormData {
   bullet_points?: string[];
   subType?: string;
   sub_type?: string;
+  showTag?: string;
+  show_tag?: string;
+  showDay?: string;
+  show_day?: string;
+  showTime?: string;
+  show_time?: string;
+  reminderOptions?: string[];
+  reminder_options?: string[];
 }
 
 interface CreateNewsFormProps {
@@ -798,6 +806,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
   });
   const [bulletInputText, setBulletInputText] = useState<string>('');
 
+  const [showTag, setShowTag] = useState<string>((initialData as any)?.showTag || (initialData as any)?.show_tag || 'MORNING SHOW');
+  const [showDay, setShowDay] = useState<string>((initialData as any)?.showDay || (initialData as any)?.show_day || 'Mon-Sat');
+  const [showTime, setShowTime] = useState<string>((initialData as any)?.showTime || (initialData as any)?.show_time || '7:00 AM IST');
+  const [reminderOptions, setReminderOptions] = useState<string[]>((initialData as any)?.reminderOptions || (initialData as any)?.reminder_options || ['15 min before', 'When it starts']);
+
   const engTranslation = isEditMode ? (initialData as any)?.translations?.english || (initialData as any)?.translations?.en : null;
 
   const isImageOrGalleryType =
@@ -820,6 +833,11 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
     type.toLowerCase() === 'bullet post' ||
     type.toLowerCase() === 'bulite post' ||
     type.toLowerCase() === 'bulletin';
+
+  const isShowAlert =
+    type.toLowerCase().trim() === 'showalert' ||
+    type.toLowerCase().trim() === 'show alert' ||
+    type.toLowerCase().replace(/\s+/g, '') === 'showalert';
 
   const handleAddBulletPoint = () => {
     const trimmed = bulletInputText.trim();
@@ -1309,7 +1327,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       tLower === 'bulletin' ||
       tLower === 'bulletpost' ||
       tLower === 'bullet post' ||
-      tLower.includes('bullet')
+      tLower.includes('bullet') ||
+      tLower === 'showalert' ||
+      tLower === 'show alert'
     );
   };
 
@@ -1608,6 +1628,14 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       imageTitle: cleanImgTitle,
       bulletPoints: isBulletPost ? finalBullets : [],
       bullet_points: isBulletPost ? finalBullets : [],
+      showTag,
+      showDay,
+      showTime,
+      reminderOptions,
+      show_tag: showTag,
+      show_day: showDay,
+      show_time: showTime,
+      reminder_options: reminderOptions,
     });
     setIsUploading(false);
     handleReset();
@@ -2752,6 +2780,31 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
                     }}
                   />
+                </Box>
+              )}
+
+              {isShowAlert && (
+                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2, p: 2, borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)', backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f9f9f9' }}>
+                  <Typography variant="subtitle2" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 600 }}>Show Alert Details</Typography>
+                  <TextField
+                    fullWidth size="small" label="Show Tag *" placeholder="e.g. MORNING SHOW" value={showTag} onChange={(e) => setShowTag(e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { color: isDark ? '#fff' : '#000', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#fff' }, '& .MuiInputLabel-root': { color: isDark ? '#a6e2f5' : '#5c548a' } }}
+                  />
+                  <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                    <TextField fullWidth size="small" label="Show Day *" placeholder="e.g. Mon-Sat" value={showDay} onChange={(e) => setShowDay(e.target.value)} sx={{ '& .MuiOutlinedInput-root': { color: isDark ? '#fff' : '#000', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#fff' }, '& .MuiInputLabel-root': { color: isDark ? '#a6e2f5' : '#5c548a' } }} />
+                    <TextField fullWidth size="small" label="Show Time *" placeholder="e.g. 7:00 AM IST" value={showTime} onChange={(e) => setShowTime(e.target.value)} sx={{ '& .MuiOutlinedInput-root': { color: isDark ? '#fff' : '#000', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#fff' }, '& .MuiInputLabel-root': { color: isDark ? '#a6e2f5' : '#5c548a' } }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" sx={{ color: isDark ? '#a6e2f5' : '#5c548a', mb: 1, fontWeight: 500 }}>Reminder Options</Typography>
+                    <FormGroup row>
+                      {['15 min before', 'When it starts'].map(opt => (
+                        <FormControlLabel key={opt} control={<Checkbox checked={reminderOptions.includes(opt)} onChange={(e) => {
+                          if (e.target.checked) setReminderOptions(prev => [...prev, opt]);
+                          else setReminderOptions(prev => prev.filter(o => o !== opt));
+                        }} sx={{ color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)', '&.Mui-checked': { color: '#FF5722' } }} />} label={<Typography variant="body2" sx={{ color: isDark ? '#fff' : '#000' }}>{opt}</Typography>} />
+                      ))}
+                    </FormGroup>
+                  </Box>
                 </Box>
               )}
             </Box>

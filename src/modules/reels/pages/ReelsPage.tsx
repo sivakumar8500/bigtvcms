@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import {
@@ -17,6 +17,8 @@ import {
   Alert,
   Select,
   MenuItem,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   AddCircleOutline,
@@ -42,6 +44,7 @@ import { useReelsController } from '../hooks/useReelsController';
 import { ReelsTable } from '../components/ReelsTable';
 import { ReelsDrawer } from '../components/ReelsDrawer';
 import { SyncChannelModal } from '../components/SyncChannelModal';
+import { InhouseReelsTab } from '../components/InhouseReelsTab';
 import { Loader } from '@/shared/components/Loader';
 
 const translations = {
@@ -160,6 +163,7 @@ const translations = {
 };
 
 export const ReelsPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState(0);
   const router = useRouter();
   const { language } = useLanguageStore();
   const { mode } = useAppTheme();
@@ -212,8 +216,35 @@ export const ReelsPage: React.FC = () => {
 
         {/* Content */}
         <Box sx={{ pt: 2, px: 2, pb: 4, flex: 1, overflowY: 'auto' }}>
+          
+          <Tabs 
+            value={activeTab} 
+            onChange={(_, v) => setActiveTab(v)} 
+            sx={{ 
+              mb: 3, 
+              borderBottom: 1, 
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'divider',
+              '& .MuiTab-root': {
+                color: isDark ? '#d0caeb' : '#5c548a',
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.95rem'
+              },
+              '& .Mui-selected': {
+                color: isDark ? '#a6e2f5 !important' : '#1c1445 !important',
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+              }
+            }}
+          >
+            <Tab label="YouTube Reels" />
+            <Tab label="In-house Reels" />
+          </Tabs>
 
-          {/* Toolbar: filter + add + sync */}
+          {activeTab === 0 && (
+            <Box>
+              {/* Toolbar: filter + add + sync */}
           <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', flexWrap: 'wrap' }}>
             <TextField
               placeholder={t.searchTitle}
@@ -385,6 +416,12 @@ export const ReelsPage: React.FC = () => {
             />
           </Box>
         </Box>
+      )}
+      
+      {activeTab === 1 && (
+        <InhouseReelsTab isDark={isDark} t={t} />
+      )}
+    </Box>
       </Box>
 
       {/* Sync Channel Modal */}
