@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, TextField, InputAdornment, IconButton, Button, Pagination, Avatar, Chip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Search, Add, LocationOn, PersonOutline } from '@mui/icons-material';
+import { Search, Add, LocationOn, PersonOutline, Visibility } from '@mui/icons-material';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -11,6 +11,7 @@ import { useReporterController, Reporter } from '../hooks/useReporterController'
 import { Loader } from '@/shared/components/Loader';
 
 import { ReporterDrawer } from '../components/ReporterDrawer';
+import { ReporterViewDialog } from '../components/ReporterViewDialog';
 
 const translations = {
   en: {
@@ -95,11 +96,14 @@ export const ReportersPage: React.FC = () => {
     setFilterName,
     handleClearFilters,
     drawerOpen,
+    viewDialogOpen,
     isEditMode,
     selectedReporter,
     handleAddClick,
     handleEditClick,
+    handleViewClick,
     handleCloseDrawer,
+    handleCloseViewDialog,
     handleDelete,
     handleStatusToggle,
     fetchReporters,
@@ -278,6 +282,9 @@ export const ReportersPage: React.FC = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                            <IconButton size="small" onClick={() => handleViewClick(row)} sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+                              <Visibility fontSize="small" />
+                            </IconButton>
                             <Button size="small" variant="text" onClick={() => handleEditClick(row)} sx={{ textTransform: 'none', color: isDark ? '#a6e2f5' : '#2563eb' }}>
                               Edit
                             </Button>
@@ -330,6 +337,13 @@ export const ReportersPage: React.FC = () => {
         onSuccess={fetchReporters}
         isDark={isDark}
         t={t}
+      />
+      
+      <ReporterViewDialog
+        open={viewDialogOpen}
+        onClose={handleCloseViewDialog}
+        reporter={selectedReporter}
+        isDark={isDark}
       />
     </Box>
   );

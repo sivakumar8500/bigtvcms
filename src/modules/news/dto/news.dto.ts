@@ -48,6 +48,14 @@ export interface NewsPostDto {
   createdAt?: string;
   updatedAt?: string;
   translations?: any;
+  showTag?: string;
+  show_tag?: string;
+  showDay?: string;
+  show_day?: string;
+  showTime?: string;
+  show_time?: string;
+  reminderOptions?: string[];
+  reminder_options?: string[];
 }
 
 export interface CreateNewsPostDto {
@@ -99,6 +107,14 @@ export interface CreateNewsPostDto {
   morefollow_tag_ids?: number[];
   sendNotification?: boolean;
   translations?: any;
+  showTag?: string;
+  show_tag?: string;
+  showDay?: string;
+  show_day?: string;
+  showTime?: string;
+  show_time?: string;
+  reminderOptions?: string[];
+  reminder_options?: string[];
 }
 
 export interface UpdateNewsPostDto {
@@ -149,6 +165,14 @@ export interface UpdateNewsPostDto {
   aitag_ids?: number[];
   morefollow_tag_ids?: number[];
   translations?: any;
+  showTag?: string;
+  show_tag?: string;
+  showDay?: string;
+  show_day?: string;
+  showTime?: string;
+  show_time?: string;
+  reminderOptions?: string[];
+  reminder_options?: string[];
 }
 
 export interface GetNewsPostsParams {

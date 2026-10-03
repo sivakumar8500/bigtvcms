@@ -11,9 +11,33 @@ export interface Reporter {
   isActive: boolean;
   isVerified: boolean;
   employment?: {
+    employeeId?: string;
+    type?: string;
+    status?: string;
     designation?: string;
     department?: string;
     role?: string;
+    bureau?: string;
+    joiningDate?: string;
+    workEmail?: string;
+    workPhone?: string;
+  };
+  mediaChannel?: {
+    id?: string;
+    name?: string;
+    type?: string;
+    logoUrl?: string;
+    websiteUrl?: string;
+    email?: string;
+    phone?: string;
+    address?: {
+      addressLine1?: string;
+      city?: string;
+      district?: string;
+      state?: string;
+      country?: string;
+      postalCode?: string;
+    };
   };
   location?: {
     city?: string;
@@ -74,6 +98,7 @@ export const useReporterController = () => {
   }, [filteredData, page, recordsPerPage]);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<Reporter | null>(null);
 
@@ -92,6 +117,18 @@ export const useReporterController = () => {
     setIsEditMode(true);
     setSelectedReporter(reporter);
     setDrawerOpen(true);
+  };
+
+  const handleViewClick = (reporter: Reporter) => {
+    setSelectedReporter(reporter);
+    setViewDialogOpen(true);
+  };
+
+  const handleCloseViewDialog = () => {
+    setViewDialogOpen(false);
+    setTimeout(() => {
+      setSelectedReporter(null);
+    }, 300);
   };
 
   const handleCloseDrawer = () => {
@@ -136,11 +173,14 @@ export const useReporterController = () => {
     handleClearFilters,
     fetchReporters,
     drawerOpen,
+    viewDialogOpen,
     isEditMode,
     selectedReporter,
     handleAddClick,
     handleEditClick,
+    handleViewClick,
     handleCloseDrawer,
+    handleCloseViewDialog,
     handleDelete,
     handleStatusToggle,
   };
