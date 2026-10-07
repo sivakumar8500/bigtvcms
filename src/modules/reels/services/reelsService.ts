@@ -4,9 +4,18 @@ import {
   YouTubeSyncParams,
   YouTubeSyncResponse,
   UploadedReel,
+  CreateYouTubeVideoPayload,
+  YouTubeShortItem,
 } from '../domain/reels.model';
 
 export class ReelsService {
+  /**
+   * Create a new YouTube Video record
+   */
+  static async createYouTubeVideo(payload: CreateYouTubeVideoPayload): Promise<YouTubeShortItem> {
+    return apiClient.post<YouTubeShortItem, CreateYouTubeVideoPayload>('/youtube/videos', payload);
+  }
+
   /**
    * Fetch paginated YouTube Videos / Shorts list
    */

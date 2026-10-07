@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useReelsController } from '../hooks/useReelsController';
+import { useReelsController, extractYouTubeVideoId } from '../hooks/useReelsController';
 import { reelSchema } from '../validators/reels.validator';
 import { ReelsService } from '../services/reelsService';
 import { apiClient } from '@/core/api/api-client';
@@ -12,6 +12,16 @@ jest.mock('@/core/api/api-client', () => ({
     delete: jest.fn(),
   },
 }));
+
+describe('extractYouTubeVideoId helper', () => {
+  it('should extract video ID from various YouTube URL formats', () => {
+    expect(extractYouTubeVideoId('https://www.youtube.com/watch?v=GSgLMsux9zM')).toBe('GSgLMsux9zM');
+    expect(extractYouTubeVideoId('https://youtu.be/GSgLMsux9zM')).toBe('GSgLMsux9zM');
+    expect(extractYouTubeVideoId('https://www.youtube.com/shorts/GSgLMsux9zM')).toBe('GSgLMsux9zM');
+    expect(extractYouTubeVideoId('GSgLMsux9zM')).toBe('GSgLMsux9zM');
+    expect(extractYouTubeVideoId('')).toBe('');
+  });
+});
 
 describe('Reel Validator Schema', () => {
   it('should validate a valid reel object', () => {
@@ -148,6 +158,68 @@ describe('ReelsService API Methods', () => {
     expect(apiClient.put).toHaveBeenCalledWith('/youtube/videos/1', { isPublish: true });
     expect(res).toEqual(mockUpdateRes);
   });
+
+  it('should call createYouTubeVideo with POST /youtube/videos and correct payload', async () => {
+    const mockPayload = {
+      videoUrl: 'https://www.youtube.com/watch?v=GSgLMsux9zM',
+      video_url: 'https://www.youtube.com/watch?v=GSgLMsux9zM',
+      thumbnailUrl: 'https://i.ytimg.com/vi/GSgLMsux9zM/maxresdefault.jpg',
+      thumbnail_url: 'https://i.ytimg.com/vi/GSgLMsux9zM/maxresdefault.jpg',
+      title: 'Heavy Rains in AP',
+      publisher: 'BIG TV Telugu',
+      publisherImage: '',
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      duration: '0:45',
+      createdAt: '2026-10-07T00:00:00.000Z',
+      postName: 'Heavy Rains in AP',
+      reportedBy: '',
+      links: ['https://www.youtube.com/watch?v=GSgLMsux9zM'],
+      content: '',
+      gallery: [],
+      isPublish: false,
+      lang: 'te',
+      video_id: 'GSgLMsux9zM',
+      videoId: 'GSgLMsux9zM',
+    };
+
+    const mockRes = { id: '101', title: 'Heavy Rains in AP' };
+    (apiClient.post as jest.Mock).mockResolvedValueOnce(mockRes);
+
+    const res = await ReelsService.createYouTubeVideo(mockPayload);
+    expect(apiClient.post).toHaveBeenCalledWith('/youtube/videos', mockPayload);
+    expect(res).toEqual(mockRes);
+  });
+
+  it('should call uploaded reels CRUD methods in ReelsService', async () => {
+    const mockReel = { title: 'Test Reel', description: 'Desc', videoUrl: 'http://video.mp4', thumbnailUrl: 'http://img.jpg', durationSeconds: 30 };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce(mockReel);
+    const created = await ReelsService.createUploadedReel(mockReel as any);
+    expect(apiClient.post).toHaveBeenCalledWith('/reels', mockReel);
+    expect(created).toEqual(mockReel);
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce({ data: [mockReel], total: 1 });
+    const fetched = await ReelsService.fetchUploadedReels(0, 20);
+    expect(apiClient.get).toHaveBeenCalledWith('/reels', { skip: 0, limit: 20 });
+    expect(fetched.total).toBe(1);
+
+    (apiClient.get as jest.Mock).mockResolvedValueOnce(mockReel);
+    const byId = await ReelsService.getUploadedReelById('123');
+    expect(apiClient.get).toHaveBeenCalledWith('/reels/123');
+    expect(byId).toEqual(mockReel);
+
+    (apiClient.put as jest.Mock).mockResolvedValueOnce(mockReel);
+    const updated = await ReelsService.updateUploadedReel('123', mockReel);
+    expect(apiClient.put).toHaveBeenCalledWith('/reels/123', mockReel);
+    expect(updated).toEqual(mockReel);
+
+    (apiClient.delete as jest.Mock).mockResolvedValueOnce({ status: 'success', message: 'deleted' });
+    const deleted = await ReelsService.deleteUploadedReel('123');
+    expect(apiClient.delete).toHaveBeenCalledWith('/reels/123');
+    expect(deleted.status).toBe('success');
+  });
 });
 
 describe('useReelsController hook', () => {
@@ -201,23 +273,39 @@ describe('useReelsController hook', () => {
     expect(result.current.form.titleEn).toBe(firstReel.titleEn);
   });
 
-  it('should handle form field change', () => {
+  it('should handle form field change and auto-extract videoId from videoUrl', () => {
     const { result } = renderHook(() => useReelsController());
     act(() => {
       result.current.handleFieldChange('titleEn', 'New Reel Title');
     });
     expect(result.current.form.titleEn).toBe('New Reel Title');
+
+    act(() => {
+      result.current.handleFieldChange('videoUrl', 'https://www.youtube.com/watch?v=GSgLMsux9zM');
+    });
+    expect(result.current.form.videoUrl).toBe('https://www.youtube.com/watch?v=GSgLMsux9zM');
+    expect(result.current.form.videoId).toBe('GSgLMsux9zM');
+    expect(result.current.uploadedImage).toBe('https://i.ytimg.com/vi/GSgLMsux9zM/maxresdefault.jpg');
   });
 
-  it('should validation fail on submit if fields are empty', () => {
+  it('should auto-populate videoUrl when videoId is entered directly', () => {
     const { result } = renderHook(() => useReelsController());
     act(() => {
-      result.current.handleSubmit();
+      result.current.handleFieldChange('videoId', 'GSgLMsux9zM');
+    });
+    expect(result.current.form.videoId).toBe('GSgLMsux9zM');
+    expect(result.current.form.videoUrl).toBe('https://www.youtube.com/watch?v=GSgLMsux9zM');
+  });
+
+  it('should validation fail on submit if fields are empty', async () => {
+    const { result } = renderHook(() => useReelsController());
+    await act(async () => {
+      await result.current.handleSubmit();
     });
     expect(Object.keys(result.current.errors).length).toBeGreaterThan(0);
   });
 
-  it('should add a reel on successful submit', () => {
+  it('should add a reel on successful submit', async () => {
     const { result } = renderHook(() => useReelsController());
     act(() => {
       result.current.handleFieldChange('titleEn', 'Metro Launch');
@@ -234,8 +322,8 @@ describe('useReelsController hook', () => {
     act(() => {
       result.current.handleFieldChange('duration', '1:00');
     });
-    act(() => {
-      result.current.handleSubmit();
+    await act(async () => {
+      await result.current.handleSubmit();
     });
     expect(result.current.rows.some((r) => r.titleEn === 'Metro Launch')).toBe(true);
   });
