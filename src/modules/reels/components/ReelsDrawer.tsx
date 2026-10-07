@@ -16,8 +16,46 @@ import {
   CloudUpload,
   DeleteOutline,
   Language as LanguageIcon,
+  YouTube as YouTubeIcon,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import { ReelFormData } from '../validators/reels.validator';
+import { useLanguageStore } from '@/core/storage/language-store';
+
+const drawerTranslations = {
+  en: {
+    videoUrlLabel: '🔗 YouTube Video Full URL',
+    videoUrlPlaceholder: 'e.g. https://www.youtube.com/watch?v=GSgLMsux9zM',
+    videoIdLabel: '🆔 Video ID',
+    videoIdPlaceholder: 'e.g. GSgLMsux9zM',
+    durationLabel: '⏱ Duration (e.g. 0:30) *',
+    durationPlaceholder: 'e.g. 0:30',
+  },
+  te: {
+    videoUrlLabel: '🔗 యూట్యూబ్ వీడియో పూర్తి URL',
+    videoUrlPlaceholder: 'ఉదా: https://www.youtube.com/watch?v=GSgLMsux9zM',
+    videoIdLabel: '🆔 వీడియో ID',
+    videoIdPlaceholder: 'ఉదా: GSgLMsux9zM',
+    durationLabel: '⏱ వ్యవధి (ఉదా: 0:30) *',
+    durationPlaceholder: 'ఉదా: 0:30',
+  },
+  hi: {
+    videoUrlLabel: '🔗 यूट्यूब वीडियो फुल URL',
+    videoUrlPlaceholder: 'उदा: https://www.youtube.com/watch?v=GSgLMsux9zM',
+    videoIdLabel: '🆔 वीडियो ID',
+    videoIdPlaceholder: 'उदा: GSgLMsux9zM',
+    durationLabel: '⏱ अवधि (उदा: 0:30) *',
+    durationPlaceholder: 'उदा: 0:30',
+  },
+  ml: {
+    videoUrlLabel: '🔗 യൂറ്റ്യൂബ് വീഡിയോ ഫുൾ URL',
+    videoUrlPlaceholder: 'ഉദാ: https://www.youtube.com/watch?v=GSgLMsux9zM',
+    videoIdLabel: '🆔 വീഡിയോ ID',
+    videoIdPlaceholder: 'ഉദാ: GSgLMsux9zM',
+    durationLabel: '⏱ ദൈർഘ്യം (ഉദാ: 0:30) *',
+    durationPlaceholder: 'ഉദാ: 0:30',
+  },
+};
 
 interface ReelsDrawerProps {
   open: boolean;
@@ -46,6 +84,8 @@ export const ReelsDrawer: React.FC<ReelsDrawerProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const { language } = useLanguageStore();
+  const dt = drawerTranslations[language as keyof typeof drawerTranslations] || drawerTranslations.en;
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -175,15 +215,63 @@ export const ReelsDrawer: React.FC<ReelsDrawerProps> = ({
 
         <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
 
-        {/* Duration */}
+        {/* YouTube Video Full URL */}
         <Box>
           <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, display: 'block', mb: 0.6 }}>
-            ⏱ Duration (e.g. 0:30) *
+            {dt.videoUrlLabel}
           </Typography>
           <TextField
             fullWidth
             size="small"
-            placeholder="e.g. 0:30"
+            placeholder={dt.videoUrlPlaceholder}
+            value={form.videoUrl || ''}
+            onChange={(e) => onFieldChange('videoUrl', e.target.value)}
+            error={!!errors.videoUrl}
+            helperText={errors.videoUrl || ''}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: isDark ? '#ffffff' : '#1c1445',
+                borderRadius: '10px',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+              },
+              '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+            }}
+          />
+        </Box>
+
+        {/* Video ID */}
+        <Box>
+          <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, display: 'block', mb: 0.6 }}>
+            {dt.videoIdLabel}
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={dt.videoIdPlaceholder}
+            value={form.videoId || ''}
+            onChange={(e) => onFieldChange('videoId', e.target.value)}
+            error={!!errors.videoId}
+            helperText={errors.videoId || ''}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: isDark ? '#ffffff' : '#1c1445',
+                borderRadius: '10px',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+              },
+              '& .MuiFormHelperText-root': { color: '#f44336', mx: 0 },
+            }}
+          />
+        </Box>
+
+        {/* Duration */}
+        <Box>
+          <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, display: 'block', mb: 0.6 }}>
+            {dt.durationLabel}
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={dt.durationPlaceholder}
             value={form.duration}
             onChange={(e) => onFieldChange('duration', e.target.value)}
             error={!!errors.duration}

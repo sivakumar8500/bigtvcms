@@ -10,10 +10,40 @@ export interface Reel {
   titleMl: string;
   imageUrl?: string;
   videoId?: string;
+  videoUrl?: string;
   channelTitle?: string;
   url?: string;
   publishedAt?: string;
 }
+
+export interface CreateYouTubeVideoPayload {
+  videoUrl?: string;
+  video_url?: string;
+  thumbnailUrl?: string;
+  thumbnail_url?: string;
+  title: string;
+  publisher?: string;
+  publisherImage?: string;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  duration?: string;
+  createdAt?: string;
+  postName?: string;
+  reportedBy?: string;
+  links?: string[];
+  content?: string;
+  gallery?: string[];
+  isPublish?: boolean;
+  lang?: string;
+  video_id?: string;
+  videoId?: string;
+  titleEn?: string;
+  titleTe?: string;
+  titleHi?: string;
+  titleMl?: string;
+}
+
 
 export interface YouTubeShortItem {
   id: number | string;

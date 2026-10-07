@@ -58,8 +58,8 @@ const MOCK_API_RESPONSE: MoreFollowItem[] = [
 
 export class MoreFollowRepository {
   private static STORAGE_KEY = 'bigtv_cms_more_follow_items_v3';
-  private static GET_API_URL = 'https://apidev.chotanews.com/morefollow';
-  private static CREATE_API_URL = 'https://apidev.chotanews.com/morefollow/create';
+  private static GET_API_URL = 'https://api.chotanews.com/morefollow';
+  private static CREATE_API_URL = 'https://api.chotanews.com/morefollow/create';
 
   private static getStoredList(): MoreFollowItem[] {
     if (typeof window === 'undefined') return MOCK_API_RESPONSE;
@@ -79,7 +79,7 @@ export class MoreFollowRepository {
   }
 
   static async getAll(): Promise<MoreFollowItem[]> {
-    // 1. Try fetching directly from GET https://apidev.chotanews.com/morefollow
+    // 1. Try fetching directly from GET https://api.chotanews.com/morefollow
     try {
       const res = await axios.get<MoreFollowItem[]>(this.GET_API_URL, {
         headers: { accept: 'application/json' },
@@ -121,7 +121,7 @@ export class MoreFollowRepository {
       image_url: dto.image_url,
     };
 
-    // 1. Try direct POST to https://apidev.chotanews.com/morefollow/create
+    // 1. Try direct POST to https://api.chotanews.com/morefollow/create
     try {
       const res = await axios.post<CreateMoreFollowResponse>(this.CREATE_API_URL, payload, {
         headers: {
@@ -180,10 +180,10 @@ export class MoreFollowRepository {
       is_active: isActiveVal,
     };
 
-    // 1. Try direct PUT to https://apidev.chotanews.com/morefollow/${id}
+    // 1. Try direct PUT to https://api.chotanews.com/morefollow/${id}
     try {
       const res = await axios.put<UpdateMoreFollowResponse>(
-        `https://apidev.chotanews.com/morefollow/${id}`,
+        `https://api.chotanews.com/morefollow/${id}`,
         payload,
         {
           headers: {
@@ -202,7 +202,7 @@ export class MoreFollowRepository {
         return updated;
       }
     } catch (error) {
-      console.warn(`PUT https://apidev.chotanews.com/morefollow/${id} failed, trying apiClient...`, error);
+      console.warn(`PUT https://api.chotanews.com/morefollow/${id} failed, trying apiClient...`, error);
     }
 
     // 2. Try via apiClient

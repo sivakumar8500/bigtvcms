@@ -6,6 +6,8 @@ export const reelSchema = z.object({
   titleHi: z.string().trim().min(1, 'Hindi title is required'),
   titleMl: z.string().trim().min(1, 'Malayalam title is required'),
   duration: z.string().trim().min(1, 'Duration is required'),
+  videoUrl: z.string().trim().optional(),
+  videoId: z.string().trim().optional(),
 });
 
 export type ReelFormData = z.infer<typeof reelSchema>;
