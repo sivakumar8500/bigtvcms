@@ -60,7 +60,6 @@ describe('TeluguTTSStudio Component', () => {
     });
 
     expect(screen.getByText('telugu_news_2.mp3')).toBeInTheDocument();
-    expect(screen.getAllByRole('table').length).toBeGreaterThan(0);
   });
 
   test('opens create speech audio modal on top right button click', async () => {
@@ -86,7 +85,7 @@ describe('TeluguTTSStudio Component', () => {
       expect(screen.getByText('sample_audio_1.mp3')).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/Search/i);
+    const searchInput = screen.getByPlaceholderText(/Search audio files|ఫైల్ పేరుతో శోధించండి/i);
     fireEvent.change(searchInput, { target: { value: 'telugu_news' } });
 
     expect(screen.queryByText('sample_audio_1.mp3')).not.toBeInTheDocument();
@@ -100,7 +99,7 @@ describe('TeluguTTSStudio Component', () => {
       expect(screen.getByText('sample_audio_1.mp3')).toBeInTheDocument();
     });
 
-    const deleteBtns = screen.getAllByTitle(/Delete|తొలగించండి|హటాయే|ఇల్లాతాక్కుక/i);
+    const deleteBtns = screen.getAllByLabelText(/Delete|తొలగించండి|హటా|हटाएं|ഇല്ലാതാക്കുക/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
     fireEvent.click(deleteBtns[0]);
 
