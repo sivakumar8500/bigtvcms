@@ -3,8 +3,7 @@ import { VoiceProfile, TTSResponse, AudioFileItem } from '../domain/tts.model';
 export const getTtsApiBaseUrl = (): string => {
   return (
     process.env.NEXT_PUBLIC_TTS_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    'http://localhost:2200'
+    'https://api.pravasamedia.com'
   ).replace(/\/$/, '');
 };
 

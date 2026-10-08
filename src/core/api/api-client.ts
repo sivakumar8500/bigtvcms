@@ -318,4 +318,12 @@ export const videoApiClient = new ApiClient(
   ).replace(/\/$/, '')
 );
 
+export const ttsApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_TTS_API_BASE_URL ||
+    'https://api.pravasamedia.com'
+  ).replace(/\/$/, '')
+);
+
+
 
