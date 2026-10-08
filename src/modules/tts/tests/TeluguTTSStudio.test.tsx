@@ -50,18 +50,10 @@ describe('TeluguTTSStudio Component', () => {
     jest.restoreAllMocks();
   });
 
-  test('renders studio title and form elements', async () => {
+  test('renders studio title and audio library table view by default', async () => {
     render(<TeluguTTSStudio />);
 
     expect(screen.getByTestId('telugu-tts-studio')).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.queryByText(/loading voices/i)).not.toBeInTheDocument();
-    });
-  });
-
-  test('renders audio files table view with filenames, play, download and delete buttons', async () => {
-    render(<TeluguTTSStudio />);
 
     await waitFor(() => {
       expect(screen.getByText('sample_audio_1.mp3')).toBeInTheDocument();
@@ -69,6 +61,22 @@ describe('TeluguTTSStudio Component', () => {
 
     expect(screen.getByText('telugu_news_2.mp3')).toBeInTheDocument();
     expect(screen.getAllByRole('table').length).toBeGreaterThan(0);
+  });
+
+  test('opens create speech audio modal on top right button click', async () => {
+    render(<TeluguTTSStudio />);
+
+    await waitFor(() => {
+      expect(screen.getByText('sample_audio_1.mp3')).toBeInTheDocument();
+    });
+
+    const createBtn = screen.getByRole('button', { name: /Create Speech Audio|ఆడియోను సృష్టించండి|ऑडियो बनाएं|ഓഡിയോ സൃഷ്ടിക്കുക/i });
+    expect(createBtn).toBeInTheDocument();
+    fireEvent.click(createBtn);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/Enter Telugu text/i)).toBeInTheDocument();
+    });
   });
 
   test('allows searching files by filename', async () => {
@@ -85,21 +93,6 @@ describe('TeluguTTSStudio Component', () => {
     expect(screen.getByText('telugu_news_2.mp3')).toBeInTheDocument();
   });
 
-  test('allows selecting sample prompt', async () => {
-    render(<TeluguTTSStudio />);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/loading voices/i)).not.toBeInTheDocument();
-    });
-
-    const sampleBtns = screen.getAllByText(/Sample|నమూనా|नमूना|സാമ്പിൾ/i);
-    expect(sampleBtns.length).toBeGreaterThan(0);
-    fireEvent.click(sampleBtns[0]);
-
-    const textarea = screen.getByPlaceholderText(/Enter Telugu text/i) as HTMLTextAreaElement;
-    expect(textarea.value).toBeTruthy();
-  });
-
   test('deletes an audio file from table', async () => {
     render(<TeluguTTSStudio />);
 
@@ -107,7 +100,7 @@ describe('TeluguTTSStudio Component', () => {
       expect(screen.getByText('sample_audio_1.mp3')).toBeInTheDocument();
     });
 
-    const deleteBtns = screen.getAllByTitle(/Delete|తొలగించండి|हटाएं|ഇല്ലാതാക്കുക/i);
+    const deleteBtns = screen.getAllByTitle(/Delete|తొలగించండి|హటాయే|ఇల్లాతాక్కుక/i);
     expect(deleteBtns.length).toBeGreaterThan(0);
     fireEvent.click(deleteBtns[0]);
 

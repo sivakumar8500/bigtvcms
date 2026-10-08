@@ -6,16 +6,11 @@ import {
   Typography,
   Button,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
   Alert,
   CircularProgress,
   Stack,
   IconButton,
-  Chip,
   Paper,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -31,36 +26,23 @@ import {
   Pause,
   Download,
   Delete,
-  VolumeUp,
   GraphicEq,
-  AutoAwesome,
   Refresh,
   Search,
+  Add,
 } from '@mui/icons-material';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { useTeluguTTS } from '../hooks/useTeluguTTS';
 import { TTSService } from '../services/ttsService';
-
-export const SAMPLE_PROMPTS = [
-  'నమస్తే! 2011 లో మా ప్రయాణం మొదలైంది.',
-  'బిగ్ టీవీ ద్వారా తాజా సమాచారం, ముఖ్యాంశాలు తెలుసుకోండి.',
-  'AI సాంకేతికత ద్వారా తెలుగు మాటలను ధ్వనిగా మార్చే విధానం.',
-];
+import { CreateTTSModal } from './CreateTTSModal';
 
 export const ttsTranslations = {
   en: {
     title: '🎙️ Telugu Text-to-Speech Studio',
-    subtitle: 'Synthesize natural Telugu voice audio with AI neural speech profiles',
-    selectVoice: 'Select Voice Profile',
-    loadingVoices: 'Loading voices...',
-    teluguText: 'Telugu Text Content',
-    textPlaceholder: 'Enter Telugu text to synthesize...',
-    quickSamples: 'Quick Sample Prompts',
-    sample: 'Sample',
-    generating: 'Generating Speech Audio...',
-    generateBtn: '✨ Generate Speech Audio',
-    playingHeader: '🎵 Playing Generated Speech Audio',
+    subtitle: 'Browse speech audio library, play previews, download, and synthesize new Telugu MP3 audio',
+    createTtsBtn: 'Create Speech Audio',
+    playingHeader: '🎵 Currently Playing Speech Audio',
     libraryHeader: '📁 Generated Audio Files Library',
     loadingFiles: 'Loading audio files...',
     noFiles: 'No generated audio files found.',
@@ -79,15 +61,8 @@ export const ttsTranslations = {
   },
   te: {
     title: '🎙️ తెలుగు టెక్స్ట్-టు-స్పీచ్ స్టూడియో',
-    subtitle: 'AI న్యూరల్ స్పీచ్ ప్రోఫైళ్ళతో సహజమైన తెలుగు ధ్వనిని సృష్టించండి',
-    selectVoice: 'వాయిస్ ప్రొఫైల్ ఎంచుకోండి',
-    loadingVoices: 'వాయిస్ ప్రొఫైల్స్ లోడ్ అవుతున్నాయి...',
-    teluguText: 'తెలుగు వచన కంటెంట్',
-    textPlaceholder: 'తెలుగు వాక్యాన్ని ఇక్కడ ఎంటర్ చేయండి...',
-    quickSamples: 'త్వరిత నమూనాలు',
-    sample: 'నమూనా',
-    generating: 'ధ్వనిని రూపొందిస్తోంది...',
-    generateBtn: '✨ ఆడియోను సృష్టించండి',
+    subtitle: 'ఆడియో ఫైళ్ల లైబ్రరీని నిర్వహించండి, ప్లే చేయండి, డౌన్‌లోడ్ చేయండి & కొత్త ఆడియోను సృష్టించండి',
+    createTtsBtn: 'ఆడియోను సృష్టించండి',
     playingHeader: '🎵 ప్లే అవుతున్న ఆడియో',
     libraryHeader: '📁 సృష్టించిన ఆడియో ఫైళ్ల లైబ్రరీ',
     loadingFiles: 'ఆడియో ఫైళ్లు లోడ్ అవుతున్నాయి...',
@@ -107,15 +82,8 @@ export const ttsTranslations = {
   },
   hi: {
     title: '🎙️ तेलुगु टेक्स्ट-टू-स्पीच स्टूडियो',
-    subtitle: 'एआई न्यूरल वॉयस प्रोफाइल के साथ प्राकृतिक तेलुगु आवाज उत्पन्न करें',
-    selectVoice: 'वॉयस प्रोफाइल चुनें',
-    loadingVoices: 'वॉयस प्रोफाइल लोड हो रहे हैं...',
-    teluguText: 'तेलुगु टेक्स्ट',
-    textPlaceholder: 'यहाँ तेलुगु वाक्य दर्ज करें...',
-    quickSamples: 'त्वरित नमूने',
-    sample: 'नमूना',
-    generating: 'ऑडियो उत्पन्न किया जा रहा है...',
-    generateBtn: '✨ ऑडियो उत्पन्न करें',
+    subtitle: 'ऑडियो फ़ाइलें ब्राउज़ करें, चलाएं, डाउनलोड करें और नया तेलुगु एमपी3 बनाएं',
+    createTtsBtn: 'ऑडियो बनाएं',
     playingHeader: '🎵 बज रहा ऑडियो',
     libraryHeader: '📁 उत्पन्न ऑडियो फाइलों की लाइब्रेरी',
     loadingFiles: 'ऑडियो फाइलें लोड हो रही हैं...',
@@ -135,15 +103,8 @@ export const ttsTranslations = {
   },
   ml: {
     title: '🎙️ തെലുങ്ക് ടെക്സ്റ്റ്-ടു-സ്പീച്ച് സ്റ്റുഡിയോ',
-    subtitle: 'എഐ ന്യൂറൽ വോയ്‌സ് പ്രൊഫൈലുകൾ ഉപയോഗിച്ച് സ്വാഭാവിക തെലുങ്ക് ശബ്ദം സൃഷ്ടിക്കുക',
-    selectVoice: 'വോയ്‌സ് പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക',
-    loadingVoices: 'വോയ്‌സുകൾ ലോഡുചെയ്യുന്നു...',
-    teluguText: 'തെലുങ്ക് ടെക്സ്റ്റ്',
-    textPlaceholder: 'ഇവിടെ തെലുങ്ക് വാചകം നൽകുക...',
-    quickSamples: 'പെട്ടെന്നുള്ള സാമ്പിളുകൾ',
-    sample: 'സാമ്പിൾ',
-    generating: 'ഓഡിയോ സൃഷ്ടിക്കുന്നു...',
-    generateBtn: '✨ ഓഡിയോ സൃഷ്ടിക്കുക',
+    subtitle: 'ഓഡിയോ ലൈബ്രറി നിയന്ത്രിക്കുക, പ്രിവ്യൂ ചെയ്യുക, പുതിയ തെലുങ്ക് ഓഡിയോ സൃഷ്ടിക്കുക',
+    createTtsBtn: 'ഓഡിയോ സൃഷ്ടിക്കുക',
     playingHeader: '🎵 പ്ലേ ചെയ്യുന്ന ഓഡിയോ',
     libraryHeader: '📁 സൃഷ്ടിച്ച ഓഡിയോ ഫയലുകളുടെ ലൈബ്രറി',
     loadingFiles: 'ഓഡിയോ ഫയലുകൾ ലോഡുചെയ്യുന്നു...',
@@ -169,32 +130,22 @@ export const TeluguTTSStudio: React.FC = () => {
   const isDark = mode === 'dark';
   const t = ttsTranslations[language] || ttsTranslations.en;
 
-  const [text, setText] = useState<string>('నమస్తే! 2011 లో మా ప్రయాణం మొదలైంది.');
+  const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
+  const ttsHook = useTeluguTTS();
   const {
-    voices,
-    selectedVoice,
-    setSelectedVoice,
-    loadingVoices,
     audioFiles,
     loadingFiles,
     fetchFiles,
-    generating,
     audioUrl,
     isPlaying,
     error,
-    synthesizeText,
     removeAudioFile,
     togglePlayPause,
-  } = useTeluguTTS();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    synthesizeText(text);
-  };
+  } = ttsHook;
 
   // Filter audio files based on search term
   const filteredFiles = audioFiles.filter((file) =>
@@ -213,7 +164,7 @@ export const TeluguTTSStudio: React.FC = () => {
   const paginatedFiles = filteredFiles.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
-    <Box data-testid="telugu-tts-studio" sx={{ maxWidth: 1040, mx: 'auto', p: { xs: 1, sm: 2 } }}>
+    <Box data-testid="telugu-tts-studio" sx={{ maxWidth: 1140, mx: 'auto', p: { xs: 1, sm: 2 } }}>
       <Paper
         elevation={0}
         sx={{
@@ -225,172 +176,69 @@ export const TeluguTTSStudio: React.FC = () => {
           boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.37)' : '0 4px 20px rgba(0,0,0,0.05)',
         }}
       >
-        {/* Header */}
-        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <GraphicEq sx={{ fontSize: 32, color: '#3b82f6' }} />
-          <Box>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 700, color: isDark ? '#ffffff' : '#1e293b', letterSpacing: '-0.02em' }}
-            >
-              {t.title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#64748b' }}>
-              {t.subtitle}
-            </Typography>
-          </Box>
-        </Box>
-
-        <form onSubmit={handleSubmit}>
-          {/* Voice Selector */}
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ mb: 1, fontWeight: 600, color: isDark ? '#cbd5e1' : '#475569' }}
-            >
-              {t.selectVoice}
-            </Typography>
-            {loadingVoices ? (
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <CircularProgress size={20} />
-                <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#64748b' }}>
-                  {t.loadingVoices}
-                </Typography>
-              </Stack>
-            ) : (
-              <FormControl fullWidth size="small">
-                <Select
-                  value={selectedVoice}
-                  onChange={(e) => setSelectedVoice(e.target.value)}
-                  displayEmpty
-                  sx={{
-                    borderRadius: '10px',
-                    color: isDark ? '#ffffff' : '#1e293b',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#3b82f6',
-                    },
-                  }}
-                >
-                  {voices.map((voice) => (
-                    <MenuItem key={voice.voice_id} value={voice.voice_id}>
-                      {voice.name} ({voice.voice_id})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+        {/* Header & Create Button Bar */}
+        <Box
+          sx={{
+            mb: 3,
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: 2,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <GraphicEq sx={{ fontSize: 32, color: '#3b82f6' }} />
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: isDark ? '#ffffff' : '#1e293b', letterSpacing: '-0.02em' }}
+              >
+                {t.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+                {t.subtitle}
+              </Typography>
+            </Box>
           </Box>
 
-          {/* Text Input Area */}
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ mb: 1, fontWeight: 600, color: isDark ? '#cbd5e1' : '#475569' }}
-            >
-              {t.teluguText}
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={t.textPlaceholder}
-              sx={{
-                '& .MuiInputBase-root': {
-                  borderRadius: '10px',
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-                  color: isDark ? '#ffffff' : '#0f172a',
-                  fontSize: '1rem',
-                  lineHeight: 1.6,
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: isDark ? 'rgba(255,255,255,0.15)' : '#cbd5e1',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#3b82f6',
-                },
-              }}
-            />
-          </Box>
-
-          {/* Sample Prompts */}
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="caption"
-              sx={{ display: 'block', mb: 1, fontWeight: 600, color: isDark ? '#94a3b8' : '#64748b' }}
-            >
-              {t.quickSamples}:
-            </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-              {SAMPLE_PROMPTS.map((prompt, idx) => (
-                <Chip
-                  key={idx}
-                  icon={<AutoAwesome sx={{ fontSize: '14px !important' }} />}
-                  label={`${t.sample} ${idx + 1}`}
-                  onClick={() => setText(prompt)}
-                  size="small"
-                  variant="outlined"
-                  clickable
-                  sx={{
-                    borderRadius: '8px',
-                    borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                    color: isDark ? '#e2e8f0' : '#334155',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#f1f5f9',
-                    '&:hover': {
-                      backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-                    },
-                  }}
-                />
-              ))}
-            </Stack>
-          </Box>
-
-          {/* Submit Button */}
+          {/* Top Right Create Button */}
           <Button
-            type="submit"
-            fullWidth
             variant="contained"
-            disabled={generating || !text.trim()}
-            startIcon={generating ? <CircularProgress size={20} color="inherit" /> : <VolumeUp />}
+            startIcon={<Add />}
+            onClick={() => setCreateModalOpen(true)}
             sx={{
-              py: 1.5,
-              borderRadius: '10px',
+              py: 1.2,
+              px: 2.5,
+              borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '1rem',
+              fontSize: '0.95rem',
               textTransform: 'none',
               backgroundColor: '#2563eb',
               boxShadow: '0 4px 14px rgba(37,99,235,0.4)',
               '&:hover': {
                 backgroundColor: '#1d4ed8',
               },
-              '&:disabled': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : '#cbd5e1',
-                color: isDark ? 'rgba(255,255,255,0.3)' : '#94a3b8',
-              },
+              whiteSpace: 'nowrap',
             }}
           >
-            {generating ? t.generating : t.generateBtn}
+            {t.createTtsBtn}
           </Button>
-        </form>
+        </Box>
 
-        {/* Error Banner */}
+        {/* Global Error Banner */}
         {error && (
-          <Alert severity="error" sx={{ mt: 3, borderRadius: '10px' }}>
+          <Alert severity="error" sx={{ mb: 3, borderRadius: '10px' }}>
             {error}
           </Alert>
         )}
 
-        {/* Currently Playing Audio Card */}
+        {/* Active Audio Player Card */}
         {audioUrl && (
           <Paper
             elevation={0}
             sx={{
-              mt: 3,
+              mb: 3,
               p: 2,
               borderRadius: '12px',
               backgroundColor: isDark ? 'rgba(37,99,235,0.15)' : '#eff6ff',
@@ -412,9 +260,7 @@ export const TeluguTTSStudio: React.FC = () => {
           </Paper>
         )}
 
-        <Divider sx={{ my: 4, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }} />
-
-        {/* Audio Library / Table View Section */}
+        {/* Audio Library Table Section */}
         <Box>
           <Box
             sx={{
@@ -450,7 +296,7 @@ export const TeluguTTSStudio: React.FC = () => {
                   ),
                 }}
                 sx={{
-                  minWidth: { xs: '100%', sm: 240 },
+                  minWidth: { xs: '100%', sm: 260 },
                   '& .MuiInputBase-root': {
                     borderRadius: '10px',
                     backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
@@ -659,6 +505,13 @@ export const TeluguTTSStudio: React.FC = () => {
           )}
         </Box>
       </Paper>
+
+      {/* Create Speech Audio Modal Drawer */}
+      <CreateTTSModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        ttsHook={ttsHook}
+      />
     </Box>
   );
 };
