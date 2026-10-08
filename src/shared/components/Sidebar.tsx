@@ -21,6 +21,7 @@ import {
   Event as EventIcon,
   LiveTv,
   AssignmentInd,
+  GraphicEq as GraphicEqIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -50,6 +51,7 @@ const sidebarTranslations = {
     menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
     menuReporters: 'Reporters',
+    menuTts: 'Telugu TTS',
   },
   te: {
     menuCreate: 'వార్తలను సృష్టించండి',
@@ -71,6 +73,7 @@ const sidebarTranslations = {
     menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
     menuReporters: 'రిపోర్టర్లు',
+    menuTts: 'తెలుగు TTS',
   },
   hi: {
     menuCreate: 'समाचार बनाएं',
@@ -92,6 +95,7 @@ const sidebarTranslations = {
     menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
     menuReporters: 'रिपोर्टर्स',
+    menuTts: 'तेलुगु टीटीएस',
   },
   ml: {
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
@@ -113,6 +117,7 @@ const sidebarTranslations = {
     menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
     menuReporters: 'റിപ്പോർട്ടർമാർ',
+    menuTts: 'തെലുങ്ക് TTS',
   },
 };
 
@@ -134,6 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
+    { text: t.menuTts, icon: <GraphicEqIcon />, href: '/tts' },
     { text: t.menuMovies, icon: <LocalMoviesIcon />, href: '/movies' },
     { text: t.menuEvents, icon: <EventIcon />, href: '/events' },
     { text: t.menuLiveTvVideos, icon: <LiveTv />, href: '/livetvvideos' },
@@ -166,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     userRole === 'adsdynapix_creator' ||
     userRole === 'ads_dynapix_creator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/events', '/livetvvideos', '/web-articles', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/tts', '/events', '/livetvvideos', '/web-articles', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
@@ -176,6 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/dashboard',
     '/notifications',
     '/reels',
+    '/tts',
     '/movies',
     '/events',
     '/livetvvideos',
