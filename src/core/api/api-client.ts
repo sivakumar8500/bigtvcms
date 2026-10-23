@@ -30,7 +30,12 @@ export function formatApiErrorMessage(apiError: any, defaultMessage: string): st
     return apiError.detail;
   }
 
-  // 3. If details is a record of string/string arrays
+  // 3. If message is an array of strings (NestJS / class-validator validation errors)
+  if (Array.isArray(apiError.message)) {
+    return apiError.message.filter(Boolean).join(', ');
+  }
+
+  // 4. If details is a record of string/string arrays
   if (apiError.details && typeof apiError.details === 'object') {
     const messages: string[] = [];
     for (const [key, value] of Object.entries(apiError.details)) {
@@ -45,9 +50,13 @@ export function formatApiErrorMessage(apiError: any, defaultMessage: string): st
     }
   }
 
-  // 4. Fallback to message
-  if (typeof apiError.message === 'string') {
+  // 5. Fallback to message
+  if (typeof apiError.message === 'string' && apiError.message.trim().length > 0) {
     return apiError.message;
+  }
+
+  if (typeof apiError.error === 'string' && apiError.error.trim().length > 0) {
+    return apiError.error;
   }
 
   return defaultMessage;
@@ -97,7 +106,9 @@ export class ApiClient {
               config.url?.includes('/categories') ||
               config.url?.includes('/aitags') ||
               config.url?.includes('/states') ||
-              config.url?.includes('/locations');
+              config.url?.includes('/locations') ||
+              config.url?.includes('/admin') ||
+              config.url?.includes('/games');
 
             const isCreateOrUpdateMethod =
               config.method?.toLowerCase() === 'post' ||
@@ -132,7 +143,7 @@ export class ApiClient {
           }
 
           try {
-            // Bypass language filter for /events, /ticket-types, /coupons, /categories, /post-types, /languages, /admin/states, /states, /locations, and /creators endpoints
+            // Bypass language filter for /events, /ticket-types, /coupons, /categories, /post-types, /languages, /admin, /games, /admin/states, /states, /locations, and /creators endpoints
             const isBypassLangApi =
               config.url?.includes('/events') ||
               config.url?.includes('/ticket-types') ||
@@ -144,6 +155,9 @@ export class ApiClient {
               config.url?.includes('/locations') ||
               config.url?.includes('/creators') ||
               config.url?.includes('/video-tags') ||
+              config.url?.includes('/admin') ||
+              config.url?.includes('/games') ||
+              config.url?.includes('/streak-recovery-requests') ||
               config.params?.skip_lang_param;
 
             if (isBypassLangApi) {
@@ -322,6 +336,14 @@ export const ttsApiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_TTS_API_BASE_URL ||
     'https://api.pravasamedia.com'
+  ).replace(/\/$/, '')
+);
+
+export const gamesApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_GAMES_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_EVENTS_API_BASE_URL ||
+    'https://api.pravasamedia.com/api/v1'
   ).replace(/\/$/, '')
 );
 

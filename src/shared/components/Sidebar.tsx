@@ -22,6 +22,7 @@ import {
   LiveTv,
   AssignmentInd,
   GraphicEq as GraphicEqIcon,
+  SportsEsports,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -51,6 +52,7 @@ const sidebarTranslations = {
     menuAdminContent: 'Upload Media Content',
     menuSettings: 'Settings',
     menuReporters: 'Reporters',
+    menuGames: 'Games',
     menuTts: 'Telugu TTS',
   },
   te: {
@@ -73,6 +75,7 @@ const sidebarTranslations = {
     menuAdminContent: 'కంటెంట్ అప్‌లోడ్ చేయండి',
     menuSettings: 'సెట్టింగులు',
     menuReporters: 'రిపోర్టర్లు',
+    menuGames: 'ఆటలు',
     menuTts: 'తెలుగు TTS',
   },
   hi: {
@@ -95,6 +98,7 @@ const sidebarTranslations = {
     menuAdminContent: 'सामग्री अपलोड करें',
     menuSettings: 'सेटिंग्स',
     menuReporters: 'रिपोर्टर्स',
+    menuGames: 'गेम्स',
     menuTts: 'तेलुगु टीटीएस',
   },
   ml: {
@@ -117,6 +121,7 @@ const sidebarTranslations = {
     menuAdminContent: 'ഉള്ളടക്കം അപ്‌ലോഡ് ചെയ്യുക',
     menuSettings: 'ക്രമീകരണങ്ങൾ',
     menuReporters: 'റിപ്പോർട്ടർമാർ',
+    menuGames: 'ഗെയിമുകൾ',
     menuTts: 'തെലുങ്ക് TTS',
   },
 };
@@ -151,6 +156,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuPostTypes, icon: <Article />, href: '/post-types' },
     { text: t.menuCreators, icon: <People />, href: '/creators' },
     { text: t.menuReporters, icon: <AssignmentInd />, href: '/reporters' },
+    { text: t.menuGames, icon: <SportsEsports />, href: '/games' },
     { text: t.menuLanguages, icon: <LanguageIcon />, href: '/languages' },
     { text: t.menuAdsDynapix, icon: <CampaignIcon />, href: '/ads-dynapix' },
     { text: t.menuMoreFollow, icon: <RssFeed />, href: '/more-follow' },
@@ -194,6 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/post-types',
     '/creators',
     '/reporters',
+    '/games',
     '/languages',
     '/ads-dynapix',
     '/more-follow',
