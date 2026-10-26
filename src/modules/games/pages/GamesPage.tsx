@@ -108,6 +108,8 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     useDefaultIcon: 'Use Default Icon',
     iconUrlPlaceholder: 'Icon URL (defaults to BigTV puzzle icon)',
     uploadingIcon: 'Uploading...',
+    today: 'Today',
+    scheduledDate: 'Publish / Scheduled Date',
   },
   te: {
     pageTitle: 'ఆటలు & స్థాయిల నిర్వహణ',
@@ -173,6 +175,8 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     useDefaultIcon: 'డిఫాల్ట్ ఐకాన్ ఉపయోగించండి',
     iconUrlPlaceholder: 'ఐకాన్ URL (డిఫాల్ట్ బిగ్‌టీవీ పజిల్ ఐకాన్)',
     uploadingIcon: 'అప్‌లోడ్ అవుతోంది...',
+    today: 'ఈరోజు',
+    scheduledDate: 'షెడ్యూల్ / ప్రచురణ తేదీ',
   },
   hi: {
     pageTitle: 'गेम्स और लेवल प्रबंधन',
@@ -238,6 +242,8 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     useDefaultIcon: 'डिफ़ॉल्ट आइकन उपयोग करें',
     iconUrlPlaceholder: 'आइकन URL (मानक बिगटीवी पहेली आइकन डिफ़ॉल्ट रूप से)',
     uploadingIcon: 'अपलोड हो रहा है...',
+    today: 'आज',
+    scheduledDate: 'निर्धारित / प्रकाशन तिथि',
   },
   ml: {
     pageTitle: 'ഗെയിമുകളും ലെവലുകളും മാനേജ്‌മെന്റ്',
@@ -303,6 +309,8 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     useDefaultIcon: 'ഡിഫോൾട്ട് ഐക്കൺ ഉപയോഗിക്കുക',
     iconUrlPlaceholder: 'ഐക്കൺ URL (സ്റ്റാൻഡേർഡ് ബിഗ്‌ടിവി പസിൽ ഐക്കൺ സ്ഥിരസ്ഥിതിയായി)',
     uploadingIcon: 'അപ്‌ലോഡ് ചെയ്യുന്നു...',
+    today: 'ഇന്ന്',
+    scheduledDate: 'ഷെഡ്യൂൾ ചെയ്ത / പ്രസിദ്ധീകരണ തീയതി',
   },
 };
 

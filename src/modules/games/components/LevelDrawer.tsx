@@ -60,6 +60,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
     title: '',
     difficulty: 'medium',
     status: 'draft',
+    publishDate: '',
     iconUrl: DEFAULT_LEVEL_ICON_URL,
     contentStr: '{\n  "grid": { "rows": 6, "columns": 6 },\n  "initialGrid": [],\n  "solution": []\n}',
   });
@@ -68,13 +69,22 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
     if (open) {
       setValidationResult(null);
       setIconUploadError(null);
+      const todayStr = new Date().toISOString().slice(0, 10);
       if (isEditMode && selectedLevel) {
+        const autoFetchedDate =
+          selectedLevel.puzzleDate ||
+          selectedLevel.assignedDate ||
+          (selectedLevel.publishedAt ? selectedLevel.publishedAt.slice(0, 10) : '') ||
+          (selectedLevel.createdAt ? selectedLevel.createdAt.slice(0, 10) : '') ||
+          todayStr;
+
         setFormData({
           levelId: selectedLevel.levelId || '',
           levelNumber: selectedLevel.levelNumber || 1,
           title: selectedLevel.title || '',
           difficulty: selectedLevel.difficulty || 'medium',
           status: selectedLevel.status || 'draft',
+          publishDate: autoFetchedDate,
           iconUrl: selectedLevel.iconUrl || DEFAULT_LEVEL_ICON_URL,
           contentStr: selectedLevel.content ? JSON.stringify(selectedLevel.content, null, 2) : '{}',
         });
@@ -85,6 +95,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           title: '',
           difficulty: 'medium',
           status: 'draft',
+          publishDate: todayStr,
           iconUrl: DEFAULT_LEVEL_ICON_URL,
           contentStr: '{\n  "grid": { "rows": 6, "columns": 6 },\n  "initialGrid": [],\n  "solution": []\n}',
         });
@@ -193,6 +204,15 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           content: parsedContent,
         });
       }
+
+      if (formData.publishDate?.trim()) {
+        try {
+          await GamesRepository.assignDailyLevel(gameId, formData.publishDate.trim(), [formData.levelId.trim()]);
+        } catch (assignErr) {
+          console.warn('Failed to assign daily level date:', assignErr);
+        }
+      }
+
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -425,6 +445,59 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
               <MenuItem value="archived">Archived</MenuItem>
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Publish / Scheduled Daily Date */}
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+          <TextField
+            {...textFieldProps}
+            label={t.scheduledDate || 'Publish / Scheduled Date'}
+            name="publishDate"
+            type="date"
+            value={formData.publishDate}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true, style: { color: isDark ? '#d0caeb' : '#5c548a' } }}
+            helperText={
+              isEditMode
+                ? selectedLevel?.isToday
+                  ? 'Active today as the daily puzzle'
+                  : 'Auto-fetched scheduled daily date for this level'
+                : 'Auto-fetched today’s date (can be changed)'
+            }
+            sx={{
+              ...textFieldProps.sx,
+              flex: 1,
+              '& .MuiFormHelperText-root': {
+                color: selectedLevel?.isToday
+                  ? isDark ? '#4ade80' : '#16a34a'
+                  : isDark ? '#a6e2f5' : '#2563eb',
+                fontSize: '0.72rem',
+              },
+            }}
+          />
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() =>
+              setFormData((prev) => ({
+                ...prev,
+                publishDate: new Date().toISOString().slice(0, 10),
+              }))
+            }
+            sx={{
+              mt: 0.2,
+              height: 40,
+              textTransform: 'none',
+              borderRadius: '10px',
+              fontSize: '0.75rem',
+              borderColor: isDark ? '#a6e2f5' : '#2563eb',
+              color: isDark ? '#a6e2f5' : '#2563eb',
+              whiteSpace: 'nowrap',
+              px: 2,
+            }}
+          >
+            {t.today || 'Today'}
+          </Button>
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

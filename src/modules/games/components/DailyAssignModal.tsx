@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,6 +8,7 @@ import {
   Typography,
   TextField,
   CircularProgress,
+  Box,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { GamesRepository } from '../repositories/games.repository';
@@ -30,9 +31,16 @@ export const DailyAssignModal: React.FC<DailyAssignModalProps> = ({
   t,
 }) => {
   const [loading, setLoading] = useState(false);
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(todayStr);
   const [levelIdsStr, setLevelIdsStr] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setDate(new Date().toISOString().slice(0, 10));
+      setLevelIdsStr('');
+    }
+  }, [open]);
 
   const handleAssign = async () => {
     if (!date) {
@@ -113,14 +121,35 @@ export const DailyAssignModal: React.FC<DailyAssignModalProps> = ({
           Assign published level(s) for players playing on this specific calendar date.
         </Typography>
 
-        <TextField
-          {...textFieldProps}
-          label="Puzzle Date *"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          InputLabelProps={{ shrink: true, style: { color: colorLabel } }}
-        />
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+          <TextField
+            {...textFieldProps}
+            label="Puzzle Date *"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            InputLabelProps={{ shrink: true, style: { color: colorLabel } }}
+            sx={{ ...textFieldProps.sx, flex: 1 }}
+          />
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setDate(new Date().toISOString().slice(0, 10))}
+            sx={{
+              mt: 0.2,
+              height: 40,
+              textTransform: 'none',
+              borderRadius: '10px',
+              fontSize: '0.75rem',
+              borderColor: isDark ? '#a6e2f5' : '#2563eb',
+              color: isDark ? '#a6e2f5' : '#2563eb',
+              whiteSpace: 'nowrap',
+              px: 2,
+            }}
+          >
+            {t.today || 'Today'}
+          </Button>
+        </Box>
 
         <TextField
           label="Level IDs (comma-separated) *"

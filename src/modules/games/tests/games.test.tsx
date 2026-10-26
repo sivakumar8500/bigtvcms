@@ -662,6 +662,38 @@ describe('Games Module - Comprehensive Test Suite', () => {
       fireEvent.click(resetBtn);
       expect(iconInput.value).toBe(DEFAULT_LEVEL_ICON_URL);
     });
+
+    it('auto-fetches level date on edit mode and assigns daily level', async () => {
+      const onClose = jest.fn();
+      const onSuccess = jest.fn();
+
+      render(
+        <LevelDrawer
+          open={true}
+          isEditMode={true}
+          gameId="sudoku"
+          selectedLevel={mockLevelsData[0]}
+          onClose={onClose}
+          onSuccess={onSuccess}
+          isDark={false}
+          t={t}
+        />
+      );
+
+      // Verify date is auto-fetched from selectedLevel publishedAt or puzzleDate
+      const dateInput = screen.getByLabelText(new RegExp(t.scheduledDate || 'Publish / Scheduled Date', 'i')) as HTMLInputElement;
+      expect(dateInput.value).toBe('2026-10-22');
+
+      // Submit
+      fireEvent.click(screen.getByText(t.btnUpdate));
+      await waitFor(() => {
+        expect(gamesApiClient.put).toHaveBeenCalledWith(
+          '/admin/games/sudoku/daily-levels/2026-10-22',
+          { levelIds: ['sudoku_001'] }
+        );
+        expect(onSuccess).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('LevelViewDialog component', () => {
