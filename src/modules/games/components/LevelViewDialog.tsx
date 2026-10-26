@@ -93,8 +93,17 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
             <Typography variant="caption" sx={{ color: colorLabel }}>
               {t?.colPublishedAt || 'Published Date'}
             </Typography>
-            <Typography variant="body2" sx={{ color: colorText, mt: 0.5, fontWeight: 600 }}>
-              {level.publishedAt
+            <Typography
+              variant="body2"
+              sx={{
+                color: level.isToday ? (isDark ? '#4ade80' : '#16a34a') : colorText,
+                mt: 0.5,
+                fontWeight: 600,
+              }}
+            >
+              {level.puzzleDate || level.assignedDate
+                ? `${level.puzzleDate || level.assignedDate}${level.isToday ? ' (Today)' : ''}`
+                : level.publishedAt
                 ? new Date(level.publishedAt).toLocaleDateString()
                 : level.status === 'published' && level.createdAt
                 ? new Date(level.createdAt).toLocaleDateString()

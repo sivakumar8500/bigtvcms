@@ -56,6 +56,9 @@ export interface LevelItem {
   sortOrder?: number;
   content: Record<string, unknown>;
   publishedAt?: string | null;
+  puzzleDate?: string | null;
+  assignedDate?: string | null;
+  isToday?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -167,7 +167,41 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
                     />
                   </TableCell>
                   <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontSize: '0.82rem' }}>
-                    {row.publishedAt ? (
+                    {row.puzzleDate || row.assignedDate ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                        <Tooltip
+                          title={`Scheduled Daily Challenge: ${row.puzzleDate || row.assignedDate}${
+                            row.publishedAt ? ` (DB Created: ${new Date(row.publishedAt).toLocaleString()})` : ''
+                          }`}
+                          arrow
+                        >
+                          <Typography
+                            component="span"
+                            sx={{
+                              fontWeight: row.isToday ? 700 : 500,
+                              color: row.isToday ? (isDark ? '#4ade80' : '#16a34a') : 'inherit',
+                              fontSize: '0.82rem',
+                            }}
+                          >
+                            {row.puzzleDate || row.assignedDate}
+                          </Typography>
+                        </Tooltip>
+                        {row.isToday && (
+                          <Chip
+                            label="TODAY"
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.62rem',
+                              fontWeight: 800,
+                              bgcolor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
+                              color: isDark ? '#4ade80' : '#15803d',
+                              borderRadius: '4px',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    ) : row.publishedAt ? (
                       <Tooltip title={new Date(row.publishedAt).toLocaleString()} arrow>
                         <span>{new Date(row.publishedAt).toLocaleDateString()}</span>
                       </Tooltip>
