@@ -65,10 +65,12 @@ export function useLiveTvVideosController() {
           }
         } else {
           const fetchedTags = await liveTvVideosRepository.getVideoTags(lang);
-          setTags(fetchedTags || []);
-          if (fetchedTags && fetchedTags.length > 0) {
+          // Strict client-side filter: Ensure ONLY tags belonging to this language are retained
+          const strictlyFiltered = (fetchedTags || []).filter((t) => (t.language || 'te') === lang);
+          setTags(strictlyFiltered);
+          if (strictlyFiltered && strictlyFiltered.length > 0) {
             setSelectedTagSlug((prev) =>
-              fetchedTags.some((t) => t.slug === prev) ? prev : fetchedTags[0].slug
+              strictlyFiltered.some((t) => t.slug === prev) ? prev : strictlyFiltered[0].slug
             );
           } else {
             setSelectedTagSlug('');
@@ -89,31 +91,34 @@ export function useLiveTvVideosController() {
   }, [selectedLanguage, fetchTags]);
 
   // 2. Fetch videos when selected tag changes
-  const loadTagVideos = useCallback(async (slug: string) => {
-    if (!slug) {
-      setVideos([]);
-      return;
-    }
-    setLoading(true);
-    setActionError(null);
-    try {
-      const fetchedVideos = await liveTvVideosRepository.getTagVideos(slug);
-      setVideos(fetchedVideos || []);
-    } catch (err: any) {
-      setActionError(err.message || 'Failed to load videos for the selected tag');
-      setVideos([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadTagVideos = useCallback(
+    async (slug: string, lang: LanguageCode = selectedLanguage) => {
+      if (!slug) {
+        setVideos([]);
+        return;
+      }
+      setLoading(true);
+      setActionError(null);
+      try {
+        const fetchedVideos = await liveTvVideosRepository.getTagVideos(slug, lang);
+        setVideos(fetchedVideos || []);
+      } catch (err: any) {
+        setActionError(err.message || 'Failed to load videos for the selected tag');
+        setVideos([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedLanguage]
+  );
 
   useEffect(() => {
-    if (selectedTagSlug) {
-      loadTagVideos(selectedTagSlug);
+    if (selectedTagSlug && tags.some((t) => t.slug === selectedTagSlug)) {
+      loadTagVideos(selectedTagSlug, selectedLanguage);
     } else {
       setVideos([]);
     }
-  }, [selectedTagSlug, loadTagVideos]);
+  }, [selectedTagSlug, tags, selectedLanguage, loadTagVideos]);
 
   // Filtered and paginated videos
   const filteredVideos = useMemo(() => {
@@ -163,12 +168,22 @@ export function useLiveTvVideosController() {
           : nameOrPayload;
 
       const newTag = await liveTvVideosRepository.createVideoTag(payload);
+      const tagLang = newTag.language || 'te';
 
-      // If matches current filter or in 'all', append
-      if (selectedLanguage === 'all' || newTag.language === selectedLanguage) {
+      // If active view is 'all', add to tags and segregated
+      if (selectedLanguage === 'all') {
         setTags((prev) => [...prev, newTag]);
+        setSegregatedTags((prev) => ({
+          ...prev,
+          [tagLang]: [...(prev[tagLang] || []), newTag],
+        }));
+        setSelectedTagSlug(newTag.slug);
+      } else if (tagLang === selectedLanguage) {
+        // Tag language matches active single-language view
+        setTags((prev) => [...prev, newTag]);
+        setSelectedTagSlug(newTag.slug);
       }
-      setSelectedTagSlug(newTag.slug); // Auto-select new tag
+
       setActionSuccess('Video tag created successfully');
       setCreateTagModalOpen(false);
       return newTag;
@@ -194,10 +209,38 @@ export function useLiveTvVideosController() {
           : nameOrPayload;
 
       const updatedTag = await liveTvVideosRepository.updateVideoTag(slug, payload);
+      const updatedLang = updatedTag.language || 'te';
 
-      setTags((prev) =>
-        prev.map((t) => (t.slug === slug ? { ...t, ...updatedTag } : t))
-      );
+      if (selectedLanguage === 'all') {
+        setTags((prev) =>
+          prev.map((t) => (t.slug === slug ? { ...t, ...updatedTag } : t))
+        );
+        setSegregatedTags((prev) => {
+          const next: SegregatedVideoTags = {
+            te: prev.te.filter((t) => t.slug !== slug),
+            ml: prev.ml.filter((t) => t.slug !== slug),
+            en: prev.en.filter((t) => t.slug !== slug),
+          };
+          if (!next[updatedLang]) next[updatedLang] = [];
+          next[updatedLang].push(updatedTag);
+          return next;
+        });
+      } else if (updatedLang !== selectedLanguage) {
+        // Tag language changed away from the current language tab; remove it immediately
+        const remaining = tags.filter((t) => t.slug !== slug);
+        setTags(remaining);
+        if (selectedTagSlug === slug) {
+          setSelectedTagSlug(remaining.length > 0 ? remaining[0].slug : '');
+          if (remaining.length === 0) {
+            setVideos([]);
+          }
+        }
+      } else {
+        setTags((prev) =>
+          prev.map((t) => (t.slug === slug ? { ...t, ...updatedTag } : t))
+        );
+      }
+
       setActionSuccess('Video tag updated successfully');
       setEditTagModalOpen(false);
       return updatedTag;
@@ -213,8 +256,16 @@ export function useLiveTvVideosController() {
       await liveTvVideosRepository.deleteVideoTag(slug);
       const remainingTags = tags.filter((t) => t.slug !== slug);
       setTags(remainingTags);
+      setSegregatedTags((prev) => ({
+        te: prev.te.filter((t) => t.slug !== slug),
+        ml: prev.ml.filter((t) => t.slug !== slug),
+        en: prev.en.filter((t) => t.slug !== slug),
+      }));
       if (selectedTagSlug === slug) {
         setSelectedTagSlug(remainingTags.length > 0 ? remainingTags[0].slug : '');
+        if (remainingTags.length === 0) {
+          setVideos([]);
+        }
       }
       setActionSuccess('Video tag deleted successfully');
     } catch (err: any) {

@@ -217,10 +217,12 @@ export class LiveTvVideosRepository {
   /**
    * GET /video-tags/:slug/videos
    */
-  public async getTagVideos(slug: string): Promise<TagVideo[]> {
+  public async getTagVideos(slug: string, language?: LanguageCode): Promise<TagVideo[]> {
     try {
+      const params = language && language !== 'all' ? { language, lan: language } : undefined;
       const res = await videoApiClient.get<{ success: boolean; data: TagVideo[] }>(
-        `/video-tags/${slug}/videos`
+        `/video-tags/${slug}/videos`,
+        params ? { params } : undefined
       );
       if (res && res.data && Array.isArray(res.data)) {
         return res.data;

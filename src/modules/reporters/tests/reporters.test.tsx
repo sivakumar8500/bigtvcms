@@ -159,7 +159,6 @@ describe('Reporters Module - Multi-Language System', () => {
     (eventsApiClient.patch as jest.Mock).mockImplementation((url: string, body?: any) => {
       return Promise.resolve({
         data: {
-          id: 'rep-te-1',
           ...mockTeluguReporters[0],
           ...body,
         },

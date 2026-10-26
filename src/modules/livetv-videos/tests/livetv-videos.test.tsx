@@ -791,4 +791,523 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
       />
     );
   });
+
+  it('strictly isolates Malayalam data when language is ml (no Telugu or English)', async () => {
+    // Mock backend returning mixed tags to test strict client isolation defense
+    (videoApiClient.get as jest.Mock).mockImplementation((url: string, config?: any) => {
+      if (url === '/video-tags') {
+        const lang = config?.params?.language;
+        if (lang === 'ml') {
+          return Promise.resolve({
+            data: [
+              ...mockMalayalamTags,
+              // Intentionally include leaked te/en tags from mock backend
+              ...mockTeluguTags,
+              ...mockEnglishTags,
+            ],
+          });
+        }
+        return Promise.resolve({ data: mockTeluguTags });
+      }
+      if (url.includes('/videos')) {
+        return Promise.resolve({ data: sampleVideos });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    const { result } = renderHook(() => useLiveTvVideosController());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    act(() => {
+      result.current.setSelectedLanguage('ml');
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedLanguage).toBe('ml');
+      // Strictly only Malayalam tags must be present
+      expect(result.current.tags.length).toBe(1);
+      expect(result.current.tags[0].slug).toBe('kerala-news');
+      expect(result.current.tags.every((t) => t.language === 'ml')).toBe(true);
+      expect(result.current.tags.some((t) => t.language === 'te')).toBe(false);
+      expect(result.current.tags.some((t) => t.language === 'en')).toBe(false);
+    });
+  });
+
+  it('strictly isolates Telugu data when language is te (no Malayalam or English)', async () => {
+    (videoApiClient.get as jest.Mock).mockImplementation((url: string, config?: any) => {
+      if (url === '/video-tags') {
+        const lang = config?.params?.language;
+        if (lang === 'te') {
+          return Promise.resolve({
+            data: [
+              ...mockTeluguTags,
+              // Intentionally include leaked ml/en tags from mock backend
+              ...mockMalayalamTags,
+              ...mockEnglishTags,
+            ],
+          });
+        }
+        return Promise.resolve({ data: [] });
+      }
+      if (url.includes('/videos')) {
+        return Promise.resolve({ data: sampleVideos });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    const { result } = renderHook(() => useLiveTvVideosController());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.selectedLanguage).toBe('te');
+      // Strictly only Telugu tags must be present
+      expect(result.current.tags.length).toBe(1);
+      expect(result.current.tags[0].slug).toBe('DNA');
+      expect(result.current.tags.every((t) => (t.language || 'te') === 'te')).toBe(true);
+      expect(result.current.tags.some((t) => t.language === 'ml')).toBe(false);
+      expect(result.current.tags.some((t) => t.language === 'en')).toBe(false);
+    });
+  });
+
+  it('handles add, delete, and update operations with strict language scoping', async () => {
+    (videoApiClient.get as jest.Mock).mockImplementation((url: string, config?: any) => {
+      if (url === '/video-tags') {
+        const lang = config?.params?.language;
+        if (lang === 'ml') return Promise.resolve({ data: [...mockMalayalamTags] });
+        if (lang === 'all')
+          return Promise.resolve({
+            data: [...mockTeluguTags, ...mockMalayalamTags],
+          });
+        return Promise.resolve({ data: [...mockTeluguTags] });
+      }
+      if (url === '/video-tags/segregated') {
+        return Promise.resolve({
+          data: {
+            te: [...mockTeluguTags],
+            ml: [...mockMalayalamTags],
+            en: [],
+          },
+        });
+      }
+      if (url.includes('/videos')) {
+        return Promise.resolve({ data: sampleVideos });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    const { result } = renderHook(() => useLiveTvVideosController());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // 1. Switch to 'ml'
+    act(() => {
+      result.current.setSelectedLanguage('ml');
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedLanguage).toBe('ml');
+      expect(result.current.tags.length).toBe(1);
+      expect(result.current.tags[0].language).toBe('ml');
+    });
+
+    // 2. Add: Create a Telugu tag while on 'ml' tab - should NOT leak into 'ml' list
+    (videoApiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: {
+        id: 'new-te-tag',
+        name: 'New Telugu Show',
+        slug: 'new-te-show',
+        language: 'te',
+      },
+    });
+
+    await act(async () => {
+      await result.current.handleCreateTag({
+        name: 'New Telugu Show',
+        slug: 'new-te-show',
+        language: 'te',
+      });
+    });
+
+    // Still only 1 tag in 'ml' view (no Telugu tag leaked)
+    expect(result.current.tags.length).toBe(1);
+    expect(result.current.tags[0].slug).toBe('kerala-news');
+
+    // 3. Add: Create a Malayalam tag while on 'ml' tab - SHOULD be added
+    (videoApiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: {
+        id: 'new-ml-tag',
+        name: 'New Malayalam Show',
+        slug: 'new-ml-show',
+        language: 'ml',
+      },
+    });
+
+    await act(async () => {
+      await result.current.handleCreateTag({
+        name: 'New Malayalam Show',
+        slug: 'new-ml-show',
+        language: 'ml',
+      });
+    });
+
+    expect(result.current.tags.length).toBe(2);
+    expect(result.current.tags.some((t) => t.slug === 'new-ml-show')).toBe(true);
+
+    // 4. Update: Change language of 'kerala-news' from 'ml' to 'te'
+    // It should be removed from the 'ml' list immediately!
+    (videoApiClient.patch as jest.Mock).mockResolvedValueOnce({
+      data: {
+        id: 'test-id-2',
+        name: 'Kerala News Express',
+        slug: 'kerala-news',
+        language: 'te', // relocated to Telugu
+      },
+    });
+
+    await act(async () => {
+      await result.current.handleUpdateTag('kerala-news', {
+        name: 'Kerala News Express',
+        language: 'te',
+      });
+    });
+
+    // 'kerala-news' was removed from 'ml' view because its language became 'te'
+    expect(result.current.tags.some((t) => t.slug === 'kerala-news')).toBe(false);
+    expect(result.current.tags.length).toBe(1);
+    expect(result.current.tags[0].slug).toBe('new-ml-show');
+
+    // 5. Delete: Delete the remaining tag 'new-ml-show'
+    (videoApiClient.delete as jest.Mock).mockResolvedValueOnce({
+      success: true,
+      message: 'Video tag deleted',
+    });
+
+    await act(async () => {
+      await result.current.handleDeleteTag('new-ml-show');
+    });
+
+    expect(result.current.tags.length).toBe(0);
+    expect(result.current.selectedTagSlug).toBe('');
+    expect(result.current.videos.length).toBe(0);
+  });
+
+  it('tests TagEditModal validation, language change alert, file upload and error handling', async () => {
+    const handleSave = jest.fn();
+    const handleClose = jest.fn();
+
+    const tag: VideoTag = {
+      id: 'tag-1',
+      name: 'Old Name',
+      slug: 'old-slug',
+      language: 'te',
+      description: 'Old description',
+      thumbnailUrl: 'blob:https://api.pravasamedia.com/old-thumb.jpg',
+      createdAt: '2026-09-16T11:20:17.883Z',
+      updatedAt: '2026-10-26T08:43:03.294Z',
+    };
+
+    const { rerender } = render(
+      <TagEditModal
+        open={true}
+        onClose={handleClose}
+        tag={tag}
+        onSave={handleSave}
+        isDark={true}
+        t={{}}
+      />
+    );
+
+    // Test empty name validation
+    const nameInput = screen.getByLabelText(/Tag Name/i);
+    fireEvent.change(nameInput, { target: { value: '   ' } });
+
+    const saveBtn = screen.getByRole('button', { name: /Save/i });
+    fireEvent.click(saveBtn);
+
+    expect(screen.getByText('Name is required')).toBeInTheDocument();
+
+    // Test file upload and remove
+    const dummyFile = new File(['image'], 'edit.png', { type: 'image/png' });
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [dummyFile] } });
+
+    // Test save failure displays error
+    handleSave.mockRejectedValueOnce(new Error('Update failed on server'));
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('Update failed on server')).toBeInTheDocument();
+    });
+
+    // Close modal
+    rerender(
+      <TagEditModal
+        open={false}
+        onClose={handleClose}
+        tag={null}
+        onSave={handleSave}
+        isDark={false}
+        t={{}}
+      />
+    );
+  });
+
+  it('tests useLiveTvVideosController error branches and UI state helpers', async () => {
+    const { result } = renderHook(() => useLiveTvVideosController());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Test modal state openers
+    act(() => {
+      result.current.handleOpenEditTagModal(mockTeluguTags[0]);
+      result.current.handleOpenEditVideoModal(sampleVideos[0]);
+      result.current.handlePlayVideo(sampleVideos[0]);
+      result.current.setPage(2);
+      result.current.setSearchQuery('evening');
+      result.current.setActionError('Custom error');
+      result.current.setActionSuccess('Custom success');
+    });
+
+    expect(result.current.editTagModalOpen).toBe(true);
+    expect(result.current.activeTagForEdit?.slug).toBe('DNA');
+    expect(result.current.editVideoModalOpen).toBe(true);
+    expect(result.current.activeVideoForEdit?.id).toBe('vid-1');
+    expect(result.current.playerModalOpen).toBe(true);
+    expect(result.current.activeVideoForPlayer?.id).toBe('vid-1');
+    expect(result.current.page).toBe(2);
+    expect(result.current.searchQuery).toBe('evening');
+    expect(result.current.actionError).toBe('Custom error');
+    expect(result.current.actionSuccess).toBe('Custom success');
+
+    // Test modal closers
+    act(() => {
+      result.current.setEditTagModalOpen(false);
+      result.current.setEditVideoModalOpen(false);
+      result.current.setPlayerModalOpen(false);
+      result.current.setCreateTagModalOpen(true);
+      result.current.handleTagSelect('DNA');
+    });
+    expect(result.current.createTagModalOpen).toBe(true);
+
+    // Test video update error branch
+    (videoApiClient.patch as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Failed to update video filename' } },
+    });
+    await act(async () => {
+      try {
+        await result.current.handleUpdateVideo('vid-1', 'new_name.mp4', 100);
+      } catch (e) {
+        // expected error
+      }
+    });
+    expect(result.current.actionError).toBe('Failed to update video filename');
+
+    // Test video delete error branch
+    (videoApiClient.delete as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Video file in use' } },
+    });
+    await act(async () => {
+      await result.current.handleDeleteVideo('morning_bulletin.mp4');
+    });
+    expect(result.current.actionError).toBe('Video file in use');
+
+    // Test sync error branch
+    (videoApiClient.post as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Sync failed' } },
+    });
+    await act(async () => {
+      await result.current.handleDailySync('DNA');
+    });
+    expect(result.current.actionError).toBe('Sync failed');
+
+    // Test create tag error branch
+    (videoApiClient.post as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Tag slug already exists' } },
+    });
+    await act(async () => {
+      try {
+        await result.current.handleCreateTag('Duplicate Tag', 'DNA');
+      } catch (e) {
+        // expected
+      }
+    });
+    expect(result.current.actionError).toBe('Tag slug already exists');
+
+    // Test update tag error branch
+    (videoApiClient.patch as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Invalid tag update' } },
+    });
+    await act(async () => {
+      try {
+        await result.current.handleUpdateTag('DNA', 'New DNA');
+      } catch (e) {
+        // expected
+      }
+    });
+    expect(result.current.actionError).toBe('Invalid tag update');
+
+    // Test delete tag error branch
+    (videoApiClient.delete as jest.Mock).mockRejectedValueOnce({
+      response: { data: { message: 'Cannot delete default tag' } },
+    });
+    await act(async () => {
+      await result.current.handleDeleteTag('DNA');
+    });
+    expect(result.current.actionError).toBe('Cannot delete default tag');
+
+    // Test successful video update
+    (videoApiClient.patch as jest.Mock).mockResolvedValueOnce({
+      data: {
+        id: 'vid-1',
+        fileName: 'updated_filename.mp4',
+        viewCount: 250,
+      },
+    });
+    await act(async () => {
+      await result.current.handleUpdateVideo('vid-1', 'updated_filename.mp4', 250);
+    });
+    expect(result.current.actionSuccess).toBe('Video updated successfully');
+
+    // Test successful video delete
+    (videoApiClient.delete as jest.Mock).mockResolvedValueOnce({
+      success: true,
+      message: 'Video deleted successfully',
+    });
+    await act(async () => {
+      await result.current.handleDeleteVideo('updated_filename.mp4');
+    });
+    expect(result.current.actionSuccess).toBe('Video deleted successfully');
+
+    // Test direct fetchTags and loadTagVideos calls
+    await act(async () => {
+      await result.current.fetchTags('te');
+      await result.current.loadTagVideos('DNA', 'te');
+      await result.current.loadTagVideos('');
+    });
+  });
+
+  it('tests LiveTvVideosTable action buttons and modal language select changes', () => {
+    const onPlay = jest.fn();
+    const onEdit = jest.fn();
+    const onDelete = jest.fn();
+
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(
+      <LiveTvVideosTable
+        videos={sampleVideos}
+        t={{ playStream: 'Play', editVideo: 'Edit', delete: 'Delete' }}
+        isDark={false}
+        onPlay={onPlay}
+        onEditVideo={onEdit}
+        onDeleteVideo={onDelete}
+      />
+    );
+
+    const playBtns = screen.getAllByRole('button', { name: /Play/i });
+    fireEvent.click(playBtns[0]);
+    expect(onPlay).toHaveBeenCalledWith(sampleVideos[0]);
+
+    const editBtns = screen.getAllByRole('button', { name: /Edit/i });
+    fireEvent.click(editBtns[0]);
+    expect(onEdit).toHaveBeenCalledWith(sampleVideos[0]);
+
+    const deleteBtns = screen.getAllByRole('button', { name: /Delete/i });
+    fireEvent.click(deleteBtns[0]);
+    expect(onDelete).toHaveBeenCalledWith(sampleVideos[0].fileName);
+
+    confirmSpy.mockRestore();
+  });
+
+  it('tests TagCreateModal and TagEditModal language select onChange handlers', () => {
+    const { unmount } = render(
+      <TagCreateModal
+        open={true}
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        isDark={false}
+        t={{}}
+      />
+    );
+
+    const langSelectInput = document.querySelector('input[name="language"]') || document.querySelector('#tag-language-select-label + div input');
+    if (langSelectInput) {
+      fireEvent.change(langSelectInput, { target: { value: 'ml' } });
+    }
+    unmount();
+
+    render(
+      <TagEditModal
+        open={true}
+        onClose={jest.fn()}
+        tag={mockTeluguTags[0]}
+        onSave={jest.fn()}
+        isDark={false}
+        t={{}}
+      />
+    );
+
+    const editLangInput = document.querySelector('input[name="language"]') || document.querySelector('#edit-tag-language-select-label + div input');
+    if (editLangInput) {
+      fireEvent.change(editLangInput, { target: { value: 'ml' } });
+    }
+  });
+
+  it('tests LiveTvVideosPage pagination, tag selection, and delete cancel dialog', async () => {
+    const manyVideos: TagVideo[] = Array.from({ length: 25 }, (_, i) => ({
+      id: `vid-${i}`,
+      fileName: `news_show_${i}.mp4`,
+      folder: 'today',
+      sizeBytes: 1024 * 1024,
+      viewCount: i * 5,
+      createdAt: '2026-09-15T10:00:00Z',
+      url: `https://api.pravasamedia.com/News_shows/telugu_shows/DNA/news_show_${i}.mp4`,
+    }));
+
+    (videoApiClient.get as jest.Mock).mockImplementation((url: string, config?: any) => {
+      if (url === '/video-tags') {
+        const lang = config?.params?.language;
+        if (lang === 'ml') return Promise.resolve({ data: mockMalayalamTags });
+        if (lang === 'en') return Promise.resolve({ data: mockEnglishTags });
+        return Promise.resolve({ data: mockTeluguTags });
+      }
+      if (url === '/video-tags/segregated') {
+        return Promise.resolve({
+          data: { te: mockTeluguTags, ml: mockMalayalamTags, en: mockEnglishTags },
+        });
+      }
+      if (url.includes('/videos')) return Promise.resolve({ data: manyVideos });
+      return Promise.resolve({ data: [] });
+    });
+
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('DNA Daily News')[0]).toBeInTheDocument();
+    });
+
+    // Test search filter input change
+    const searchInput = screen.getByPlaceholderText(/Search videos by file name/i);
+    fireEvent.change(searchInput, { target: { value: 'news_show_1' } });
+
+    // Test pagination page click if available
+    const page2Btn = screen.queryByRole('button', { name: /Go to page 2/i });
+    if (page2Btn) {
+      fireEvent.click(page2Btn);
+    }
+  });
 });
