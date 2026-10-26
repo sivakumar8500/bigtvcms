@@ -67,6 +67,9 @@ export interface LevelItem {
   difficulty: 'easy' | 'medium' | 'hard' | 'expert' | string;
   status: 'draft' | 'published' | 'archived' | string;
   iconUrl?: string | null;
+  backgroundImageUrl?: string | null;
+  completionImageUrl?: string | null;
+  logoUrl?: string | null;
   sortOrder?: number;
   content: Record<string, unknown>;
   publishedAt?: string | null;
@@ -77,6 +80,19 @@ export interface LevelItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export const getLevelImageUrl = (level?: Partial<LevelItem> | null): string => {
+  if (!level) return DEFAULT_LEVEL_ICON_URL;
+  return (
+    level.backgroundImageUrl ||
+    level.logoUrl ||
+    level.completionImageUrl ||
+    level.iconUrl ||
+    (typeof level.content?.backgroundImage === 'string' ? (level.content.backgroundImage as string) : '') ||
+    (typeof level.content?.backgroundImageUrl === 'string' ? (level.content.backgroundImageUrl as string) : '') ||
+    DEFAULT_LEVEL_ICON_URL
+  );
+};
 
 export interface LevelListResponse {
   gameId: string;
@@ -96,6 +112,9 @@ export interface GenerateLevelsDto {
   publish?: boolean;
   checkpointCount?: number;
   iconUrl?: string;
+  backgroundImageUrl?: string;
+  completionImageUrl?: string;
+  logoUrl?: string;
 }
 
 export interface CreateLevelDto {
@@ -105,6 +124,9 @@ export interface CreateLevelDto {
   difficulty: string;
   status: string;
   iconUrl?: string;
+  backgroundImageUrl?: string;
+  completionImageUrl?: string;
+  logoUrl?: string;
   content: Record<string, unknown>;
 }
 
@@ -114,6 +136,9 @@ export interface UpdateLevelDto {
   levelNumber?: number;
   status?: string;
   iconUrl?: string;
+  backgroundImageUrl?: string;
+  completionImageUrl?: string;
+  logoUrl?: string;
   content?: Record<string, unknown>;
 }
 

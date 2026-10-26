@@ -16,7 +16,7 @@ import {
   Avatar,
 } from '@mui/material';
 import { Visibility, Publish, Unpublished, Archive, PlayCircle } from '@mui/icons-material';
-import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
 
 interface LevelsTableProps {
   data: LevelItem[];
@@ -150,7 +150,7 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
                   <TableCell sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 500 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                       <Avatar
-                        src={row.iconUrl || DEFAULT_LEVEL_ICON_URL}
+                        src={getLevelImageUrl(row)}
                         variant="rounded"
                         alt={row.title}
                         sx={{

@@ -110,6 +110,9 @@ export const GenerateLevelsModal: React.FC<GenerateLevelsModalProps> = ({
         count: numCount,
         publish,
         iconUrl: iconUrl || DEFAULT_LEVEL_ICON_URL,
+        backgroundImageUrl: iconUrl || DEFAULT_LEVEL_ICON_URL,
+        completionImageUrl: iconUrl || DEFAULT_LEVEL_ICON_URL,
+        logoUrl: iconUrl || DEFAULT_LEVEL_ICON_URL,
         ...(isZip && { checkpointCount: numCheckpoints }),
       });
       if (typeof window !== 'undefined' && typeof window.alert === 'function') {

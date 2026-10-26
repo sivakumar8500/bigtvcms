@@ -12,7 +12,7 @@ import {
   Avatar,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
 
 interface LevelViewDialogProps {
   open: boolean;
@@ -54,7 +54,7 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Avatar
-            src={level.iconUrl || DEFAULT_LEVEL_ICON_URL}
+            src={getLevelImageUrl(level)}
             variant="rounded"
             alt={level.title}
             sx={{

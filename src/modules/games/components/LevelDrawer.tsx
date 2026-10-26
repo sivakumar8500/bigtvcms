@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Close, CheckCircleOutline, CloudUpload, Refresh, Image as ImageIcon } from '@mui/icons-material';
-import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
 import { GamesRepository } from '../repositories/games.repository';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
 import { UploadService } from '@/modules/media/services/upload.service';
@@ -85,7 +85,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           difficulty: selectedLevel.difficulty || 'medium',
           status: selectedLevel.status || 'draft',
           publishDate: autoFetchedDate,
-          iconUrl: selectedLevel.iconUrl || DEFAULT_LEVEL_ICON_URL,
+          iconUrl: getLevelImageUrl(selectedLevel),
           contentStr: selectedLevel.content ? JSON.stringify(selectedLevel.content, null, 2) : '{}',
         });
       } else {
@@ -184,6 +184,9 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
     setLoading(true);
     try {
       const payloadIconUrl = formData.iconUrl?.trim() || DEFAULT_LEVEL_ICON_URL;
+      if (parsedContent && typeof parsedContent === 'object') {
+        parsedContent.backgroundImage = payloadIconUrl;
+      }
       if (isEditMode && selectedLevel) {
         await GamesRepository.updateLevel(gameId, selectedLevel.levelId || selectedLevel.id, {
           title: formData.title || `Level ${formData.levelNumber}`,
@@ -191,6 +194,9 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           levelNumber: Number(formData.levelNumber),
           status: formData.status,
           iconUrl: payloadIconUrl,
+          backgroundImageUrl: payloadIconUrl,
+          completionImageUrl: payloadIconUrl,
+          logoUrl: payloadIconUrl,
           content: parsedContent,
         });
       } else {
@@ -201,6 +207,9 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           difficulty: formData.difficulty,
           status: formData.status,
           iconUrl: payloadIconUrl,
+          backgroundImageUrl: payloadIconUrl,
+          completionImageUrl: payloadIconUrl,
+          logoUrl: payloadIconUrl,
           content: parsedContent,
         });
       }

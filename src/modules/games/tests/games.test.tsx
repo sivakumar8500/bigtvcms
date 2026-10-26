@@ -16,7 +16,7 @@ import { StreakActionDialog } from '../components/StreakActionDialog';
 import { LevelPlayModal } from '../components/LevelPlayModal';
 import { gamesTranslations } from '../pages/GamesPage';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
-import { DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
+import { DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
 import { UploadService } from '@/modules/media/services/upload.service';
 
 jest.mock('@/modules/media/services/upload.service', () => ({
@@ -693,6 +693,70 @@ describe('Games Module - Comprehensive Test Suite', () => {
         );
         expect(onSuccess).toHaveBeenCalled();
       });
+    });
+
+    it('populates and sends backgroundImageUrl and content.backgroundImage when editing level with backgroundImageUrl', async () => {
+      const onClose = jest.fn();
+      const onSuccess = jest.fn();
+      const sampleBgUrl = 'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_b798a3da-3586-4eed-b702-50ccf99e6f5e.jpeg';
+      const levelWithBg = {
+        ...mockLevelsData[0],
+        levelId: 'zip_020',
+        levelNumber: 20,
+        title: 'Level 20',
+        backgroundImageUrl: sampleBgUrl,
+        completionImageUrl: sampleBgUrl,
+        logoUrl: sampleBgUrl,
+        content: { grid: { rows: 6, columns: 6 } },
+      };
+
+      render(
+        <LevelDrawer
+          open={true}
+          isEditMode={true}
+          gameId="zip"
+          selectedLevel={levelWithBg as any}
+          onClose={onClose}
+          onSuccess={onSuccess}
+          isDark={false}
+          t={t}
+        />
+      );
+
+      const iconInput = screen.getByPlaceholderText(DEFAULT_LEVEL_ICON_URL) as HTMLInputElement;
+      expect(iconInput.value).toBe(sampleBgUrl);
+
+      fireEvent.click(screen.getByText(t.btnUpdate));
+      await waitFor(() => {
+        expect(gamesApiClient.patch).toHaveBeenCalledWith(
+          '/admin/games/zip/levels/zip_020',
+          expect.objectContaining({
+            iconUrl: sampleBgUrl,
+            backgroundImageUrl: sampleBgUrl,
+            completionImageUrl: sampleBgUrl,
+            logoUrl: sampleBgUrl,
+            content: expect.objectContaining({
+              backgroundImage: sampleBgUrl,
+            }),
+          })
+        );
+        expect(onSuccess).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('getLevelImageUrl utility', () => {
+    it('resolves image correctly across backgroundImageUrl, logoUrl, completionImageUrl, iconUrl, content and default', () => {
+      const sampleBgUrl = 'https://bigtv-cms.s3.ap-south-1.amazonaws.com/cms_news_b798a3da-3586-4eed-b702-50ccf99e6f5e.jpeg';
+      expect(getLevelImageUrl(null)).toBe(DEFAULT_LEVEL_ICON_URL);
+      expect(getLevelImageUrl(undefined)).toBe(DEFAULT_LEVEL_ICON_URL);
+      expect(getLevelImageUrl({})).toBe(DEFAULT_LEVEL_ICON_URL);
+      expect(getLevelImageUrl({ backgroundImageUrl: sampleBgUrl })).toBe(sampleBgUrl);
+      expect(getLevelImageUrl({ logoUrl: 'https://img.com/logo.png' })).toBe('https://img.com/logo.png');
+      expect(getLevelImageUrl({ completionImageUrl: 'https://img.com/comp.png' })).toBe('https://img.com/comp.png');
+      expect(getLevelImageUrl({ iconUrl: 'https://img.com/icon.png' })).toBe('https://img.com/icon.png');
+      expect(getLevelImageUrl({ content: { backgroundImage: 'https://img.com/bg.png' } })).toBe('https://img.com/bg.png');
+      expect(getLevelImageUrl({ content: { backgroundImageUrl: 'https://img.com/bg2.png' } })).toBe('https://img.com/bg2.png');
     });
   });
 
