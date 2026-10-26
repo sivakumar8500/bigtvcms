@@ -317,7 +317,8 @@ describe('NotificationsPage', () => {
     fireEvent.change(screen.getByLabelText(/Notification Content/i), { target: { value: 'Content body' } });
     fireEvent.change(screen.getByLabelText(/Image URL \*/i), { target: { value: 'https://img.com' } });
 
-    const submitBtn = screen.getByRole('button', { name: /Send Notification/i, id: 'submit-send-notification-btn' });
+    const sendButtons = screen.getAllByRole('button', { name: /Send Notification/i });
+    const submitBtn = sendButtons[sendButtons.length - 1];
     fireEvent.click(submitBtn);
 
     await waitFor(() => {

@@ -73,6 +73,7 @@ describe('WebArticlesPage Component', () => {
         is_web_post: true,
         web_post_url: 'https://example.com/article-1',
         date: '2026-07-31',
+        language: 'te',
       },
     ]);
 
@@ -93,7 +94,7 @@ describe('WebArticlesPage Component', () => {
     jest.clearAllMocks();
   });
 
-  it('renders Web Articles page title', async () => {
+  it('renders Web Articles page title and defaults to Telugu source', async () => {
     render(
       <ThemeProvider>
         <WebArticlesPage />
@@ -102,10 +103,30 @@ describe('WebArticlesPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText(/Web Articles/i).length).toBeGreaterThan(0);
+      expect(screen.getByText('Sample Web Article 1')).toBeInTheDocument();
+      expect(screen.getByText('Telugu (te)')).toBeInTheDocument();
+      expect(screen.getByText('Malayalam (ml)')).toBeInTheDocument();
+      expect(screen.getByText('BigTV Telugu (bigtvlive.com)')).toBeInTheDocument();
     });
+
+    expect(WpRepository.getPosts).toHaveBeenCalledWith(1, 100, 'te');
   });
 
-  it('renders web article list item', async () => {
+  it('switches to Malayalam when clicking Malayalam tab', async () => {
+    (WpRepository.getPosts as jest.Mock).mockResolvedValue([
+      {
+        id: 8959,
+        title: 'Malayalam Web Article',
+        content: 'Malayalam content',
+        categoryName: 'Kerala',
+        categories: ['Kerala'],
+        is_web_post: true,
+        web_post_url: 'https://bigtv24x7.com/kerala-news',
+        date: '2026-10-25',
+        language: 'ml',
+      },
+    ]);
+
     render(
       <ThemeProvider>
         <WebArticlesPage />
@@ -113,7 +134,43 @@ describe('WebArticlesPage Component', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Sample Web Article 1')).toBeInTheDocument();
+      expect(screen.getByText('Malayalam (ml)')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Malayalam (ml)'));
+
+    await waitFor(() => {
+      expect(WpRepository.getPosts).toHaveBeenCalledWith(1, 100, 'ml');
+      expect(screen.getByText('Malayalam Web Article')).toBeInTheDocument();
+      expect(screen.getByText('BigTV Malayalam (bigtv24x7.com)')).toBeInTheDocument();
+    });
+  });
+
+  it('automatically defaults to Malayalam when user comes from Malayalam language store', async () => {
+    useLanguageStore.setState({ language: 'ml' });
+
+    (WpRepository.getPosts as jest.Mock).mockResolvedValue([
+      {
+        id: 8959,
+        title: 'Malayalam Auto Article',
+        content: 'Auto Content',
+        categoryName: 'Kerala',
+        categories: ['Kerala'],
+        web_post_url: 'https://bigtv24x7.com/auto',
+        date: '2026-10-25',
+        language: 'ml',
+      },
+    ]);
+
+    render(
+      <ThemeProvider>
+        <WebArticlesPage />
+      </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(WpRepository.getPosts).toHaveBeenCalledWith(1, 100, 'ml');
+      expect(screen.getByText('Malayalam Auto Article')).toBeInTheDocument();
     });
   });
 

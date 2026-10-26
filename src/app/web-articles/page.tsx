@@ -87,6 +87,10 @@ const translations = {
     createSuccess: 'Web article created successfully.',
     updateSuccess: 'Web article updated successfully.',
     visitLink: 'Visit Link',
+    tabTelugu: 'Telugu (te)',
+    tabMalayalam: 'Malayalam (ml)',
+    sourceTelugu: 'BigTV Telugu (bigtvlive.com)',
+    sourceMalayalam: 'BigTV Malayalam (bigtv24x7.com)',
   },
   te: {
     title: 'వెబ్ వ్యాసాలు (Web Articles)',
@@ -128,6 +132,10 @@ const translations = {
     createSuccess: 'వెబ్ వ్యాసం విజయవంతంగా సృష్టించబడింది.',
     updateSuccess: 'వెబ్ వ్యాసం విజయవంతంగా నవీకరించబడింది.',
     visitLink: 'లింక్ తెరవండి',
+    tabTelugu: 'తెలుగు (te)',
+    tabMalayalam: 'మలయాళం (ml)',
+    sourceTelugu: 'బిగ్‌టీవీ తెలుగు (bigtvlive.com)',
+    sourceMalayalam: 'బిగ్‌టీవీ మలయాళం (bigtv24x7.com)',
   },
   hi: {
     title: 'वेब लेख (Web Articles)',
@@ -169,6 +177,10 @@ const translations = {
     createSuccess: 'वेब लेख सफलतापूर्वक बनाया गया।',
     updateSuccess: 'वेब लेख सफलतापूर्वक अद्यतन किया गया।',
     visitLink: 'लिंक खोलें',
+    tabTelugu: 'तेलुगु (te)',
+    tabMalayalam: 'मलयालम (ml)',
+    sourceTelugu: 'बिग टीवी तेलुगु (bigtvlive.com)',
+    sourceMalayalam: 'बिग टीवी मलयालम (bigtv24x7.com)',
   },
   ml: {
     title: 'വെബ് ലേഖനങ്ങൾ (Web Articles)',
@@ -210,6 +222,10 @@ const translations = {
     createSuccess: 'വെബ് ലേഖനം വിജയകരമായി സൃഷ്ടിച്ചു.',
     updateSuccess: 'വെബ് ലേഖനം വിജയകരമായി പുതുക്കി.',
     visitLink: 'ലിങ്ക് സന്ദർശിക്കുക',
+    tabTelugu: 'തെലുങ്ക് (te)',
+    tabMalayalam: 'മലയാളം (ml)',
+    sourceTelugu: 'ബിഗ് ടിവി തെലുങ്ക് (bigtvlive.com)',
+    sourceMalayalam: 'ബിഗ് ടിവി മലയാളം (bigtv24x7.com)',
   },
 };
 
@@ -259,13 +275,40 @@ export default function WebArticlesPage() {
     setToastOpen(true);
   };
 
+  // Language detection: check URL search params (lang/language/lan/from) or global language store
+  const getInitialSourceLang = (): 'te' | 'ml' => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (
+          params.get('lang') ||
+          params.get('language') ||
+          params.get('lan') ||
+          params.get('from') ||
+          ''
+        ).toLowerCase();
+        if (urlLang === 'ml' || urlLang === 'malayala' || urlLang === 'malayalam') {
+          return 'ml';
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+    if (language === 'ml' || (language as string)?.toLowerCase()?.includes('malayala')) {
+      return 'ml';
+    }
+    return 'te';
+  };
+
+  const [selectedSourceLang, setSelectedSourceLang] = useState<'te' | 'ml'>('te');
+
   // Load articles & metadata
-  const fetchData = async (pageNumber: number = 1) => {
+  const fetchData = async (pageNumber: number = 1, sourceLang: 'te' | 'ml' = selectedSourceLang) => {
     setLoading(true);
     try {
-      const wpPosts = await WpRepository.getPosts(pageNumber, 100);
+      const wpPosts = await WpRepository.getPosts(pageNumber, 100, sourceLang);
       setPosts(wpPosts);
-      const uniqueCats = Array.from(new Set(wpPosts.map(p => p.categoryName || 'Uncategorized')));
+      const uniqueCats = Array.from(new Set(wpPosts.map((p) => p.categoryName || 'Uncategorized')));
       setCategoriesList((prev) => Array.from(new Set([...prev, ...uniqueCats])));
       if (wpPosts.length === 100) {
         setServerTotalPages((prev) => Math.max(prev, pageNumber + 1));
@@ -280,8 +323,16 @@ export default function WebArticlesPage() {
   };
 
   useEffect(() => {
-    fetchData(1);
-  }, []);
+    const initialLang = getInitialSourceLang();
+    setSelectedSourceLang(initialLang);
+    fetchData(1, initialLang);
+  }, [language]);
+
+  const handleSourceLangChange = (newLang: 'te' | 'ml') => {
+    setSelectedSourceLang(newLang);
+    setPage(1);
+    fetchData(1, newLang);
+  };
 
   // Filtering logic
   const filteredPosts = useMemo(() => {
@@ -460,9 +511,87 @@ export default function WebArticlesPage() {
                       fontWeight: 700,
                     }}
                   />
+                  <Chip
+                    label={selectedSourceLang === 'ml' ? t.sourceMalayalam : t.sourceTelugu}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      borderColor: selectedSourceLang === 'ml' ? '#10b981' : '#3b82f6',
+                      color: selectedSourceLang === 'ml' ? '#10b981' : '#3b82f6',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      display: { xs: 'none', md: 'inline-flex' },
+                    }}
+                  />
                 </Box>
 
-{/* Create Button Hidden */}
+                {/* Language Switcher Tabs */}
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Button
+                    id="web-articles-lang-te"
+                    variant={selectedSourceLang === 'te' ? 'contained' : 'outlined'}
+                    size="small"
+                    onClick={() => handleSourceLangChange('te')}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      borderRadius: '10px',
+                      px: 2,
+                      py: 0.6,
+                      backgroundColor: selectedSourceLang === 'te'
+                        ? (isDark ? '#a6e2f5' : '#1c1445')
+                        : (isDark ? 'rgba(255,255,255,0.04)' : '#ffffff'),
+                      color: selectedSourceLang === 'te'
+                        ? (isDark ? '#1c1445' : '#ffffff')
+                        : (isDark ? '#d0caeb' : '#5c548a'),
+                      borderColor: selectedSourceLang === 'te'
+                        ? 'transparent'
+                        : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'),
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: selectedSourceLang === 'te'
+                          ? (isDark ? '#8cd5ed' : '#2d2270')
+                          : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
+                        boxShadow: 'none',
+                      },
+                    }}
+                  >
+                    {t.tabTelugu}
+                  </Button>
+                  <Button
+                    id="web-articles-lang-ml"
+                    variant={selectedSourceLang === 'ml' ? 'contained' : 'outlined'}
+                    size="small"
+                    onClick={() => handleSourceLangChange('ml')}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      borderRadius: '10px',
+                      px: 2,
+                      py: 0.6,
+                      backgroundColor: selectedSourceLang === 'ml'
+                        ? (isDark ? '#a6e2f5' : '#1c1445')
+                        : (isDark ? 'rgba(255,255,255,0.04)' : '#ffffff'),
+                      color: selectedSourceLang === 'ml'
+                        ? (isDark ? '#1c1445' : '#ffffff')
+                        : (isDark ? '#d0caeb' : '#5c548a'),
+                      borderColor: selectedSourceLang === 'ml'
+                        ? 'transparent'
+                        : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'),
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: selectedSourceLang === 'ml'
+                          ? (isDark ? '#8cd5ed' : '#2d2270')
+                          : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
+                        boxShadow: 'none',
+                      },
+                    }}
+                  >
+                    {t.tabMalayalam}
+                  </Button>
+                </Box>
               </Box>
 
               {/* Filters Bar */}
@@ -681,9 +810,25 @@ export default function WebArticlesPage() {
                           />
                         </Grid>
                         <Grid item xs={2}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1e293b' }}>
-                            {Array.isArray(post.categories) ? post.categories.join(', ') : post.categoryName || 'General'}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
+                            <Box
+                              sx={{
+                                display: 'inline-block',
+                                px: 0.8,
+                                py: 0.2,
+                                borderRadius: '4px',
+                                bgcolor: (post.language === 'ml' || selectedSourceLang === 'ml') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                                color: (post.language === 'ml' || selectedSourceLang === 'ml') ? '#10b981' : '#3b82f6',
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                              }}
+                            >
+                              {(post.language || selectedSourceLang).toUpperCase()}
+                            </Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1e293b' }}>
+                              {Array.isArray(post.categories) ? post.categories.join(', ') : post.categoryName || 'General'}
+                            </Typography>
+                          </Box>
                         </Grid>
                         <Grid item xs={3.5}>
                           <Typography
