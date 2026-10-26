@@ -29,6 +29,7 @@ interface TagEditModalProps {
   onSave: (slug: string, payload: UpdateVideoTagDto | string, file?: File | null) => Promise<any>;
   isDark: boolean;
   t: Record<string, string>;
+  allowedLanguages?: TagLanguage[];
 }
 
 export const TagEditModal: React.FC<TagEditModalProps> = ({
@@ -38,7 +39,12 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
   onSave,
   isDark,
   t,
+  allowedLanguages,
 }) => {
+  const effectiveAllowed: TagLanguage[] = allowedLanguages && allowedLanguages.length > 0
+    ? allowedLanguages
+    : ['te', 'ml', 'en'];
+
   const [name, setName] = useState('');
   const [language, setLanguage] = useState<TagLanguage>('te');
   const [description, setDescription] = useState('');
@@ -172,7 +178,7 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
               value={language}
               label={t.language || 'Language'}
               onChange={(e) => setLanguage(e.target.value as TagLanguage)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || effectiveAllowed.length === 1}
               sx={{
                 color: isDark ? '#ffffff' : '#1c1445',
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -191,9 +197,15 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
                 },
               }}
             >
-              <MenuItem value="te">{t.teluguOption || 'Telugu (te)'}</MenuItem>
-              <MenuItem value="ml">{t.malayalamOption || 'Malayalam (ml)'}</MenuItem>
-              <MenuItem value="en">{t.englishOption || 'English (en)'}</MenuItem>
+              {effectiveAllowed.includes('te') && (
+                <MenuItem value="te">{t.teluguOption || 'Telugu (te)'}</MenuItem>
+              )}
+              {effectiveAllowed.includes('ml') && (
+                <MenuItem value="ml">{t.malayalamOption || 'Malayalam (ml)'}</MenuItem>
+              )}
+              {effectiveAllowed.includes('en') && (
+                <MenuItem value="en">{t.englishOption || 'English (en)'}</MenuItem>
+              )}
             </Select>
           </FormControl>
 

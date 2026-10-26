@@ -1310,4 +1310,72 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
       fireEvent.click(page2Btn);
     }
   });
+
+  it('hides Telugu and English options when language is Malayalam (ml)', async () => {
+    act(() => {
+      useLanguageStore.setState({ language: 'ml' });
+    });
+
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/വീഡിയോ ടാഗുകളും/i)).toBeInTheDocument();
+    });
+
+    // Verify Telugu and English tabs are NOT present
+    expect(screen.queryByText(/തെലുങ്ക് \(te\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Telugu \(te\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ഇംഗ്ലീഷ് \(en\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/English \(en\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/എല്ലാ ഭാഷകളും/i)).not.toBeInTheDocument();
+
+    // Verify Malayalam tab IS present
+    expect(screen.getByText(/മലയാളം \(ml\)/i)).toBeInTheDocument();
+
+    // Open Create Tag Modal
+    const createBtn = screen.getByRole('button', { name: /\+ പുതിയ വീഡിയോ ടാഗ്/i });
+    await act(async () => {
+      fireEvent.click(createBtn);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('വീഡിയോ ടാഗ് സൃഷ്ടിക്കുക')).toBeInTheDocument();
+    });
+
+    // In modal, Telugu and English options must not be shown
+    expect(screen.queryByText('തെലുങ്ക് (te)')).not.toBeInTheDocument();
+    expect(screen.queryByText('ഇംഗ്ലീഷ് (en)')).not.toBeInTheDocument();
+  });
+
+  it('hides Malayalam and English options when language is Telugu (te)', async () => {
+    act(() => {
+      useLanguageStore.setState({ language: 'te' });
+    });
+
+    await act(async () => {
+      render(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('వీడియో ట్యాగ్‌లు & స్ట్రీమ్ నిర్వహణ')).toBeInTheDocument();
+    });
+
+    // Verify Malayalam and English tabs are NOT present
+    expect(screen.queryByText(/మలయాళం \(ml\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ఇంగ్లీష్ \(en\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/అన్ని భాషలు/i)).not.toBeInTheDocument();
+
+    // Verify Telugu tab IS present
+    expect(screen.getByText(/తెలుగు \(te\) ★డిఫాల్ట్/i)).toBeInTheDocument();
+  });
 });

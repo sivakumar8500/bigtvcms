@@ -8,14 +8,54 @@ import {
   TagLanguage,
   SegregatedVideoTags,
 } from '../domain/LiveTvVideo';
+import { useLanguageStore } from '@/core/storage/language-store';
 import {
   liveTvVideosRepository,
   CreateVideoTagDto,
   UpdateVideoTagDto,
 } from '../repositories/live-tv-videos.repository';
 
-export function useLiveTvVideosController() {
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>('te');
+export function useLiveTvVideosController(initialLanguage?: LanguageCode) {
+  const { language: appLanguage } = useLanguageStore();
+
+  const resolveLanguage = (): LanguageCode => {
+    if (initialLanguage) return initialLanguage;
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (
+          params.get('lang') ||
+          params.get('language') ||
+          params.get('lan') ||
+          params.get('from') ||
+          ''
+        ).toLowerCase().trim();
+        if (urlLang === 'ml' || urlLang === 'malayala' || urlLang === 'malayalam') return 'ml';
+        if (urlLang === 'te' || urlLang === 'telugu') return 'te';
+        if (urlLang === 'en' || urlLang === 'english') return 'en';
+        if (urlLang === 'all') return 'all';
+      } catch (e) {}
+    }
+    const currentLang = (appLanguage || '').toLowerCase().trim();
+    if (currentLang === 'ml' || currentLang === 'malayala' || currentLang === 'malayalam') {
+      return 'ml';
+    }
+    if (currentLang === 'te' || currentLang === 'telugu') {
+      return 'te';
+    }
+    return 'te';
+  };
+
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(resolveLanguage);
+
+  useEffect(() => {
+    const currentLang = (appLanguage || '').toLowerCase().trim();
+    if ((currentLang === 'ml' || currentLang === 'malayala' || currentLang === 'malayalam') && selectedLanguage !== 'ml') {
+      setSelectedLanguage('ml');
+    } else if ((currentLang === 'te' || currentLang === 'telugu') && selectedLanguage !== 'te') {
+      setSelectedLanguage('te');
+    }
+  }, [appLanguage]);
   const [tags, setTags] = useState<VideoTag[]>([]);
   const [segregatedTags, setSegregatedTags] = useState<SegregatedVideoTags>({
     te: [],

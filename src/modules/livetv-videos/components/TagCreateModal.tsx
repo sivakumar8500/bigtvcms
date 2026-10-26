@@ -28,6 +28,7 @@ interface TagCreateModalProps {
   isDark: boolean;
   t: Record<string, string>;
   initialLanguage?: TagLanguage;
+  allowedLanguages?: TagLanguage[];
 }
 
 export const TagCreateModal: React.FC<TagCreateModalProps> = ({
@@ -37,11 +38,19 @@ export const TagCreateModal: React.FC<TagCreateModalProps> = ({
   isDark,
   t,
   initialLanguage = 'te',
+  allowedLanguages,
 }) => {
+  const effectiveAllowed: TagLanguage[] = allowedLanguages && allowedLanguages.length > 0
+    ? allowedLanguages
+    : ['te', 'ml', 'en'];
+  const defaultLang: TagLanguage = effectiveAllowed.includes(initialLanguage)
+    ? initialLanguage
+    : effectiveAllowed[0];
+
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
-  const [language, setLanguage] = useState<TagLanguage>(initialLanguage);
+  const [language, setLanguage] = useState<TagLanguage>(defaultLang);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,9 +72,9 @@ export const TagCreateModal: React.FC<TagCreateModalProps> = ({
       setPreview(null);
       setError(null);
     } else {
-      setLanguage(initialLanguage || 'te');
+      setLanguage(defaultLang);
     }
-  }, [open, preview, initialLanguage]);
+  }, [open, preview, defaultLang]);
 
   // Auto-generate slug from name if slug hasn't been manually heavily edited
   useEffect(() => {
@@ -178,7 +187,7 @@ export const TagCreateModal: React.FC<TagCreateModalProps> = ({
               value={language}
               label={t.language || 'Language'}
               onChange={(e) => setLanguage(e.target.value as TagLanguage)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || effectiveAllowed.length === 1}
               sx={{
                 color: isDark ? '#ffffff' : '#1c1445',
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -197,9 +206,15 @@ export const TagCreateModal: React.FC<TagCreateModalProps> = ({
                 },
               }}
             >
-              <MenuItem value="te">{t.teluguOption || 'Telugu (te)'}</MenuItem>
-              <MenuItem value="ml">{t.malayalamOption || 'Malayalam (ml)'}</MenuItem>
-              <MenuItem value="en">{t.englishOption || 'English (en)'}</MenuItem>
+              {effectiveAllowed.includes('te') && (
+                <MenuItem value="te">{t.teluguOption || 'Telugu (te)'}</MenuItem>
+              )}
+              {effectiveAllowed.includes('ml') && (
+                <MenuItem value="ml">{t.malayalamOption || 'Malayalam (ml)'}</MenuItem>
+              )}
+              {effectiveAllowed.includes('en') && (
+                <MenuItem value="en">{t.englishOption || 'English (en)'}</MenuItem>
+              )}
             </Select>
           </FormControl>
 

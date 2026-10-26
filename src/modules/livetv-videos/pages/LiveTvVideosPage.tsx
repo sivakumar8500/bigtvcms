@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import {
@@ -353,6 +353,39 @@ export const LiveTvVideosPage: React.FC = () => {
     userRole === 'creator' ||
     userRole === 'creators';
 
+  const allowedLanguages: TagLanguage[] = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (
+          params.get('lang') ||
+          params.get('language') ||
+          params.get('lan') ||
+          params.get('from') ||
+          ''
+        ).toLowerCase().trim();
+        if (urlLang === 'ml' || urlLang === 'malayala' || urlLang === 'malayalam') return ['ml'];
+        if (urlLang === 'te' || urlLang === 'telugu') return ['te'];
+        if (urlLang === 'en' || urlLang === 'english') return ['en'];
+        if (urlLang === 'all') return ['te', 'ml', 'en'];
+      } catch (e) {}
+    }
+    const currentLang = (language || '').toLowerCase().trim();
+    if (currentLang === 'ml' || currentLang === 'malayala' || currentLang === 'malayalam') {
+      return ['ml'];
+    }
+    if (currentLang === 'te' || currentLang === 'telugu') {
+      return ['te'];
+    }
+    return ['te', 'ml', 'en'];
+  }, [language]);
+
+  const tabValue = useMemo(() => {
+    if (selectedLanguage === 'all' && allowedLanguages.length > 1) return 'all';
+    if (allowedLanguages.includes(selectedLanguage as TagLanguage)) return selectedLanguage;
+    return allowedLanguages[0] || 'te';
+  }, [selectedLanguage, allowedLanguages]);
+
   const selectedTag = tags.find((t) => t.slug === selectedTagSlug);
 
   const confirmDeleteTag = () => {
@@ -523,7 +556,7 @@ export const LiveTvVideosPage: React.FC = () => {
                 }}
               >
                 <Tabs
-                  value={selectedLanguage}
+                  value={tabValue}
                   onChange={(_, val: LanguageCode) => setSelectedLanguage(val)}
                   variant="scrollable"
                   scrollButtons="auto"
@@ -549,10 +582,18 @@ export const LiveTvVideosPage: React.FC = () => {
                     },
                   }}
                 >
-                  <Tab label={t.allLanguagesTab} value="all" icon={<LanguageIcon />} iconPosition="start" />
-                  <Tab label={t.teluguTab} value="te" />
-                  <Tab label={t.malayalamTab} value="ml" />
-                  <Tab label={t.englishTab} value="en" />
+                  {allowedLanguages.length > 1 && (
+                    <Tab label={t.allLanguagesTab} value="all" icon={<LanguageIcon />} iconPosition="start" />
+                  )}
+                  {allowedLanguages.includes('te') && (
+                    <Tab label={t.teluguTab} value="te" />
+                  )}
+                  {allowedLanguages.includes('ml') && (
+                    <Tab label={t.malayalamTab} value="ml" />
+                  )}
+                  {allowedLanguages.includes('en') && (
+                    <Tab label={t.englishTab} value="en" />
+                  )}
                 </Tabs>
               </Box>
 
@@ -1007,8 +1048,11 @@ export const LiveTvVideosPage: React.FC = () => {
                 isDark={isDark}
                 t={t}
                 initialLanguage={
-                  (selectedLanguage === 'all' ? 'te' : selectedLanguage) as TagLanguage
+                  (selectedLanguage === 'all'
+                    ? (allowedLanguages[0] || 'te')
+                    : selectedLanguage) as TagLanguage
                 }
+                allowedLanguages={allowedLanguages}
               />
 
               <TagEditModal
@@ -1018,6 +1062,7 @@ export const LiveTvVideosPage: React.FC = () => {
                 onSave={handleUpdateTag}
                 isDark={isDark}
                 t={t}
+                allowedLanguages={allowedLanguages}
               />
 
               <VideoPlayerModal
