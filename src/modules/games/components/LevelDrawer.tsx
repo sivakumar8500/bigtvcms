@@ -273,51 +273,6 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           {...textFieldProps}
         />
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <FormControl fullWidth size="small">
-            <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.colDifficulty} *</InputLabel>
-            <Select
-              value={formData.difficulty}
-              label={`${t.colDifficulty} *`}
-              onChange={(e) => setFormData((p) => ({ ...p, difficulty: e.target.value }))}
-              sx={{
-                color: isDark ? '#ffffff' : '#1c1445',
-                borderRadius: '10px',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                },
-              }}
-            >
-              <MenuItem value="easy">Easy</MenuItem>
-              <MenuItem value="medium">Medium</MenuItem>
-              <MenuItem value="hard">Hard</MenuItem>
-              <MenuItem value="expert">Expert</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth size="small">
-            <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.colStatus} *</InputLabel>
-            <Select
-              value={formData.status}
-              label={`${t.colStatus} *`}
-              onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value }))}
-              sx={{
-                color: isDark ? '#ffffff' : '#1c1445',
-                borderRadius: '10px',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                },
-              }}
-            >
-              <MenuItem value="draft">Draft</MenuItem>
-              <MenuItem value="published">Published</MenuItem>
-              <MenuItem value="archived">Archived</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
         {/* Level Icon Upload & Attach */}
         <Box
           sx={{
@@ -425,6 +380,51 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
               {iconUploadError}
             </Alert>
           )}
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.colDifficulty} *</InputLabel>
+            <Select
+              value={formData.difficulty}
+              label={`${t.colDifficulty} *`}
+              onChange={(e) => setFormData((p) => ({ ...p, difficulty: e.target.value }))}
+              sx={{
+                color: isDark ? '#ffffff' : '#1c1445',
+                borderRadius: '10px',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                },
+              }}
+            >
+              <MenuItem value="easy">Easy</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="hard">Hard</MenuItem>
+              <MenuItem value="expert">Expert</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth size="small">
+            <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>{t.colStatus} *</InputLabel>
+            <Select
+              value={formData.status}
+              label={`${t.colStatus} *`}
+              onChange={(e) => setFormData((p) => ({ ...p, status: e.target.value }))}
+              sx={{
+                color: isDark ? '#ffffff' : '#1c1445',
+                borderRadius: '10px',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                },
+              }}
+            >
+              <MenuItem value="draft">Draft</MenuItem>
+              <MenuItem value="published">Published</MenuItem>
+              <MenuItem value="archived">Archived</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

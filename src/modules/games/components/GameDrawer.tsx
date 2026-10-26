@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Drawer,
   Box,
@@ -14,10 +14,13 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Avatar,
+  Alert,
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
-import { GameItem } from '../dto/games.dto';
+import { Close, CloudUpload, Refresh, Image as ImageIcon } from '@mui/icons-material';
+import { GameItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
 import { GamesRepository } from '../repositories/games.repository';
+import { UploadService } from '@/modules/media/services/upload.service';
 
 interface GameDrawerProps {
   open: boolean;
@@ -39,12 +42,16 @@ export const GameDrawer: React.FC<GameDrawerProps> = ({
   t,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
+  const [iconUploadError, setIconUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     slug: '',
     name: '',
     gameType: 'sudoku',
     description: '',
-    iconUrl: '',
+    iconUrl: DEFAULT_LEVEL_ICON_URL,
     isActive: true,
     dailyPublishEnabled: true,
     metadataStr: '',
@@ -52,13 +59,14 @@ export const GameDrawer: React.FC<GameDrawerProps> = ({
 
   useEffect(() => {
     if (open) {
+      setIconUploadError(null);
       if (isEditMode && selectedGame) {
         setFormData({
           slug: selectedGame.slug || '',
           name: selectedGame.name || '',
           gameType: selectedGame.gameType || 'sudoku',
           description: selectedGame.description || '',
-          iconUrl: selectedGame.iconUrl || '',
+          iconUrl: selectedGame.iconUrl || DEFAULT_LEVEL_ICON_URL,
           isActive: selectedGame.isActive ?? true,
           dailyPublishEnabled: selectedGame.dailyPublishEnabled ?? true,
           metadataStr: selectedGame.metadata ? JSON.stringify(selectedGame.metadata, null, 2) : '',
@@ -69,7 +77,7 @@ export const GameDrawer: React.FC<GameDrawerProps> = ({
           name: '',
           gameType: 'sudoku',
           description: '',
-          iconUrl: '',
+          iconUrl: DEFAULT_LEVEL_ICON_URL,
           isActive: true,
           dailyPublishEnabled: true,
           metadataStr: '',
@@ -77,6 +85,29 @@ export const GameDrawer: React.FC<GameDrawerProps> = ({
       }
     }
   }, [open, isEditMode, selectedGame]);
+
+  const handleIconFileSelect = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setIconUploadError('Please select a valid image file');
+      return;
+    }
+    setUploadingIcon(true);
+    setIconUploadError(null);
+    try {
+      const url = await UploadService.uploadImage(file);
+      setFormData((prev) => ({ ...prev, iconUrl: url }));
+    } catch (err: any) {
+      console.error('Failed to upload game icon:', err);
+      setIconUploadError(err.message || 'Failed to upload icon to S3');
+    } finally {
+      setUploadingIcon(false);
+    }
+  };
+
+  const handleResetToDefaultIcon = () => {
+    setFormData((prev) => ({ ...prev, iconUrl: DEFAULT_LEVEL_ICON_URL }));
+    setIconUploadError(null);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -227,14 +258,114 @@ export const GameDrawer: React.FC<GameDrawerProps> = ({
           </Select>
         </FormControl>
 
-        <TextField
-          label="Icon / Thumbnail Image URL"
-          name="iconUrl"
-          value={formData.iconUrl}
-          onChange={handleChange}
-          placeholder="https://cdn.example.com/icons/sudoku.png"
-          {...textFieldProps}
-        />
+        {/* Icon Upload & Attach */}
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: '12px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: isDark ? '#d0caeb' : '#5c548a',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <ImageIcon sx={{ fontSize: '1.2rem', color: isDark ? '#a6e2f5' : '#2563eb' }} />
+              {t.levelIcon || 'Game / Level Icon'}
+            </Typography>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleResetToDefaultIcon}
+              startIcon={<Refresh sx={{ fontSize: '0.9rem' }} />}
+              sx={{
+                textTransform: 'none',
+                fontSize: '0.75rem',
+                color: isDark ? '#a6e2f5' : '#2563eb',
+              }}
+            >
+              {t.useDefaultIcon || 'Use Default Icon'}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1.5 }}>
+            <Avatar
+              src={formData.iconUrl || DEFAULT_LEVEL_ICON_URL}
+              variant="rounded"
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: '10px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.15)',
+                bgcolor: isDark ? 'rgba(0,0,0,0.3)' : '#f8fafc',
+                objectFit: 'contain',
+              }}
+            />
+
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <input
+                ref={fileInputRef}
+                data-testid="game-icon-file-input"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleIconFileSelect(f);
+                  e.target.value = '';
+                }}
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingIcon}
+                startIcon={uploadingIcon ? <CircularProgress size={16} /> : <CloudUpload />}
+                sx={{
+                  alignSelf: 'flex-start',
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  borderColor: isDark ? '#a6e2f5' : '#2563eb',
+                  color: isDark ? '#a6e2f5' : '#2563eb',
+                }}
+              >
+                {uploadingIcon ? (t.uploadingIcon || 'Uploading...') : (t.uploadIcon || 'Upload Icon')}
+              </Button>
+            </Box>
+          </Box>
+
+          <TextField
+            {...textFieldProps}
+            label={t.iconUrlPlaceholder || 'Icon / Thumbnail Image URL'}
+            name="iconUrl"
+            value={formData.iconUrl}
+            onChange={handleChange}
+            placeholder={DEFAULT_LEVEL_ICON_URL}
+            helperText={formData.iconUrl === DEFAULT_LEVEL_ICON_URL ? 'Default BigTV puzzle icon is attached' : undefined}
+            sx={{
+              ...textFieldProps.sx,
+              '& .MuiFormHelperText-root': {
+                color: isDark ? '#4ade80' : '#16a34a',
+                fontSize: '0.72rem',
+              },
+            }}
+          />
+
+          {iconUploadError && (
+            <Alert severity="error" sx={{ mt: 1, borderRadius: '8px', fontSize: '0.78rem' }}>
+              {iconUploadError}
+            </Alert>
+          )}
+        </Box>
 
         <TextField
           label="Description / Rules"

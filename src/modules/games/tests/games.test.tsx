@@ -524,6 +524,40 @@ describe('Games Module - Comprehensive Test Suite', () => {
         expect(onSuccess).toHaveBeenCalled();
       });
     });
+
+    it('uploads game icon and supports resetting to default', async () => {
+      const onClose = jest.fn();
+      const onSuccess = jest.fn();
+
+      render(
+        <GameDrawer
+          open={true}
+          isEditMode={true}
+          selectedGame={mockGamesData[0]}
+          onClose={onClose}
+          onSuccess={onSuccess}
+          isDark={false}
+          t={t}
+        />
+      );
+
+      // Verify file upload
+      const fileInput = screen.getByTestId('game-icon-file-input') as HTMLInputElement;
+      const fakeFile = new File(['fake game icon'], 'game_icon.png', { type: 'image/png' });
+      await act(async () => {
+        fireEvent.change(fileInput, { target: { files: [fakeFile] } });
+      });
+
+      await waitFor(() => {
+        expect(UploadService.uploadImage).toHaveBeenCalledWith(fakeFile);
+      });
+
+      // Reset to default
+      const resetBtn = screen.getByText(t.useDefaultIcon);
+      fireEvent.click(resetBtn);
+      const urlInput = screen.getByPlaceholderText(DEFAULT_LEVEL_ICON_URL) as HTMLInputElement;
+      expect(urlInput.value).toBe(DEFAULT_LEVEL_ICON_URL);
+    });
   });
 
   describe('GameViewDialog component', () => {
