@@ -155,20 +155,22 @@ export class ApiClient {
               config.url?.includes('/locations') ||
               config.url?.includes('/creators') ||
               config.url?.includes('/video-tags') ||
+              config.url?.includes('/reporters') ||
               config.url?.includes('/admin') ||
               config.url?.includes('/games') ||
               config.url?.includes('/streak-recovery-requests') ||
               config.params?.skip_lang_param;
 
             if (isBypassLangApi) {
-              const isVideoTags = config.url?.includes('/video-tags');
+              const isPreserveLangApi =
+                config.url?.includes('/video-tags') || config.url?.includes('/reporters');
               if (config.headers) {
                 delete config.headers['Accept-Language'];
                 delete config.headers['accept-language'];
               }
               if (config.params) {
                 delete config.params.lang;
-                if (!isVideoTags) {
+                if (!isPreserveLangApi) {
                   delete config.params.language;
                 }
                 delete config.params.language_code;
@@ -177,7 +179,7 @@ export class ApiClient {
                 }
               }
               if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
-                if (!isVideoTags) {
+                if (!isPreserveLangApi) {
                   delete (config.data as any).language;
                 }
                 delete (config.data as any).language_code;

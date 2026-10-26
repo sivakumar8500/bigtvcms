@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Drawer, Box, Typography, TextField, Button, IconButton, Divider, CircularProgress, Switch, FormControlLabel, Autocomplete, Chip } from '@mui/material';
+import {
+  Drawer,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Divider,
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Autocomplete,
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { Close, CloudUpload, DeleteOutline } from '@mui/icons-material';
-import { Reporter } from '../hooks/useReporterController';
-import { eventsApiClient } from '@/core/api/api-client';
+import { Reporter, ReporterLanguage } from '../domain/Reporter';
+import { reportersRepository } from '../repositories/reporters.repository';
 import { UploadService } from '@/modules/media/services/upload.service';
 
 interface ReporterDrawerProps {
@@ -13,6 +30,7 @@ interface ReporterDrawerProps {
   onSuccess: () => void;
   isDark: boolean;
   t: any;
+  defaultLanguage?: ReporterLanguage;
 }
 
 export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
@@ -23,6 +41,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
   onSuccess,
   isDark,
   t,
+  defaultLanguage = 'te',
 }) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +51,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
 
   const [formData, setFormData] = useState({
     name: '',
+    language: 'te' as ReporterLanguage,
     profileImageUrl: '',
     bio: '',
     languages: [] as string[],
@@ -74,6 +94,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         setSelectedFile(null);
         setFormData({
           name: selectedReporter.name || '',
+          language: (selectedReporter.language || 'te') as ReporterLanguage,
           profileImageUrl: selectedReporter.profileImageUrl || '',
           bio: selectedReporter.bio || '',
           languages: selectedReporter.languages || [],
@@ -113,6 +134,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         setSelectedFile(null);
         setFormData({
           name: '',
+          language: (defaultLanguage || 'te') as ReporterLanguage,
           profileImageUrl: '',
           bio: '',
           languages: [],
@@ -149,16 +171,16 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         });
       }
     }
-  }, [open, isEditMode, selectedReporter]);
+  }, [open, isEditMode, selectedReporter, defaultLanguage]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any) => {
     const { name, value, checked, type } = e.target;
-    
+
     let finalValue: any = type === 'checkbox' ? checked : value;
     if (name === 'mc_phone' || name === 'emp_workPhone') {
       finalValue = (finalValue as string).replace(/\D/g, '').slice(0, 10);
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: finalValue,
@@ -166,37 +188,36 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
   };
 
   const handleFileSelect = (file: File) => {
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+      alert('Only JPG, PNG and WEBP formats are allowed');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setSelectedFile(file);
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewImage(e.target?.result as string);
-      setSelectedFile(file);
+    reader.onload = () => {
+      setPreviewImage(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp')) {
-      handleFileSelect(file);
-    }
+    if (file) handleFileSelect(file);
   };
 
-  const handleSubmit = async () => {
-    const requiredFields = [
-      'name', 'bio', 'mc_phone', 'mc_websiteUrl', 'mc_email',
-      'mc_addressLine1', 'mc_city', 'mc_district', 'mc_state', 'mc_country', 'mc_postalCode',
-      'emp_designation', 'emp_type', 'emp_status', 'emp_role', 'emp_department', 'emp_bureau',
-      'emp_joiningDate', 'emp_workEmail', 'emp_workPhone',
-      'social_instagram', 'social_facebook', 'social_twitter', 'social_youtube'
-    ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    for (const field of requiredFields) {
-      if (!String(formData[field as keyof typeof formData]).trim()) {
-        alert('All fields are required');
-        return;
-      }
+    if (!formData.name.trim()) {
+      alert('Reporter Name is required');
+      return;
     }
 
     if (!formData.profileImageUrl && !selectedFile) {
@@ -212,13 +233,14 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
     setLoading(true);
     try {
       let finalImageUrl = formData.profileImageUrl;
-      
+
       if (selectedFile) {
         finalImageUrl = await UploadService.uploadImage(selectedFile);
       }
 
       const payload: any = {
-        name: formData.name,
+        name: formData.name.trim(),
+        language: formData.language || 'te',
         profileImageUrl: finalImageUrl,
         bio: formData.bio,
         languages: formData.languages,
@@ -242,7 +264,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           state: formData.mc_state,
           country: formData.mc_country,
           postalCode: formData.mc_postalCode,
-        }
+        },
       };
 
       if (formData.emp_designation || formData.emp_role) {
@@ -260,7 +282,12 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         };
       }
 
-      if (formData.social_instagram || formData.social_facebook || formData.social_twitter || formData.social_youtube) {
+      if (
+        formData.social_instagram ||
+        formData.social_facebook ||
+        formData.social_twitter ||
+        formData.social_youtube
+      ) {
         payload.socialMediaProfiles = {
           ...(formData.social_instagram && { instagram: formData.social_instagram }),
           ...(formData.social_facebook && { facebook: formData.social_facebook }),
@@ -270,9 +297,9 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
       }
 
       if (isEditMode && selectedReporter) {
-        await eventsApiClient.patch(`/reporters/${selectedReporter.id}`, payload);
+        await reportersRepository.updateReporter(selectedReporter.id, payload);
       } else {
-        await eventsApiClient.post('/reporters', payload);
+        await reportersRepository.createReporter(payload);
       }
       onSuccess();
       onClose();
@@ -286,7 +313,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
 
   const textFieldProps = {
     fullWidth: true,
-    size: "small" as const,
+    size: 'small' as const,
     InputLabelProps: { style: { color: isDark ? '#d0caeb' : '#5c548a' } },
     sx: {
       '& .MuiOutlinedInput-root': {
@@ -295,7 +322,7 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' },
         '&.Mui-focused fieldset': { borderColor: isDark ? '#a6e2f5' : '#2563eb' },
       },
-    }
+    },
   };
 
   return (
@@ -305,16 +332,16 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: { xs: '100%', sm: '560px' },
-          backgroundColor: isDark ? '#1a1438' : '#ffffff',
+          width: { xs: '100%', sm: 500 },
+          backgroundColor: isDark ? '#140e36' : '#ffffff',
           color: isDark ? '#ffffff' : '#1c1445',
           p: 3,
         },
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {isEditMode ? 'Edit Reporter' : 'Add Reporter'}
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          {isEditMode ? t?.editReporter || 'Edit Reporter' : t?.addReporter || 'Add Reporter'}
         </Typography>
         <IconButton onClick={onClose} sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
           <Close />
@@ -322,11 +349,24 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
       </Box>
       <Divider sx={{ mb: 3, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, flex: 1, overflowY: 'auto', pr: 1 }}>
-        
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, flex: 1, overflowY: 'auto', pr: 1 }}
+      >
         {/* Profile Image Uploader */}
         <Box>
-          <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600, mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.8 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: isDark ? '#d0caeb' : '#5c548a',
+              fontWeight: 600,
+              mb: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.8,
+            }}
+          >
             <CloudUpload sx={{ fontSize: '1rem' }} /> Profile Image *
           </Typography>
 
@@ -335,33 +375,58 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             type="file"
             accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
             style={{ display: 'none' }}
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); e.target.value = ''; }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFileSelect(f);
+              e.target.value = '';
+            }}
           />
 
           {previewImage ? (
-            <Box sx={{
-              position: 'relative', borderRadius: '12px', overflow: 'hidden',
-              border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
-            }}>
+            <Box
+              sx={{
+                position: 'relative',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.1)',
+              }}
+            >
               <Box
                 component="img"
                 src={previewImage}
                 alt="Preview"
                 sx={{ width: '100%', maxHeight: '150px', objectFit: 'cover', display: 'block' }}
               />
-              <Box sx={{
-                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
-                display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-                p: 1.5,
-              }}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  p: 1.5,
+                }}
+              >
                 <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>
                   ✓ Image uploaded
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={() => { setPreviewImage(null); setSelectedFile(null); setFormData(p => ({...p, profileImageUrl: ''})) }}
-                  sx={{ color: '#fff', backgroundColor: 'rgba(244,67,54,0.8)', '&:hover': { backgroundColor: '#f44336' }, p: 0.5 }}
+                  onClick={() => {
+                    setPreviewImage(null);
+                    setSelectedFile(null);
+                    setFormData((p) => ({ ...p, profileImageUrl: '' }));
+                  }}
+                  sx={{
+                    color: '#fff',
+                    backgroundColor: 'rgba(244,67,54,0.8)',
+                    '&:hover': { backgroundColor: '#f44336' },
+                    p: 0.5,
+                  }}
                 >
                   <DeleteOutline sx={{ fontSize: '1rem' }} />
                 </IconButton>
@@ -369,56 +434,162 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
             </Box>
           ) : (
             <Box
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               sx={{
-                border: `2px dashed ${dragOver ? (isDark ? '#a6e2f5' : '#1c1445') : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)')}`,
-                borderRadius: '12px', p: 3, textAlign: 'center', cursor: 'pointer',
+                border: `2px dashed ${
+                  dragOver
+                    ? isDark
+                      ? '#a6e2f5'
+                      : '#1c1445'
+                    : isDark
+                    ? 'rgba(255,255,255,0.2)'
+                    : 'rgba(0,0,0,0.18)'
+                }`,
+                borderRadius: '12px',
+                p: 3,
+                textAlign: 'center',
+                cursor: 'pointer',
                 backgroundColor: dragOver ? 'rgba(166,226,245,0.06)' : 'rgba(28,20,69,0.04)',
-                '&:hover': { borderColor: (isDark ? '#a6e2f5' : '#1c1445') },
+                '&:hover': { borderColor: isDark ? '#a6e2f5' : '#1c1445' },
               }}
             >
-              <CloudUpload sx={{ fontSize: '2rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 0.5 }} />
-              <Typography variant="body2" sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600, fontSize: '0.85rem' }}>
+              <CloudUpload
+                sx={{ fontSize: '2rem', color: isDark ? '#d0caeb' : '#9e9e9e', mb: 0.5 }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 600, fontSize: '0.85rem' }}
+              >
                 Click or drag & drop profile photo
               </Typography>
             </Box>
           )}
         </Box>
 
-        <TextField label="Name *" name="name" value={formData.name} onChange={handleChange} {...textFieldProps} />
-        
+        <TextField
+          label="Name *"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+
+        {/* Primary Language Dropdown Selector */}
+        <FormControl fullWidth size="small">
+          <InputLabel id="reporter-language-select-label" sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>
+            {t?.language || 'Language *'}
+          </InputLabel>
+          <Select
+            labelId="reporter-language-select-label"
+            name="language"
+            value={formData.language}
+            label={t?.language || 'Language *'}
+            onChange={handleChange}
+            sx={{
+              color: isDark ? '#ffffff' : '#1c1445',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+              },
+              '& .MuiSvgIcon-root': {
+                color: isDark ? '#ffffff' : undefined,
+              },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: isDark ? '#1a1340' : '#ffffff',
+                  color: isDark ? '#ffffff' : '#1c1445',
+                },
+              },
+            }}
+          >
+            <MenuItem value="te">{t?.teluguOption || 'Telugu (te) - Default'}</MenuItem>
+            <MenuItem value="en">{t?.englishOption || 'English (en)'}</MenuItem>
+            <MenuItem value="ml">{t?.malayalamOption || 'Malayalam (ml)'}</MenuItem>
+          </Select>
+        </FormControl>
+
         <Box sx={{ display: 'flex', gap: 4, ml: 0, mt: 0.5 }}>
           <FormControlLabel
-            control={<Switch checked={formData.isActive} onChange={handleChange} name="isActive" color="primary" />}
-            label="Active" sx={{ color: isDark ? '#d0caeb' : '#5c548a', m: 0 }}
+            control={
+              <Switch
+                checked={formData.isActive}
+                onChange={handleChange}
+                name="isActive"
+                color="primary"
+              />
+            }
+            label="Active"
+            sx={{ color: isDark ? '#d0caeb' : '#5c548a', m: 0 }}
           />
           <FormControlLabel
-            control={<Switch checked={formData.isVerified} onChange={handleChange} name="isVerified" color="secondary" />}
-            label="Verified" sx={{ color: isDark ? '#d0caeb' : '#5c548a', m: 0 }}
+            control={
+              <Switch
+                checked={formData.isVerified}
+                onChange={handleChange}
+                name="isVerified"
+                color="secondary"
+              />
+            }
+            label="Verified"
+            sx={{ color: isDark ? '#d0caeb' : '#5c548a', m: 0 }}
           />
         </Box>
 
-        <TextField label="Bio *" name="bio" value={formData.bio} onChange={handleChange} multiline rows={2} {...textFieldProps} />
-        
+        <TextField
+          label="Bio *"
+          name="bio"
+          value={formData.bio}
+          onChange={handleChange}
+          multiline
+          rows={2}
+          {...textFieldProps}
+        />
+
         <Autocomplete
           multiple
           freeSolo
-          options={['English', 'Telugu', 'Hindi', 'Malayalam', 'Marathi', 'Tamil', 'Kannada', 'Bengali', 'Gujarati']}
+          options={[
+            'English',
+            'Telugu',
+            'Hindi',
+            'Malayalam',
+            'Marathi',
+            'Tamil',
+            'Kannada',
+            'Bengali',
+            'Gujarati',
+          ]}
           value={formData.languages}
-          onChange={(_, newValue) => setFormData(p => ({ ...p, languages: newValue }))}
+          onChange={(_, newValue) => setFormData((p) => ({ ...p, languages: newValue }))}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip key={key} variant="outlined" label={option} {...tagProps} size="small" sx={{ color: isDark ? '#ffffff' : '#1c1445', borderColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} />;
+              return (
+                <Chip
+                  key={key}
+                  variant="outlined"
+                  label={option}
+                  {...tagProps}
+                  size="small"
+                  sx={{
+                    color: isDark ? '#ffffff' : '#1c1445',
+                    borderColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                  }}
+                />
+              );
             })
           }
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Languages *"
+              label="Spoken Languages *"
               placeholder="Select or type..."
               {...textFieldProps}
             />
@@ -428,13 +599,36 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
         <Autocomplete
           multiple
           freeSolo
-          options={['Local News', 'Sports', 'Politics', 'Entertainment', 'Crime', 'Business', 'Technology', 'Health', 'Education', 'Weather']}
+          options={[
+            'Local News',
+            'Sports',
+            'Politics',
+            'Entertainment',
+            'Crime',
+            'Business',
+            'Technology',
+            'Health',
+            'Education',
+            'Weather',
+          ]}
           value={formData.specializations}
-          onChange={(_, newValue) => setFormData(p => ({ ...p, specializations: newValue }))}
+          onChange={(_, newValue) => setFormData((p) => ({ ...p, specializations: newValue }))}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return <Chip key={key} variant="outlined" label={option} {...tagProps} size="small" sx={{ color: isDark ? '#ffffff' : '#1c1445', borderColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} />;
+              return (
+                <Chip
+                  key={key}
+                  variant="outlined"
+                  label={option}
+                  {...tagProps}
+                  size="small"
+                  sx={{
+                    color: isDark ? '#ffffff' : '#1c1445',
+                    borderColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                  }}
+                />
+              );
             })
           }
           renderInput={(params) => (
@@ -447,140 +641,129 @@ export const ReporterDrawer: React.FC<ReporterDrawerProps> = ({
           )}
         />
 
-        <Typography variant="subtitle2" sx={{ mt: 2, color: isDark ? '#a6e2f5' : '#2563eb', fontWeight: 600 }}>
+        <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+        <Typography variant="subtitle2" sx={{ color: isDark ? '#a6e2f5' : '#2563eb', fontWeight: 700 }}>
+          Employment Information
+        </Typography>
+
+        <TextField
+          label="Designation"
+          name="emp_designation"
+          value={formData.emp_designation}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Bureau"
+          name="emp_bureau"
+          value={formData.emp_bureau}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Department"
+          name="emp_department"
+          value={formData.emp_department}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Role"
+          name="emp_role"
+          value={formData.emp_role}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Employment Type"
+          name="emp_type"
+          value={formData.emp_type}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Work Email"
+          name="emp_workEmail"
+          type="email"
+          value={formData.emp_workEmail}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="Work Phone"
+          name="emp_workPhone"
+          value={formData.emp_workPhone}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+
+        <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+        <Typography variant="subtitle2" sx={{ color: isDark ? '#a6e2f5' : '#2563eb', fontWeight: 700 }}>
           Media Channel Details
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Channel ID *" name="mc_id" value="BIGTV0001" disabled {...textFieldProps} />
-          <TextField label="Channel Name *" name="mc_name" value="BIGTV" disabled {...textFieldProps} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Type *" name="mc_type" value="News" disabled {...textFieldProps} />
-          <TextField label="Phone *" name="mc_phone" value={formData.mc_phone} onChange={handleChange} {...textFieldProps} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Logo URL *" name="mc_logoUrl" value="https://api.pravasamedia.com/api/v1/files/3a93fda3-a973-4b3b-a56a-3dc3829a6bc7" disabled {...textFieldProps} />
-          <TextField label="Website URL *" name="mc_websiteUrl" value={formData.mc_websiteUrl} onChange={handleChange} {...textFieldProps} />
-        </Box>
-        <TextField label="Email *" name="mc_email" value={formData.mc_email} onChange={handleChange} {...textFieldProps} />
-        
-        <Typography variant="subtitle2" sx={{ mt: 1, color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>Reporter Address</Typography>
-        <TextField label="Address Line 1 *" name="mc_addressLine1" value={formData.mc_addressLine1} onChange={handleChange} {...textFieldProps} />
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="City *" name="mc_city" value={formData.mc_city} onChange={handleChange} {...textFieldProps} />
-          <TextField label="District *" name="mc_district" value={formData.mc_district} onChange={handleChange} {...textFieldProps} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="State *" name="mc_state" value={formData.mc_state} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Country *" name="mc_country" value={formData.mc_country} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Postal Code *" name="mc_postalCode" value={formData.mc_postalCode} onChange={handleChange} {...textFieldProps} />
-        </Box>
+        <TextField
+          label="Channel Name"
+          name="mc_name"
+          value={formData.mc_name}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="City"
+          name="mc_city"
+          value={formData.mc_city}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="District"
+          name="mc_district"
+          value={formData.mc_district}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
+        <TextField
+          label="State"
+          name="mc_state"
+          value={formData.mc_state}
+          onChange={handleChange}
+          {...textFieldProps}
+        />
 
-        <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
-
-        <Typography variant="subtitle2" sx={{ mt: 2, color: isDark ? '#a6e2f5' : '#2563eb', fontWeight: 600 }}>
-          Employment Details
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Employee ID *" name="emp_employeeId" value="BIGTV0002" disabled {...textFieldProps} />
-          <Autocomplete
-            freeSolo
-            options={['Senior Reporter', 'Editor', 'MD', 'Digital Manager', 'Reporter', 'Anchor', 'Camera Operator', 'Producer']}
-            value={formData.emp_designation}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_designation: newValue || '' }))}
-            onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_designation: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Designation *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
+        <Box sx={{ display: 'flex', gap: 2, pt: 2, mt: 'auto' }}>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            disabled={loading}
+            fullWidth
+            sx={{
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              color: isDark ? '#d0caeb' : '#5c548a',
+              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            fullWidth
+            sx={{
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+              color: isDark ? '#1c1445' : '#ffffff',
+              '&:hover': { backgroundColor: isDark ? '#8cd5ed' : '#2d2270' },
+            }}
+          >
+            {loading ? <CircularProgress size={24} /> : isEditMode ? 'Update' : 'Create'}
+          </Button>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Autocomplete
-            freeSolo
-            options={['Full Time', 'Part Time', 'Hours Base', 'Documentary Base']}
-            value={formData.emp_type}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_type: newValue || '' }))}
-            onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_type: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Type *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
-          <Autocomplete
-            options={['Active', 'Inactive']}
-            value={formData.emp_status}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_status: newValue || '' }))}
-            renderInput={(params) => <TextField {...params} label="Status *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Autocomplete
-            freeSolo
-            options={['Trainee', 'Junior', 'Senior', 'Super', 'MD']}
-            value={formData.emp_role}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_role: newValue || '' }))}
-            onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_role: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Role *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
-          <Autocomplete
-            freeSolo
-            options={['IT', 'Account', 'Digital', 'App', 'Editorial', 'Production', 'Sales', 'HR']}
-            value={formData.emp_department}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_department: newValue || '' }))}
-            onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_department: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Department *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Autocomplete
-            freeSolo
-            options={['Mumbai Bureau', 'Delhi Bureau', 'Hyderabad Bureau', 'Bangalore Bureau', 'Chennai Bureau', 'Kolkata Bureau', 'Pune Bureau']}
-            value={formData.emp_bureau}
-            onChange={(_, newValue) => setFormData(p => ({ ...p, emp_bureau: newValue || '' }))}
-            onInputChange={(_, newInputValue) => setFormData(p => ({ ...p, emp_bureau: newInputValue }))}
-            renderInput={(params) => <TextField {...params} label="Bureau *" {...textFieldProps} />}
-            sx={{ flex: 1 }}
-          />
-          <TextField 
-            label="Joining Date *" 
-            name="emp_joiningDate" 
-            type="date"
-            value={formData.emp_joiningDate} 
-            onChange={handleChange} 
-            {...textFieldProps} 
-            InputLabelProps={{ ...textFieldProps.InputLabelProps, shrink: true }} 
-          />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Work Email *" name="emp_workEmail" value={formData.emp_workEmail} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Work Phone *" name="emp_workPhone" value={formData.emp_workPhone} onChange={handleChange} {...textFieldProps} />
-        </Box>
-
-        <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
-
-        <Typography variant="subtitle2" sx={{ mt: 2, color: isDark ? '#a6e2f5' : '#2563eb', fontWeight: 600 }}>
-          Social Media Profiles
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Instagram URL *" name="social_instagram" value={formData.social_instagram} onChange={handleChange} {...textFieldProps} />
-          <TextField label="Facebook URL *" name="social_facebook" value={formData.social_facebook} onChange={handleChange} {...textFieldProps} />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField label="Twitter (X) URL *" name="social_twitter" value={formData.social_twitter} onChange={handleChange} {...textFieldProps} />
-          <TextField label="YouTube URL *" name="social_youtube" value={formData.social_youtube} onChange={handleChange} {...textFieldProps} />
-        </Box>
-      </Box>
-
-      <Box sx={{ mt: 3, pt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2, borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)' }}>
-        <Button onClick={onClose} variant="outlined" sx={{ borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)', color: isDark ? '#d0caeb' : '#5c548a' }}>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={loading} sx={{ backgroundColor: isDark ? '#a6e2f5' : '#1c1445', color: isDark ? '#1c1445' : '#ffffff' }}>
-          {loading ? <CircularProgress size={24} /> : (isEditMode ? 'Update' : 'Save')}
-        </Button>
       </Box>
     </Drawer>
   );

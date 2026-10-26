@@ -1,53 +1,24 @@
-import { useState, useEffect, useMemo } from 'react';
-import { eventsApiClient } from '@/core/api/api-client';
+'use client';
 
-export interface Reporter {
-  id: string;
-  name: string;
-  profileImageUrl?: string;
-  bio?: string;
-  languages?: string[];
-  specializations?: string[];
-  isActive: boolean;
-  isVerified: boolean;
-  employment?: {
-    employeeId?: string;
-    type?: string;
-    status?: string;
-    designation?: string;
-    department?: string;
-    role?: string;
-    bureau?: string;
-    joiningDate?: string;
-    workEmail?: string;
-    workPhone?: string;
-  };
-  mediaChannel?: {
-    id?: string;
-    name?: string;
-    type?: string;
-    logoUrl?: string;
-    websiteUrl?: string;
-    email?: string;
-    phone?: string;
-    address?: {
-      addressLine1?: string;
-      city?: string;
-      district?: string;
-      state?: string;
-      country?: string;
-      postalCode?: string;
-    };
-  };
-  location?: {
-    city?: string;
-    state?: string;
-  };
-  createdAt?: string;
-}
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Reporter,
+  ReporterLanguage,
+  ReporterLanguageCode,
+  SegregatedReporters,
+} from '../domain/Reporter';
+import { reportersRepository } from '../repositories/reporters.repository';
+
+export type { Reporter, ReporterLanguage, ReporterLanguageCode, SegregatedReporters };
 
 export const useReporterController = () => {
+  const [selectedLanguage, setSelectedLanguage] = useState<ReporterLanguageCode>('te');
   const [data, setData] = useState<Reporter[]>([]);
+  const [segregatedData, setSegregatedData] = useState<SegregatedReporters>({
+    te: [],
+    en: [],
+    ml: [],
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,38 +26,57 @@ export const useReporterController = () => {
   const [filterName, setFilterName] = useState('');
   const recordsPerPage = 10;
 
-  const fetchReporters = async () => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedReporter, setSelectedReporter] = useState<Reporter | null>(null);
+
+  const fetchReporters = useCallback(async (lang: ReporterLanguageCode = selectedLanguage) => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await eventsApiClient.get<any>('/reporters');
-      let reportersArray: Reporter[] = [];
-      if (Array.isArray(response)) {
-        reportersArray = response;
-      } else if (response && typeof response === 'object' && Array.isArray(response.data)) {
-        reportersArray = response.data;
-      } else if (response && typeof response === 'object' && Array.isArray(response.items)) {
-        reportersArray = response.items;
-      } else {
-        console.warn('Unexpected response format from /reporters:', response);
-      }
-      setData(reportersArray);
+      const [fetchedList, segregated] = await Promise.all([
+        reportersRepository.getReporters(lang),
+        reportersRepository.getSegregatedReporters().catch(() => ({ te: [], en: [], ml: [] })),
+      ]);
+
+      setData(fetchedList || []);
+      setSegregatedData(segregated || { te: [], en: [], ml: [] });
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Failed to load reporters');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedLanguage]);
 
   useEffect(() => {
-    fetchReporters();
-  }, []);
+    fetchReporters(selectedLanguage);
+  }, [selectedLanguage, fetchReporters]);
+
+  const handleLanguageChange = (lang: ReporterLanguageCode) => {
+    setSelectedLanguage(lang);
+    setPage(1);
+  };
+
+  const languageCounts = useMemo(() => {
+    const teCount = segregatedData.te?.length || 0;
+    const enCount = segregatedData.en?.length || 0;
+    const mlCount = segregatedData.ml?.length || 0;
+    const allCount = teCount + enCount + mlCount;
+    return {
+      te: teCount,
+      en: enCount,
+      ml: mlCount,
+      all: allCount,
+    };
+  }, [segregatedData]);
 
   const filteredData = useMemo(() => {
     let result = Array.isArray(data) ? data : [];
     if (filterName) {
       const lowerFilter = filterName.toLowerCase();
-      result = result.filter(r => (r?.name || '').toLowerCase().includes(lowerFilter));
+      result = result.filter((r) => (r?.name || '').toLowerCase().includes(lowerFilter));
     }
     return result;
   }, [data, filterName]);
@@ -96,11 +86,6 @@ export const useReporterController = () => {
     const startIndex = (page - 1) * recordsPerPage;
     return filteredData.slice(startIndex, startIndex + recordsPerPage);
   }, [filteredData, page, recordsPerPage]);
-
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedReporter, setSelectedReporter] = useState<Reporter | null>(null);
 
   const handleClearFilters = () => {
     setFilterName('');
@@ -140,10 +125,9 @@ export const useReporterController = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this reporter?')) return;
     try {
-      await eventsApiClient.delete(`/reporters/${id}`);
-      fetchReporters();
+      await reportersRepository.deleteReporter(id);
+      fetchReporters(selectedLanguage);
     } catch (err: any) {
       console.error('Failed to delete:', err);
       alert(err.message || 'Failed to delete reporter');
@@ -152,8 +136,8 @@ export const useReporterController = () => {
 
   const handleStatusToggle = async (reporter: Reporter) => {
     try {
-      await eventsApiClient.patch(`/reporters/${reporter.id}`, { isActive: !reporter.isActive });
-      fetchReporters();
+      await reportersRepository.updateReporter(reporter.id, { isActive: !reporter.isActive });
+      fetchReporters(selectedLanguage);
     } catch (err: any) {
       console.error('Failed to update status:', err);
       alert(err.message || 'Failed to update status');
@@ -161,6 +145,9 @@ export const useReporterController = () => {
   };
 
   return {
+    selectedLanguage,
+    setSelectedLanguage: handleLanguageChange,
+    languageCounts,
     data,
     paginatedData,
     loading,
