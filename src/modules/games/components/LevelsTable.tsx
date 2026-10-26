@@ -13,9 +13,10 @@ import {
   IconButton,
   Button,
   Tooltip,
+  Avatar,
 } from '@mui/material';
 import { Visibility, Publish, Unpublished, Archive, PlayCircle } from '@mui/icons-material';
-import { LevelItem } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
 
 interface LevelsTableProps {
   data: LevelItem[];
@@ -147,7 +148,25 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
                     </Box>
                   </TableCell>
                   <TableCell sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 500 }}>
-                    {row.title || `Level ${row.levelNumber}`}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar
+                        src={row.iconUrl || DEFAULT_LEVEL_ICON_URL}
+                        variant="rounded"
+                        alt={row.title}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.1)',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                          objectFit: 'contain',
+                          flexShrink: 0,
+                        }}
+                      />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#1c1445' }}>
+                        {row.title || `Level ${row.levelNumber}`}
+                      </Typography>
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Chip

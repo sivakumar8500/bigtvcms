@@ -9,9 +9,10 @@ import {
   Box,
   Grid,
   Chip,
+  Avatar,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { LevelItem } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
 
 interface LevelViewDialogProps {
   open: boolean;
@@ -51,9 +52,23 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
           borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
         }}
       >
-        <Typography variant="h6" component="span" fontWeight="bold">
-          {level.title || `Level ${level.levelNumber}`} ({level.levelId})
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Avatar
+            src={level.iconUrl || DEFAULT_LEVEL_ICON_URL}
+            variant="rounded"
+            alt={level.title}
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: '8px',
+              border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.12)',
+              bgcolor: isDark ? 'rgba(0,0,0,0.3)' : '#f8fafc',
+            }}
+          />
+          <Typography variant="h6" component="span" fontWeight="bold">
+            {level.title || `Level ${level.levelNumber}`} ({level.levelId})
+          </Typography>
+        </Box>
         <Button onClick={onClose} sx={{ minWidth: 'auto', p: 1, color: colorText }}>
           <Close />
         </Button>

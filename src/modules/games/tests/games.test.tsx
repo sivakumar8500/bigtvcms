@@ -16,6 +16,14 @@ import { StreakActionDialog } from '../components/StreakActionDialog';
 import { LevelPlayModal } from '../components/LevelPlayModal';
 import { gamesTranslations } from '../pages/GamesPage';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
+import { DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
+import { UploadService } from '@/modules/media/services/upload.service';
+
+jest.mock('@/modules/media/services/upload.service', () => ({
+  UploadService: {
+    uploadImage: jest.fn().mockResolvedValue('https://api.pravasamedia.com/api/v1/files/custom-icon-uploaded.webp'),
+  },
+}));
 
 jest.mock('@/core/api/api-client', () => ({
   gamesApiClient: {
@@ -567,8 +575,58 @@ describe('Games Module - Comprehensive Test Suite', () => {
       // Submit
       fireEvent.click(screen.getByText(t.btnSave));
       await waitFor(() => {
+        expect(gamesApiClient.post).toHaveBeenCalledWith(
+          '/admin/games/sudoku/levels',
+          expect.objectContaining({
+            levelId: 'sudoku_100',
+            title: 'Special 100',
+            iconUrl: DEFAULT_LEVEL_ICON_URL,
+          })
+        );
         expect(onSuccess).toHaveBeenCalled();
       });
+    });
+
+    it('uploads custom level icon file and supports resetting to default', async () => {
+      const onClose = jest.fn();
+      const onSuccess = jest.fn();
+
+      render(
+        <LevelDrawer
+          open={true}
+          isEditMode={false}
+          gameId="sudoku"
+          selectedLevel={null}
+          onClose={onClose}
+          onSuccess={onSuccess}
+          isDark={false}
+          t={t}
+        />
+      );
+
+      // Verify default icon is initially set
+      const iconInput = screen.getByPlaceholderText(DEFAULT_LEVEL_ICON_URL) as HTMLInputElement;
+      expect(iconInput.value).toBe(DEFAULT_LEVEL_ICON_URL);
+
+      // Upload custom icon file
+      const fileInput = screen.getByTestId('level-icon-file-input') as HTMLInputElement;
+      const fakeFile = new File(['fake image data'], 'custom_icon.png', { type: 'image/png' });
+      await act(async () => {
+        fireEvent.change(fileInput, { target: { files: [fakeFile] } });
+      });
+
+      await waitFor(() => {
+        expect(UploadService.uploadImage).toHaveBeenCalledWith(fakeFile);
+      });
+
+      await waitFor(() => {
+        expect(iconInput.value).toBe('https://api.pravasamedia.com/api/v1/files/custom-icon-uploaded.webp');
+      });
+
+      // Reset to default
+      const resetBtn = screen.getByText(t.useDefaultIcon);
+      fireEvent.click(resetBtn);
+      expect(iconInput.value).toBe(DEFAULT_LEVEL_ICON_URL);
     });
   });
 
@@ -621,6 +679,7 @@ describe('Games Module - Comprehensive Test Suite', () => {
           difficulty: 'medium',
           count: 3,
           publish: true,
+          iconUrl: DEFAULT_LEVEL_ICON_URL,
         }));
         expect(onSuccess).toHaveBeenCalled();
       });

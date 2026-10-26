@@ -16,9 +16,11 @@ import {
   Switch,
   CircularProgress,
   Alert,
+  Avatar,
 } from '@mui/material';
-import { AutoAwesome, Close } from '@mui/icons-material';
+import { AutoAwesome, Close, Image as ImageIcon } from '@mui/icons-material';
 import { GamesRepository } from '../repositories/games.repository';
+import { DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
 
 interface GenerateLevelsModalProps {
   open: boolean;
@@ -53,6 +55,7 @@ export const GenerateLevelsModal: React.FC<GenerateLevelsModalProps> = ({
   const [count, setCount] = useState(3);
   const [publish, setPublish] = useState(true);
   const [checkpointCount, setCheckpointCount] = useState(isZip ? 4 : 5);
+  const [iconUrl, setIconUrl] = useState(DEFAULT_LEVEL_ICON_URL);
 
   useEffect(() => {
     if (open) {
@@ -65,6 +68,7 @@ export const GenerateLevelsModal: React.FC<GenerateLevelsModalProps> = ({
       setCheckpointCount(isZ ? 4 : 5);
       setCount(3);
       setDifficulty('medium');
+      setIconUrl(DEFAULT_LEVEL_ICON_URL);
     }
   }, [open, gameId, gameType]);
 
@@ -105,6 +109,7 @@ export const GenerateLevelsModal: React.FC<GenerateLevelsModalProps> = ({
         difficulty,
         count: numCount,
         publish,
+        iconUrl: iconUrl || DEFAULT_LEVEL_ICON_URL,
         ...(isZip && { checkpointCount: numCheckpoints }),
       });
       if (typeof window !== 'undefined' && typeof window.alert === 'function') {
@@ -248,6 +253,50 @@ export const GenerateLevelsModal: React.FC<GenerateLevelsModalProps> = ({
           label="Publish immediately upon generation"
           sx={{ color: colorLabel }}
         />
+
+        {/* Auto-Attached Level Icon Preview */}
+        <Box
+          sx={{
+            p: 1.5,
+            borderRadius: '10px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Avatar
+            src={iconUrl || DEFAULT_LEVEL_ICON_URL}
+            variant="rounded"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: '8px',
+              border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.15)',
+              bgcolor: isDark ? 'rgba(0,0,0,0.3)' : '#f8fafc',
+            }}
+          />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="caption" sx={{ color: colorLabel, fontWeight: 600, display: 'block' }}>
+              {t.levelIcon || 'Level Icon'} (Auto-Attached)
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: isDark ? '#4ade80' : '#16a34a',
+                fontFamily: 'monospace',
+                fontSize: '0.72rem',
+                display: 'block',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {iconUrl || DEFAULT_LEVEL_ICON_URL}
+            </Typography>
+          </Box>
+        </Box>
       </DialogContent>
 
       <DialogActions

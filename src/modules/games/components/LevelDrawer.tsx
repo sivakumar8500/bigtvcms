@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Drawer,
   Box,
@@ -13,11 +13,14 @@ import {
   FormControl,
   InputLabel,
   Alert,
+  Avatar,
+  Tooltip,
 } from '@mui/material';
-import { Close, CheckCircleOutline } from '@mui/icons-material';
-import { LevelItem } from '../dto/games.dto';
+import { Close, CheckCircleOutline, CloudUpload, Refresh, Image as ImageIcon } from '@mui/icons-material';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL } from '../dto/games.dto';
 import { GamesRepository } from '../repositories/games.repository';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
+import { UploadService } from '@/modules/media/services/upload.service';
 
 interface LevelDrawerProps {
   open: boolean;
@@ -42,6 +45,10 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
+  const [iconUploadError, setIconUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [validationResult, setValidationResult] = useState<{
     valid?: boolean;
     errors?: string[];
@@ -53,12 +60,14 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
     title: '',
     difficulty: 'medium',
     status: 'draft',
+    iconUrl: DEFAULT_LEVEL_ICON_URL,
     contentStr: '{\n  "grid": { "rows": 6, "columns": 6 },\n  "initialGrid": [],\n  "solution": []\n}',
   });
 
   useEffect(() => {
     if (open) {
       setValidationResult(null);
+      setIconUploadError(null);
       if (isEditMode && selectedLevel) {
         setFormData({
           levelId: selectedLevel.levelId || '',
@@ -66,6 +75,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           title: selectedLevel.title || '',
           difficulty: selectedLevel.difficulty || 'medium',
           status: selectedLevel.status || 'draft',
+          iconUrl: selectedLevel.iconUrl || DEFAULT_LEVEL_ICON_URL,
           contentStr: selectedLevel.content ? JSON.stringify(selectedLevel.content, null, 2) : '{}',
         });
       } else {
@@ -75,6 +85,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           title: '',
           difficulty: 'medium',
           status: 'draft',
+          iconUrl: DEFAULT_LEVEL_ICON_URL,
           contentStr: '{\n  "grid": { "rows": 6, "columns": 6 },\n  "initialGrid": [],\n  "solution": []\n}',
         });
       }
@@ -87,6 +98,29 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
       ...prev,
       [name]: name === 'levelNumber' ? Number(value) : value,
     }));
+  };
+
+  const handleIconFileSelect = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setIconUploadError('Please select a valid image file');
+      return;
+    }
+    setUploadingIcon(true);
+    setIconUploadError(null);
+    try {
+      const url = await UploadService.uploadImage(file);
+      setFormData((prev) => ({ ...prev, iconUrl: url }));
+    } catch (err: any) {
+      console.error('Failed to upload level icon:', err);
+      setIconUploadError(err.message || 'Failed to upload icon to S3');
+    } finally {
+      setUploadingIcon(false);
+    }
+  };
+
+  const handleResetToDefaultIcon = () => {
+    setFormData((prev) => ({ ...prev, iconUrl: DEFAULT_LEVEL_ICON_URL }));
+    setIconUploadError(null);
   };
 
   const handleValidateContent = async () => {
@@ -138,12 +172,14 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
 
     setLoading(true);
     try {
+      const payloadIconUrl = formData.iconUrl?.trim() || DEFAULT_LEVEL_ICON_URL;
       if (isEditMode && selectedLevel) {
         await GamesRepository.updateLevel(gameId, selectedLevel.levelId || selectedLevel.id, {
           title: formData.title || `Level ${formData.levelNumber}`,
           difficulty: formData.difficulty,
           levelNumber: Number(formData.levelNumber),
           status: formData.status,
+          iconUrl: payloadIconUrl,
           content: parsedContent,
         });
       } else {
@@ -153,6 +189,7 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           title: formData.title.trim() || `Level ${formData.levelNumber}`,
           difficulty: formData.difficulty,
           status: formData.status,
+          iconUrl: payloadIconUrl,
           content: parsedContent,
         });
       }
@@ -279,6 +316,115 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
               <MenuItem value="archived">Archived</MenuItem>
             </Select>
           </FormControl>
+        </Box>
+
+        {/* Level Icon Upload & Attach */}
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: '12px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: isDark ? '#d0caeb' : '#5c548a',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <ImageIcon sx={{ fontSize: '1.2rem', color: isDark ? '#a6e2f5' : '#2563eb' }} />
+              {t.levelIcon || 'Level Icon'}
+            </Typography>
+            <Button
+              size="small"
+              variant="text"
+              onClick={handleResetToDefaultIcon}
+              startIcon={<Refresh sx={{ fontSize: '0.9rem' }} />}
+              sx={{
+                textTransform: 'none',
+                fontSize: '0.75rem',
+                color: isDark ? '#a6e2f5' : '#2563eb',
+              }}
+            >
+              {t.useDefaultIcon || 'Use Default Icon'}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1.5 }}>
+            <Avatar
+              src={formData.iconUrl || DEFAULT_LEVEL_ICON_URL}
+              variant="rounded"
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: '10px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.15)',
+                bgcolor: isDark ? 'rgba(0,0,0,0.3)' : '#f8fafc',
+                objectFit: 'contain',
+              }}
+            />
+
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <input
+                ref={fileInputRef}
+                data-testid="level-icon-file-input"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleIconFileSelect(f);
+                  e.target.value = '';
+                }}
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingIcon}
+                startIcon={uploadingIcon ? <CircularProgress size={16} /> : <CloudUpload />}
+                sx={{
+                  alignSelf: 'flex-start',
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  borderColor: isDark ? '#a6e2f5' : '#2563eb',
+                  color: isDark ? '#a6e2f5' : '#2563eb',
+                }}
+              >
+                {uploadingIcon ? (t.uploadingIcon || 'Uploading...') : (t.uploadIcon || 'Upload Icon')}
+              </Button>
+            </Box>
+          </Box>
+
+          <TextField
+            {...textFieldProps}
+            label={t.iconUrlPlaceholder || 'Icon URL'}
+            name="iconUrl"
+            value={formData.iconUrl}
+            onChange={handleChange}
+            placeholder={DEFAULT_LEVEL_ICON_URL}
+            helperText={formData.iconUrl === DEFAULT_LEVEL_ICON_URL ? 'Default BigTV puzzle icon is attached' : undefined}
+            sx={{
+              ...textFieldProps.sx,
+              '& .MuiFormHelperText-root': {
+                color: isDark ? '#4ade80' : '#16a34a',
+                fontSize: '0.72rem',
+              },
+            }}
+          />
+
+          {iconUploadError && (
+            <Alert severity="error" sx={{ mt: 1, borderRadius: '8px', fontSize: '0.78rem' }}>
+              {iconUploadError}
+            </Alert>
+          )}
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

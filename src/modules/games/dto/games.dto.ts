@@ -54,6 +54,9 @@ export interface LevelEngagementStats {
   failureRate?: number;
 }
 
+export const DEFAULT_LEVEL_ICON_URL =
+  'https://api.pravasamedia.com/api/v1/files/6b77d169-78ef-4c57-98ce-73b7a4ce6740';
+
 export interface LevelItem {
   id: string;
   gameId: string;
@@ -63,6 +66,7 @@ export interface LevelItem {
   title: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'expert' | string;
   status: 'draft' | 'published' | 'archived' | string;
+  iconUrl?: string | null;
   sortOrder?: number;
   content: Record<string, unknown>;
   publishedAt?: string | null;
@@ -91,6 +95,7 @@ export interface GenerateLevelsDto {
   count?: number;
   publish?: boolean;
   checkpointCount?: number;
+  iconUrl?: string;
 }
 
 export interface CreateLevelDto {
@@ -99,6 +104,7 @@ export interface CreateLevelDto {
   title: string;
   difficulty: string;
   status: string;
+  iconUrl?: string;
   content: Record<string, unknown>;
 }
 
@@ -107,6 +113,7 @@ export interface UpdateLevelDto {
   difficulty?: string;
   levelNumber?: number;
   status?: string;
+  iconUrl?: string;
   content?: Record<string, unknown>;
 }
 
