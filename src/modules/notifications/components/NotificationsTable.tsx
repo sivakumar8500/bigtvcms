@@ -101,6 +101,55 @@ export const NotificationsTable: React.FC<NotificationsTableProps> = ({
     );
   };
 
+  const getLanguageBadge = (lan?: string) => {
+    const l = (lan || 'te').toLowerCase();
+    const config: Record<string, { label: string; bg: string; color: string; border: string }> = {
+      te: {
+        label: 'TE',
+        bg: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+        color: '#3b82f6',
+        border: 'rgba(59, 130, 246, 0.3)',
+      },
+      en: {
+        label: 'EN',
+        bg: isDark ? 'rgba(168, 85, 247, 0.15)' : 'rgba(168, 85, 247, 0.1)',
+        color: '#a855f7',
+        border: 'rgba(168, 85, 247, 0.3)',
+      },
+      ml: {
+        label: 'ML',
+        bg: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)',
+        color: '#10b981',
+        border: 'rgba(16, 185, 129, 0.3)',
+      },
+    };
+    const c = config[l] || {
+      label: l.toUpperCase(),
+      bg: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+      color: isDark ? '#ffffff' : '#1c1445',
+      border: 'rgba(255, 255, 255, 0.2)',
+    };
+    return (
+      <Box
+        sx={{
+          display: 'inline-block',
+          px: 1,
+          py: 0.3,
+          borderRadius: '6px',
+          backgroundColor: c.bg,
+          border: `1px solid ${c.border}`,
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ color: c.color, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.72rem' }}
+        >
+          {c.label}
+        </Typography>
+      </Box>
+    );
+  };
+
   const formatDateStr = (dateStr?: string | null) => {
     if (!dateStr) return { date: '—', time: '' };
     try {
@@ -141,12 +190,13 @@ export const NotificationsTable: React.FC<NotificationsTableProps> = ({
         }}
       >
         <Box sx={{ flex: '0 0 36px', px: 0.5 }}>#</Box>
-        <Box sx={{ flex: '0 0 64px', px: 1 }}>{t.colImage}</Box>
-        <Box sx={{ flex: '3 1 0', px: 1 }}>{t.colDetails}</Box>
-        <Box sx={{ flex: '1.8 1 0', px: 1 }}>{t.colPostId}</Box>
-        <Box sx={{ flex: '1.3 1 0', px: 1 }}>{t.colStatus}</Box>
-        <Box sx={{ flex: '1.6 1 0', px: 1 }}>{t.colDelivery}</Box>
-        <Box sx={{ flex: '1.5 1 0', px: 1 }}>{t.colTimestamps}</Box>
+        <Box sx={{ flex: '0 0 52px', px: 0.5 }}>{t.colLanguage || 'Lang'}</Box>
+        <Box sx={{ flex: '0 0 60px', px: 0.5 }}>{t.colImage}</Box>
+        <Box sx={{ flex: '2.8 1 0', px: 1 }}>{t.colDetails}</Box>
+        <Box sx={{ flex: '1.6 1 0', px: 1 }}>{t.colPostId}</Box>
+        <Box sx={{ flex: '1.2 1 0', px: 1 }}>{t.colStatus}</Box>
+        <Box sx={{ flex: '1.5 1 0', px: 1 }}>{t.colDelivery}</Box>
+        <Box sx={{ flex: '1.4 1 0', px: 1 }}>{t.colTimestamps}</Box>
         <Box sx={{ flex: '0.8 1 0', px: 1, textAlign: 'right' }}>Actions</Box>
       </Box>
 
@@ -197,8 +247,13 @@ export const NotificationsTable: React.FC<NotificationsTableProps> = ({
                 </Box>
               </Box>
 
+              {/* Language Badge */}
+              <Box sx={{ flex: '0 0 52px', px: 0.5 }}>
+                {getLanguageBadge(row.lan || row.language)}
+              </Box>
+
               {/* Banner Image */}
-              <Box sx={{ flex: '0 0 64px', px: 1 }}>
+              <Box sx={{ flex: '0 0 60px', px: 0.5 }}>
                 <Box
                   component="img"
                   src={row.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=400'}

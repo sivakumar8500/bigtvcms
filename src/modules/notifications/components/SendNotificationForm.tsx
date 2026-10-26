@@ -38,7 +38,7 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
   const [imageUrl, setImageUrl] = useState<string>('');
   const [brandName, setBrandName] = useState<string>('BigTV');
   const [brandLogo, setBrandLogo] = useState<string>('www.logo.com');
-  const [lan, setLan] = useState<string>('en');
+  const [lan, setLan] = useState<string>('te');
   const [sendTime, setSendTime] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -102,6 +102,7 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
       brandName: brandName.trim() || 'BigTV',
       brandLogo: brandLogo.trim() || 'www.logo.com',
       lan,
+      language: lan,
     };
 
     if (sendTime) {
@@ -116,7 +117,7 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
       setPostId('');
       setLink('');
       setImageUrl('');
-      setLan('en');
+      setLan('te');
       setSendTime('');
       onSuccess();
       onClose();
@@ -336,10 +337,9 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
                 label={t.lblLanguage || 'Language'}
                 onChange={(e) => setLan(e.target.value)}
               >
-                <MenuItem value="en">English (en)</MenuItem>
-                <MenuItem value="te">Telugu (te)</MenuItem>
-                <MenuItem value="hi">Hindi (hi)</MenuItem>
-                <MenuItem value="ml">Malayalam (ml)</MenuItem>
+                <MenuItem value="te">{t.langTelugu || 'Telugu (te)'}</MenuItem>
+                <MenuItem value="en">{t.langEnglish || 'English (en)'}</MenuItem>
+                <MenuItem value="ml">{t.langMalayalam || 'Malayalam (ml)'}</MenuItem>
               </Select>
             </FormControl>
           </Grid>

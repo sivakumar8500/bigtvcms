@@ -7,6 +7,8 @@ export interface NotificationRecord {
   imageUrl: string;
   brandName: string | null;
   brandLogo: string | null;
+  lan?: string;
+  language?: string;
   status: 'COMPLETED' | 'PENDING' | 'FAILED' | string;
   totalTargeted: number;
   successCount: number;

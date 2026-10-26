@@ -4,6 +4,8 @@ import {
   SendNotificationResponse,
   GetNotificationsResponse,
   NotificationItem,
+  NotificationLanguage,
+  SegregatedNotificationsResponse,
 } from '../dto/notification.dto';
 
 export class NotificationRepository {
@@ -16,7 +18,12 @@ export class NotificationRepository {
     'https://api.pravasamedia.com/api/v1/sendNotification/stats';
 
   static async sendNotification(payload: SendNotificationDto): Promise<SendNotificationResponse> {
-    const response = await axios.post<SendNotificationResponse>(this.NOTIFICATION_API_URL, payload, {
+    const normalizedPayload = {
+      ...payload,
+      language: payload.language || payload.lan || 'te',
+      lan: payload.lan || payload.language || 'te',
+    };
+    const response = await axios.post<SendNotificationResponse>(this.NOTIFICATION_API_URL, normalizedPayload, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -26,10 +33,25 @@ export class NotificationRepository {
 
   static async getNotifications(
     skip: number = 0,
-    take: number = 20
+    take: number = 20,
+    language: NotificationLanguage = 'te',
+    search?: string,
+    postId?: number
   ): Promise<GetNotificationsResponse> {
-    const response = await axios.get<any>(this.NOTIFICATION_STATS_API_URL, {
-      params: { skip, take },
+    const params: Record<string, any> = { skip, take };
+    if (language) {
+      params.language = language;
+      params.lan = language;
+    }
+    if (search && search.trim()) {
+      params.search = search.trim();
+    }
+    if (postId !== undefined && postId !== null) {
+      params.post_id = postId;
+    }
+
+    const response = await axios.get<any>(this.NOTIFICATION_API_URL, {
+      params,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -54,12 +76,12 @@ export class NotificationRepository {
           items = notificationsObj.items.map(NotificationRepository.mapRawNotificationItem);
           total = typeof notificationsObj.total === 'number' ? notificationsObj.total : items.length;
         }
-      } else if (Array.isArray(raw.data)) {
-        items = raw.data.map(NotificationRepository.mapRawNotificationItem);
-        total = raw.data.length;
       } else if (Array.isArray(raw.data.items)) {
         items = raw.data.items.map(NotificationRepository.mapRawNotificationItem);
         total = typeof raw.data.total === 'number' ? raw.data.total : items.length;
+      } else if (Array.isArray(raw.data)) {
+        items = raw.data.map(NotificationRepository.mapRawNotificationItem);
+        total = raw.data.length;
       } else if (raw.data.id) {
         items = [NotificationRepository.mapRawNotificationItem(raw.data)];
         total = 1;
@@ -81,6 +103,18 @@ export class NotificationRepository {
     };
   }
 
+  static async getSegregatedNotifications(
+    take: number = 20
+  ): Promise<SegregatedNotificationsResponse> {
+    const response = await axios.get<any>(`${this.NOTIFICATION_API_URL}/segregated`, {
+      params: { take },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  }
+
   private static mapRawNotificationItem(item: any): NotificationItem {
     return {
       id: item.id || '',
@@ -91,10 +125,13 @@ export class NotificationRepository {
       imageUrl: item.imageUrl || item.image_url || '',
       brandName: item.brandName || item.brand_name || null,
       brandLogo: item.brandLogo || item.brand_logo || null,
+      lan: item.lan || item.language || 'te',
+      language: item.language || item.lan || 'te',
       status: item.status || 'PENDING',
       totalTargeted: item.totalTargeted !== undefined ? item.totalTargeted : (item.totalTargetedUsers || 0),
       successCount: item.successCount !== undefined ? item.successCount : (item.receivedUsersCount || 0),
       failureCount: item.failureCount !== undefined ? item.failureCount : (item.droppedUsersCount || 0),
+      statusMessage: item.statusMessage || null,
       sentAt: item.sentAt || null,
       createdAt: item.createdAt || '',
       updatedAt: item.updatedAt || item.createdAt || '',

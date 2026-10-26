@@ -13,7 +13,7 @@ describe('useNotificationsController', () => {
     jest.clearAllMocks();
   });
 
-  it('fetches notifications successfully', async () => {
+  it('fetches notifications successfully with default language te', async () => {
     const mockData = {
       success: true,
       data: {
@@ -31,6 +31,7 @@ describe('useNotificationsController', () => {
             totalTargeted: 10,
             successCount: 8,
             failureCount: 2,
+            lan: 'te',
             createdAt: '2026-08-07T10:00:00.000Z',
             updatedAt: '2026-08-07T10:00:00.000Z',
           },
@@ -50,9 +51,35 @@ describe('useNotificationsController', () => {
       expect(result.current.loading).toBe(false);
     });
 
+    expect(NotificationRepository.getNotifications).toHaveBeenCalledWith(0, 20, 'te', undefined);
+    expect(result.current.selectedLanguage).toBe('te');
     expect(result.current.notifications).toEqual(mockData.data.items);
     expect(result.current.total).toBe(1);
     expect(result.current.error).toBeNull();
+  });
+
+  it('handles language switching and resets skip to 0', async () => {
+    (NotificationRepository.getNotifications as jest.Mock).mockResolvedValue({
+      success: true,
+      data: { items: [], total: 0, skip: 0, take: 20 },
+    });
+
+    const { result } = renderHook(() => useNotificationsController(10, 20, 'te'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    act(() => {
+      result.current.handleLanguageChange('en');
+    });
+
+    expect(result.current.selectedLanguage).toBe('en');
+    expect(result.current.skip).toBe(0);
+
+    await waitFor(() => {
+      expect(NotificationRepository.getNotifications).toHaveBeenCalledWith(0, 20, 'en', undefined);
+    });
   });
 
   it('handles fetch notifications error', async () => {

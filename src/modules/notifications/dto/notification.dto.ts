@@ -1,12 +1,15 @@
+export type NotificationLanguage = 'te' | 'en' | 'ml' | 'all';
+
 export interface SendNotificationDto {
   title: string;
   content: string;
   post_id: number;
   link: string;
   image_url: string;
-  brandName: string;
-  brandLogo: string;
-  lan: string;
+  brandName?: string;
+  brandLogo?: string;
+  lan?: string;
+  language?: string;
   send_time?: string;
 }
 
@@ -25,6 +28,8 @@ export interface NotificationItem {
   imageUrl: string;
   brandName: string | null;
   brandLogo: string | null;
+  lan?: string;
+  language?: string;
   status: string;
   totalTargeted: number;
   successCount: number;
@@ -42,6 +47,16 @@ export interface GetNotificationsResponse {
     total: number;
     skip: number;
     take: number;
+  };
+  timestamp: string;
+}
+
+export interface SegregatedNotificationsResponse {
+  success: boolean;
+  data: {
+    te: { items: NotificationItem[]; total: number };
+    en: { items: NotificationItem[]; total: number };
+    ml: { items: NotificationItem[]; total: number };
   };
   timestamp: string;
 }

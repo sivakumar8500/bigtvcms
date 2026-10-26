@@ -108,7 +108,8 @@ export class ApiClient {
               config.url?.includes('/states') ||
               config.url?.includes('/locations') ||
               config.url?.includes('/admin') ||
-              config.url?.includes('/games');
+              config.url?.includes('/games') ||
+              config.url?.includes('/sendNotification');
 
             const isCreateOrUpdateMethod =
               config.method?.toLowerCase() === 'post' ||
@@ -143,7 +144,7 @@ export class ApiClient {
           }
 
           try {
-            // Bypass language filter for /events, /ticket-types, /coupons, /categories, /post-types, /languages, /admin, /games, /admin/states, /states, /locations, and /creators endpoints
+            // Bypass language filter for /events, /ticket-types, /coupons, /categories, /post-types, /languages, /admin, /games, /admin/states, /states, /locations, /creators, and /sendNotification endpoints
             const isBypassLangApi =
               config.url?.includes('/events') ||
               config.url?.includes('/ticket-types') ||
@@ -156,6 +157,7 @@ export class ApiClient {
               config.url?.includes('/creators') ||
               config.url?.includes('/video-tags') ||
               config.url?.includes('/reporters') ||
+              config.url?.includes('/sendNotification') ||
               config.url?.includes('/admin') ||
               config.url?.includes('/games') ||
               config.url?.includes('/streak-recovery-requests') ||
@@ -163,7 +165,9 @@ export class ApiClient {
 
             if (isBypassLangApi) {
               const isPreserveLangApi =
-                config.url?.includes('/video-tags') || config.url?.includes('/reporters');
+                config.url?.includes('/video-tags') ||
+                config.url?.includes('/reporters') ||
+                config.url?.includes('/sendNotification');
               if (config.headers) {
                 delete config.headers['Accept-Language'];
                 delete config.headers['accept-language'];
@@ -181,9 +185,12 @@ export class ApiClient {
               if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
                 if (!isPreserveLangApi) {
                   delete (config.data as any).language;
+                  delete (config.data as any).lan;
                 }
                 delete (config.data as any).language_code;
-                delete (config.data as any).lang;
+                if (!isPreserveLangApi) {
+                  delete (config.data as any).lang;
+                }
               }
             } else {
               // Determine active language from params or localStorage

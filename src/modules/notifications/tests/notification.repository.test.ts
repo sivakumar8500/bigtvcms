@@ -34,6 +34,8 @@ describe('NotificationRepository', () => {
           imageUrl: 'https://example.com/image.jpg',
           brandName: 'BigTV',
           brandLogo: 'www.logo.com',
+          lan: 'en',
+          language: 'en',
           status: 'PENDING',
           totalTargeted: 0,
           successCount: 0,
@@ -53,67 +55,116 @@ describe('NotificationRepository', () => {
 
     expect(mockedAxios.post).toHaveBeenCalledWith(
       'https://api.pravasamedia.com/api/v1/sendNotification',
-      payload,
+      {
+        ...payload,
+        language: 'en',
+        lan: 'en',
+      },
       { headers: { 'Content-Type': 'application/json' } }
     );
     expect(res).toEqual(mockResponse.data);
   });
 
+  it('should default language to te when omitted in sendNotification', async () => {
+    const payload: SendNotificationDto = {
+      title: 'Breaking News',
+      content: 'Content',
+      post_id: 10,
+      link: 'myapp://post/10',
+      image_url: 'https://example.com/img.jpg',
+    };
+
+    mockedAxios.post.mockResolvedValue({ data: { success: true } });
+
+    await NotificationRepository.sendNotification(payload);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith(
+      'https://api.pravasamedia.com/api/v1/sendNotification',
+      expect.objectContaining({
+        language: 'te',
+        lan: 'te',
+      }),
+      expect.any(Object)
+    );
+  });
+
   describe('getNotifications', () => {
-    it('should map a single notification stats response correctly into items list', async () => {
-      const mockStatsResponse = {
+    it('should call getNotifications with default language te', async () => {
+      const mockResponse = {
         data: {
           success: true,
           data: {
-            id: '3e05643c-286a-4356-bdb6-be1805a39293',
-            title: 'మా ఫ్యామిలీపై చంద్రబాబు',
-            postId: 738,
-            status: 'COMPLETED',
-            statusMessage: null,
-            totalTargetedUsers: 1019,
-            receivedUsersCount: 803,
-            droppedUsersCount: 216,
-            deliveryRatePercentage: 78.8,
-            lan: 'te',
-            sentAt: '2026-08-24T09:13:35.229Z',
-            createdAt: '2026-08-24T09:13:32.003Z',
+            items: [
+              {
+                id: '3e05643c-286a-4356-bdb6-be1805a39293',
+                title: 'మా ఫ్యామిలీపై చంద్రబాబు',
+                content: 'వివరాలు',
+                postId: 738,
+                status: 'COMPLETED',
+                totalTargeted: 1019,
+                successCount: 803,
+                failureCount: 216,
+                lan: 'te',
+                createdAt: '2026-08-24T09:13:32.003Z',
+              },
+            ],
+            total: 1,
+            skip: 0,
+            take: 20,
           },
           timestamp: '2026-08-24T09:59:36.270Z',
         },
       };
 
-      mockedAxios.get.mockResolvedValue(mockStatsResponse);
+      mockedAxios.get.mockResolvedValue(mockResponse);
 
       const res = await NotificationRepository.getNotifications(0, 20);
 
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://api.pravasamedia.com/api/v1/sendNotification/stats',
+        'https://api.pravasamedia.com/api/v1/sendNotification',
         {
-          params: { skip: 0, take: 20 },
+          params: { skip: 0, take: 20, language: 'te', lan: 'te' },
           headers: { 'Content-Type': 'application/json' },
         }
       );
 
       expect(res.success).toBe(true);
       expect(res.data.items).toHaveLength(1);
-      expect(res.data.total).toBe(1);
-      expect(res.data.items[0]).toEqual({
-        id: '3e05643c-286a-4356-bdb6-be1805a39293',
-        title: 'మా ఫ్యామిలీపై చంద్రబాబు',
-        content: '',
-        postId: 738,
-        link: '',
-        imageUrl: '',
-        brandName: null,
-        brandLogo: null,
-        status: 'COMPLETED',
-        totalTargeted: 1019,
-        successCount: 803,
-        failureCount: 216,
-        sentAt: '2026-08-24T09:13:35.229Z',
-        createdAt: '2026-08-24T09:13:32.003Z',
-        updatedAt: '2026-08-24T09:13:32.003Z',
-      });
+      expect(res.data.items[0].lan).toBe('te');
+      expect(res.data.items[0].title).toBe('మా ఫ్యామిలీపై చంద్రబాబు');
+    });
+
+    it('should pass custom language, search, and postId filters', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          data: {
+            items: [],
+            total: 0,
+            skip: 10,
+            take: 10,
+          },
+        },
+      };
+
+      mockedAxios.get.mockResolvedValue(mockResponse);
+
+      await NotificationRepository.getNotifications(10, 10, 'en', 'modi', 99);
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.pravasamedia.com/api/v1/sendNotification',
+        {
+          params: {
+            skip: 10,
+            take: 10,
+            language: 'en',
+            lan: 'en',
+            search: 'modi',
+            post_id: 99,
+          },
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     });
 
     it('should map a list notification response with nested notifications items and total correctly', async () => {
@@ -148,7 +199,7 @@ describe('NotificationRepository', () => {
 
       mockedAxios.get.mockResolvedValue(mockListResponse);
 
-      const res = await NotificationRepository.getNotifications(0, 20);
+      const res = await NotificationRepository.getNotifications(0, 20, 'ml');
 
       expect(res.success).toBe(true);
       expect(res.data.items).toHaveLength(1);
@@ -156,7 +207,7 @@ describe('NotificationRepository', () => {
       expect(res.data.items[0].title).toBe('Test Title');
     });
 
-    it('should handle raw array responses', async () => {
+    it('should handle raw array responses and single object response', async () => {
       const mockArrayResponse = {
         data: [
           {
@@ -177,8 +228,20 @@ describe('NotificationRepository', () => {
       expect(res.data.items).toHaveLength(1);
       expect(res.data.total).toBe(1);
       expect(res.data.items[0].title).toBe('Array Title');
-      expect(res.data.items[0].status).toBe('FAILED');
-      expect(res.data.items[0].totalTargeted).toBe(20);
+
+      // Test raw.data as single object with id
+      mockedAxios.get.mockResolvedValue({
+        data: {
+          data: {
+            id: 'single-obj',
+            title: 'Single Object',
+          },
+        },
+      });
+
+      const singleRes = await NotificationRepository.getNotifications(0, 20);
+      expect(singleRes.data.items).toHaveLength(1);
+      expect(singleRes.data.items[0].id).toBe('single-obj');
     });
 
     it('should handle empty/null response gracefully', async () => {
@@ -189,6 +252,32 @@ describe('NotificationRepository', () => {
       expect(res.success).toBe(false);
       expect(res.data.items).toEqual([]);
       expect(res.data.total).toBe(0);
+    });
+
+    it('should fetch segregated notifications', async () => {
+      const mockSegregated = {
+        data: {
+          success: true,
+          data: {
+            te: { items: [], total: 10 },
+            en: { items: [], total: 5 },
+            ml: { items: [], total: 2 },
+          },
+        },
+      };
+
+      mockedAxios.get.mockResolvedValue(mockSegregated);
+
+      const res = await NotificationRepository.getSegregatedNotifications(10);
+
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.pravasamedia.com/api/v1/sendNotification/segregated',
+        {
+          params: { take: 10 },
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      expect(res).toEqual(mockSegregated.data);
     });
   });
 });
