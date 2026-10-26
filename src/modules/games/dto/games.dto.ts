@@ -44,6 +44,16 @@ export interface GameListResponse {
   total?: number;
 }
 
+export interface LevelEngagementStats {
+  membersPlayed: number;
+  completed: number;
+  failed: number;
+  notCompleted: number;
+  totalAttempts?: number;
+  completionRate?: number;
+  failureRate?: number;
+}
+
 export interface LevelItem {
   id: string;
   gameId: string;
@@ -59,6 +69,7 @@ export interface LevelItem {
   puzzleDate?: string | null;
   assignedDate?: string | null;
   isToday?: boolean;
+  stats?: LevelEngagementStats;
   createdAt?: string;
   updatedAt?: string;
 }

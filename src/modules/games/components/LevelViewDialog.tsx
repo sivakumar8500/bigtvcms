@@ -120,6 +120,69 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
           </Grid>
         </Grid>
 
+        {/* Engagement & Dropout Statistics */}
+        <Box
+          sx={{
+            mb: 3,
+            p: 2,
+            borderRadius: '12px',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ color: colorLabel, mb: 1.5, fontWeight: 700 }}>
+            {t?.engagementStats || 'Player Engagement & Dropout Stats'}
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="caption" sx={{ color: colorLabel }}>
+                {t?.colPlayed || 'Played'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: isDark ? '#93c5fd' : '#1d4ed8', fontWeight: 700, mt: 0.5 }}>
+                {level.stats?.membersPlayed ?? 0}
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="caption" sx={{ color: colorLabel }}>
+                {t?.colCompleted || 'Completed'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: isDark ? '#4ade80' : '#16a34a', fontWeight: 700, mt: 0.5 }}>
+                {level.stats?.completed ?? 0}
+                <Typography component="span" variant="caption" sx={{ ml: 0.5, color: isDark ? '#86efac' : '#15803d' }}>
+                  ({level.stats?.completionRate ?? 0}%)
+                </Typography>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="caption" sx={{ color: colorLabel }}>
+                {t?.colDropped || 'Middle Drop'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: isDark ? '#fbbf24' : '#b45309', fontWeight: 700, mt: 0.5 }}>
+                {level.stats?.notCompleted ?? 0}
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="caption" sx={{ color: colorLabel }}>
+                {t?.colFailed || 'Failed'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: isDark ? '#f87171' : '#dc2626', fontWeight: 700, mt: 0.5 }}>
+                {level.stats?.failed ?? 0}
+                <Typography component="span" variant="caption" sx={{ ml: 0.5, color: isDark ? '#fca5a5' : '#b91c1c' }}>
+                  ({level.stats?.failureRate ?? 0}%)
+                </Typography>
+              </Typography>
+            </Grid>
+            <Grid item xs={6} sm={2.4}>
+              <Typography variant="caption" sx={{ color: colorLabel }}>
+                {t?.totalAttempts || 'Total Attempts'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: colorText, fontWeight: 700, mt: 0.5 }}>
+                {level.stats?.totalAttempts ?? 0}
+              </Typography>
+            </Grid>
+          </Grid>
+        </Box>
+
         <Typography variant="subtitle2" sx={{ color: colorLabel, mb: 1, fontWeight: 600 }}>
           Level Content & Solutions (JSON)
         </Typography>

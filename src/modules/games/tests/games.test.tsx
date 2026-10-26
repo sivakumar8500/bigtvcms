@@ -70,6 +70,15 @@ const mockLevelsData = [
     content: { grid: { rows: 6, columns: 6 } },
     publishedAt: '2026-10-22T10:30:00Z',
     createdAt: '2026-10-22T10:00:00Z',
+    stats: {
+      membersPlayed: 142,
+      completed: 110,
+      failed: 12,
+      notCompleted: 20,
+      totalAttempts: 160,
+      completionRate: 77,
+      failureRate: 8,
+    },
   },
   {
     id: 'lvl_2',
@@ -82,6 +91,15 @@ const mockLevelsData = [
     content: { grid: { rows: 9, columns: 9 } },
     publishedAt: null,
     createdAt: '2026-10-22T11:00:00Z',
+    stats: {
+      membersPlayed: 0,
+      completed: 0,
+      failed: 0,
+      notCompleted: 0,
+      totalAttempts: 0,
+      completionRate: 0,
+      failureRate: 0,
+    },
   },
 ];
 
@@ -402,10 +420,42 @@ describe('Games Module - Comprehensive Test Suite', () => {
       expect(screen.getByText('Published At')).toBeInTheDocument();
       expect(screen.getByText('Not Published')).toBeInTheDocument();
 
+      // Engagement columns and values
+      expect(screen.getByText('Played')).toBeInTheDocument();
+      expect(screen.getByText('Middle Drop')).toBeInTheDocument();
+      expect(screen.getByText('Failed')).toBeInTheDocument();
+      expect(screen.getByText('142')).toBeInTheDocument();
+      expect(screen.getByText('20')).toBeInTheDocument();
+      expect(screen.getByText('12')).toBeInTheDocument();
+
       // Publish / Unpublish icon clicks
       const unpublishBtns = screen.getAllByTitle('Unpublish (Revert to Draft)');
       fireEvent.click(unpublishBtns[0]);
       expect(onUnpublish).toHaveBeenCalledWith(mockLevelsData[0]);
+
+      const publishBtns = screen.getAllByTitle('Publish Level');
+      fireEvent.click(publishBtns[0]);
+      expect(onPublish).toHaveBeenCalledWith(mockLevelsData[1]);
+
+      const playBtns = screen.getAllByLabelText('Play Level');
+      fireEvent.click(playBtns[0]);
+      expect(onPlay).toHaveBeenCalledWith(mockLevelsData[0]);
+
+      const viewBtns = screen.getAllByLabelText('View Level');
+      fireEvent.click(viewBtns[0]);
+      expect(onView).toHaveBeenCalledWith(mockLevelsData[0]);
+
+      const archiveBtns = screen.getAllByLabelText('Archive Level');
+      fireEvent.click(archiveBtns[0]);
+      expect(onArchive).toHaveBeenCalledWith(mockLevelsData[0]);
+
+      const editBtns = screen.getAllByText(t.btnEdit);
+      fireEvent.click(editBtns[0]);
+      expect(onEdit).toHaveBeenCalledWith(mockLevelsData[0]);
+
+      const deleteBtns = screen.getAllByText(t.btnDelete);
+      fireEvent.click(deleteBtns[0]);
+      expect(onDelete).toHaveBeenCalledWith(mockLevelsData[0]);
     });
   });
 
@@ -538,6 +588,11 @@ describe('Games Module - Comprehensive Test Suite', () => {
       expect(screen.getByText(/Level 1/i)).toBeInTheDocument();
       expect(screen.getByText(/Published At/i)).toBeInTheDocument();
       expect(screen.getByText(/Level Content & Solutions/i)).toBeInTheDocument();
+      expect(screen.getByText(/Player Engagement & Dropout Stats/i)).toBeInTheDocument();
+      expect(screen.getByText('142')).toBeInTheDocument();
+      expect(screen.getByText('110')).toBeInTheDocument();
+      expect(screen.getByText('20')).toBeInTheDocument();
+      expect(screen.getByText('12')).toBeInTheDocument();
     });
   });
 

@@ -89,6 +89,15 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colLevelTitle}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colDifficulty}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colStatus}</TableCell>
+            <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }} align="center">
+              {t.colPlayed || 'Played'}
+            </TableCell>
+            <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }} align="center">
+              {t.colDropped || 'Middle Drop'}
+            </TableCell>
+            <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }} align="center">
+              {t.colFailed || 'Failed'}
+            </TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colPublishedAt}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colCreatedAt}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }} align="center">
@@ -99,7 +108,7 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} align="center" sx={{ py: 6, color: isDark ? '#d0caeb' : '#5c548a' }}>
+              <TableCell colSpan={10} align="center" sx={{ py: 6, color: isDark ? '#d0caeb' : '#5c548a' }}>
                 <Typography>{t.noLevels}</Typography>
               </TableCell>
             </TableRow>
@@ -165,6 +174,94 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
                         borderRadius: '6px',
                       }}
                     />
+                  </TableCell>
+                  {/* Played Count */}
+                  <TableCell align="center">
+                    <Tooltip
+                      title={`${t.colPlayed || 'Played'}: ${row.stats?.membersPlayed ?? 0} | ${t.colCompleted || 'Completed'}: ${row.stats?.completed ?? 0} (${row.stats?.completionRate ?? 0}%)`}
+                      arrow
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDark ? '#93c5fd' : '#1d4ed8',
+                          fontFamily: 'monospace',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {row.stats?.membersPlayed ?? 0}
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                  {/* Middle Drop Count */}
+                  <TableCell align="center">
+                    <Tooltip
+                      title={`${t.colDropped || 'Middle Drop'}: ${row.stats?.notCompleted ?? 0}`}
+                      arrow
+                    >
+                      <Chip
+                        label={row.stats?.notCompleted ?? 0}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          backgroundColor:
+                            (row.stats?.notCompleted ?? 0) > 0
+                              ? isDark
+                                ? 'rgba(245, 158, 11, 0.2)'
+                                : '#fef3c7'
+                              : isDark
+                              ? 'rgba(255, 255, 255, 0.05)'
+                              : '#f3f4f6',
+                          color:
+                            (row.stats?.notCompleted ?? 0) > 0
+                              ? isDark
+                                ? '#fbbf24'
+                                : '#b45309'
+                              : isDark
+                              ? '#94a3b8'
+                              : '#9ca3af',
+                          borderRadius: '6px',
+                        }}
+                      />
+                    </Tooltip>
+                  </TableCell>
+                  {/* Failed Count */}
+                  <TableCell align="center">
+                    <Tooltip
+                      title={`${t.colFailed || 'Failed'}: ${row.stats?.failed ?? 0} (${row.stats?.failureRate ?? 0}%)`}
+                      arrow
+                    >
+                      <Chip
+                        label={row.stats?.failed ?? 0}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          backgroundColor:
+                            (row.stats?.failed ?? 0) > 0
+                              ? isDark
+                                ? 'rgba(239, 68, 68, 0.2)'
+                                : '#fee2e2'
+                              : isDark
+                              ? 'rgba(255, 255, 255, 0.05)'
+                              : '#f3f4f6',
+                          color:
+                            (row.stats?.failed ?? 0) > 0
+                              ? isDark
+                                ? '#f87171'
+                                : '#dc2626'
+                              : isDark
+                              ? '#94a3b8'
+                              : '#9ca3af',
+                          borderRadius: '6px',
+                        }}
+                      />
+                    </Tooltip>
                   </TableCell>
                   <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontSize: '0.82rem' }}>
                     {row.puzzleDate || row.assignedDate ? (

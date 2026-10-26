@@ -66,6 +66,10 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     colLevelNumber: 'Level',
     colLevelTitle: 'Title',
     colDifficulty: 'Difficulty',
+    colPlayed: 'Played',
+    colDropped: 'Middle Drop',
+    colFailed: 'Failed',
+    colCompleted: 'Completed',
     colPublishedAt: 'Published At',
     colCreatedAt: 'Created At',
     notPublished: 'Not Published',
@@ -90,6 +94,14 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     gameDetailsTitle: 'Game Catalogue Details',
     allDifficulties: 'All Difficulties',
     allStatuses: 'All Statuses',
+    engagementStats: 'Player Engagement & Dropout Stats',
+    totalPlayed: 'Total Played',
+    totalCompleted: 'Total Completed',
+    totalDropped: 'Total Middle Drop',
+    totalFailed: 'Total Failed',
+    completionRate: 'Completion Rate',
+    failureRate: 'Failure Rate',
+    totalAttempts: 'Total Attempts',
   },
   te: {
     pageTitle: 'ఆటలు & స్థాయిల నిర్వహణ',
@@ -113,6 +125,10 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     colLevelNumber: 'స్థాయి',
     colLevelTitle: 'శీర్షిక',
     colDifficulty: 'కఠినతరం',
+    colPlayed: 'ఆడారు',
+    colDropped: 'మధ్యలో ఆపారు',
+    colFailed: 'విఫలమయ్యారు',
+    colCompleted: 'పూర్తయింది',
     colPublishedAt: 'ప్రచురించిన తేదీ',
     colCreatedAt: 'సృష్టించిన తేదీ',
     notPublished: 'ప్రచురించబడలేదు',
@@ -137,6 +153,14 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     gameDetailsTitle: 'ఆట వివరాలు',
     allDifficulties: 'అన్ని కఠినతరాలు',
     allStatuses: 'అన్ని స్థితులు',
+    engagementStats: 'ప్లేయర్ భాగస్వామ్యం & డ్రాపౌట్ గణాంకాలు',
+    totalPlayed: 'మొత్తం ఆడారు',
+    totalCompleted: 'మొత్తం పూర్తయింది',
+    totalDropped: 'మొత్తం మధ్యలో ఆపారు',
+    totalFailed: 'మొత్తం విఫలమయ్యారు',
+    completionRate: 'పూర్తి రేటు',
+    failureRate: 'వైఫల్య రేటు',
+    totalAttempts: 'మొత్తం ప్రయత్నాలు',
   },
   hi: {
     pageTitle: 'गेम्स और लेवल प्रबंधन',
@@ -160,6 +184,10 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     colLevelNumber: 'लेवल',
     colLevelTitle: 'शीर्षक',
     colDifficulty: 'कठिनाई',
+    colPlayed: 'खेला गया',
+    colDropped: 'बीच में छोड़ा',
+    colFailed: 'असफल',
+    colCompleted: 'पूर्ण',
     colPublishedAt: 'प्रकाशित तिथि',
     colCreatedAt: 'बनाया गया',
     notPublished: 'प्रकाशित नहीं',
@@ -184,6 +212,14 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     gameDetailsTitle: 'गेम कैटलॉग विवरण',
     allDifficulties: 'सभी कठिनाई स्तर',
     allStatuses: 'सभी स्थितियां',
+    engagementStats: 'खिलाड़ी सहभागिता और ड्रॉपआउट आंकड़े',
+    totalPlayed: 'कुल खेला गया',
+    totalCompleted: 'कुल पूर्ण',
+    totalDropped: 'कुल बीच में छोड़ा',
+    totalFailed: 'कुल असफल',
+    completionRate: 'पूर्णता दर',
+    failureRate: 'विफलता दर',
+    totalAttempts: 'कुल प्रयास',
   },
   ml: {
     pageTitle: 'ഗെയിമുകളും ലെവലുകളും മാനേജ്‌മെന്റ്',
@@ -207,6 +243,10 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     colLevelNumber: 'ലെവൽ',
     colLevelTitle: 'ശീർഷകം',
     colDifficulty: 'കാഠിന്യം',
+    colPlayed: 'കളിച്ചു',
+    colDropped: 'ഇടയിൽ നിർത്തി',
+    colFailed: 'പരാജയപ്പെട്ടു',
+    colCompleted: 'പൂർത്തിയായി',
     colPublishedAt: 'പ്രസിദ്ധീകരിച്ച തീയതി',
     colCreatedAt: 'സൃഷ്ടിച്ചത്',
     notPublished: 'പ്രസിദ്ധീകരിച്ചിട്ടില്ല',
@@ -231,6 +271,14 @@ export const gamesTranslations: Record<string, Record<string, string>> = {
     gameDetailsTitle: 'ഗെയിം വിശദാംശങ്ങൾ',
     allDifficulties: 'എല്ലാ കാഠിന്യ നിലകളും',
     allStatuses: 'എല്ലാ നിലകളും',
+    engagementStats: 'പ്ലെയർ പങ്കാളിത്തവും ഡ്രോപ്പ്ഔട്ട് സ്ഥിതിവിവരക്കണക്കുകളും',
+    totalPlayed: 'ആകെ കളിച്ചു',
+    totalCompleted: 'ആകെ പൂർത്തിയായി',
+    totalDropped: 'ആകെ ഇടയിൽ നിർത്തി',
+    totalFailed: 'ആകെ പരാജയപ്പെട്ടു',
+    completionRate: 'പൂർത്തിയാക്കൽ നിരക്ക്',
+    failureRate: 'പരാജയ നിരക്ക്',
+    totalAttempts: 'ആകെ ശ്രമങ്ങൾ',
   },
 };
 
@@ -283,6 +331,7 @@ export const GamesPage: React.FC = () => {
     setStatusFilter,
     handleClearLevelsFilter,
     fetchLevels,
+    levels,
     paginatedLevels,
     levelDrawerOpen,
     isLevelEditMode,
@@ -326,6 +375,22 @@ export const GamesPage: React.FC = () => {
     handleCloseStreakActionDialog,
     handleSubmitStreakAction,
   } = useGamesController();
+
+  const levelsAggregateStats = React.useMemo(() => {
+    let totalPlayed = 0;
+    let totalCompleted = 0;
+    let totalDropped = 0;
+    let totalFailed = 0;
+    (levels || []).forEach((lvl) => {
+      if (lvl.stats) {
+        totalPlayed += lvl.stats.membersPlayed || 0;
+        totalCompleted += lvl.stats.completed || 0;
+        totalDropped += lvl.stats.notCompleted || 0;
+        totalFailed += lvl.stats.failed || 0;
+      }
+    });
+    return { totalPlayed, totalCompleted, totalDropped, totalFailed };
+  }, [levels]);
 
   return (
     <Box
@@ -503,6 +568,80 @@ export const GamesPage: React.FC = () => {
           {/* TAB 1: LEVELS MANAGEMENT */}
           {activeTab === 1 && (
             <>
+              {/* Engagement Stats Overview KPI Cards */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' },
+                  gap: 2,
+                  mb: 3,
+                }}
+              >
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: '14px',
+                    backgroundColor: isDark ? 'rgba(37, 99, 235, 0.12)' : '#eff6ff',
+                    border: isDark ? '1px solid rgba(59, 130, 246, 0.25)' : '1px solid #bfdbfe',
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: isDark ? '#93c5fd' : '#1e40af', fontWeight: 600 }}>
+                    {t.totalPlayed || 'Total Played'}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: isDark ? '#bfdbfe' : '#1d4ed8', fontWeight: 800, mt: 0.5 }}>
+                    {levelsAggregateStats.totalPlayed}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: '14px',
+                    backgroundColor: isDark ? 'rgba(34, 197, 94, 0.12)' : '#f0fdf4',
+                    border: isDark ? '1px solid rgba(34, 197, 94, 0.25)' : '1px solid #bbf7d0',
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: isDark ? '#86efac' : '#166534', fontWeight: 600 }}>
+                    {t.totalCompleted || 'Total Completed'}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: isDark ? '#bbf7d0' : '#15803d', fontWeight: 800, mt: 0.5 }}>
+                    {levelsAggregateStats.totalCompleted}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: '14px',
+                    backgroundColor: isDark ? 'rgba(245, 158, 11, 0.12)' : '#fffbeb',
+                    border: isDark ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid #fde68a',
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: isDark ? '#fcd34d' : '#92400e', fontWeight: 600 }}>
+                    {t.totalDropped || 'Total Middle Drop'}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: isDark ? '#fef08a' : '#b45309', fontWeight: 800, mt: 0.5 }}>
+                    {levelsAggregateStats.totalDropped}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: '14px',
+                    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.12)' : '#fef2f2',
+                    border: isDark ? '1px solid rgba(239, 68, 68, 0.25)' : '1px solid #fecaca',
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: isDark ? '#fca5a5' : '#991b1b', fontWeight: 600 }}>
+                    {t.totalFailed || 'Total Failed'}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: isDark ? '#fecaca' : '#dc2626', fontWeight: 800, mt: 0.5 }}>
+                    {levelsAggregateStats.totalFailed}
+                  </Typography>
+                </Box>
+              </Box>
+
               {/* Toolbar */}
               <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center', flexWrap: 'wrap' }}>
                 <FormControl size="small" sx={{ minWidth: 160 }}>
