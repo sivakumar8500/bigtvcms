@@ -99,27 +99,74 @@ describe('NotificationsPage', () => {
       expect(screen.getByText('Failed')).toBeInTheDocument();
     });
 
-    // Check language tabs are present
-    expect(screen.getByText('Telugu (te)')).toBeInTheDocument();
+    // In default English mode, only English tab is present
     expect(screen.getByText('English (en)')).toBeInTheDocument();
-    expect(screen.getByText('Malayalam (ml)')).toBeInTheDocument();
-    expect(screen.getByText('All Languages')).toBeInTheDocument();
+    expect(screen.queryByText('Telugu (te)')).not.toBeInTheDocument();
+    expect(screen.queryByText('Malayalam (ml)')).not.toBeInTheDocument();
+    expect(screen.queryByText('All Languages')).not.toBeInTheDocument();
 
-    // Check language badges are rendered
+    // Check language badges are rendered in table
     expect(screen.getByText('TE')).toBeInTheDocument();
     expect(screen.getByText('EN')).toBeInTheDocument();
     expect(screen.getByText('ML')).toBeInTheDocument();
+  });
 
-    // Click English tab
-    fireEvent.click(screen.getByText('English (en)'));
-    await waitFor(() => {
-      expect(NotificationRepository.getNotifications).toHaveBeenCalledWith(
-        0,
-        20,
-        'en',
-        undefined
-      );
+  it('shows only Telugu tab when language is set to te', async () => {
+    const { useLanguageStore } = require('@/core/storage/language-store');
+    useLanguageStore.setState({ language: 'te' });
+
+    (NotificationRepository.getNotifications as jest.Mock).mockResolvedValue({
+      success: true,
+      data: {
+        items: mockItems,
+        total: 3,
+        skip: 0,
+        take: 20,
+      },
+      timestamp: '2026-08-07T11:30:32.913Z',
     });
+
+    render(<NotificationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('తెలుగు (te)')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText('ఇంగ్లీష్ (en)')).not.toBeInTheDocument();
+    expect(screen.queryByText('మలయాళం (ml)')).not.toBeInTheDocument();
+    expect(screen.queryByText('అన్ని భాషలు')).not.toBeInTheDocument();
+
+    // Reset back to English
+    useLanguageStore.setState({ language: 'en' });
+  });
+
+  it('shows only Malayalam tab when language is set to ml', async () => {
+    const { useLanguageStore } = require('@/core/storage/language-store');
+    useLanguageStore.setState({ language: 'ml' });
+
+    (NotificationRepository.getNotifications as jest.Mock).mockResolvedValue({
+      success: true,
+      data: {
+        items: mockItems,
+        total: 3,
+        skip: 0,
+        take: 20,
+      },
+      timestamp: '2026-08-07T11:30:32.913Z',
+    });
+
+    render(<NotificationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('മലയാളം (ml)')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByText('തെലുങ്ക് (te)')).not.toBeInTheDocument();
+    expect(screen.queryByText('ഇംഗ്ലീഷ് (en)')).not.toBeInTheDocument();
+    expect(screen.queryByText('എല്ലാ ഭാഷകളും')).not.toBeInTheDocument();
+
+    // Reset back to English
+    useLanguageStore.setState({ language: 'en' });
   });
 
   it('filters notifications by search query and status', async () => {
@@ -243,7 +290,7 @@ describe('NotificationsPage', () => {
     fireEvent.click(page2Button);
 
     await waitFor(() => {
-      expect(NotificationRepository.getNotifications).toHaveBeenCalledWith(20, 20, 'te', undefined);
+      expect(NotificationRepository.getNotifications).toHaveBeenCalledWith(20, 20, 'en', undefined);
     });
   });
 

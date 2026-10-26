@@ -24,6 +24,7 @@ const initialReels: Reel[] = [
     titleTe: 'హైదరాబాద్ బిర్యానీ టూర్',
     titleHi: 'हैदराबाद बिरयानी टूर',
     titleMl: 'ഹൈദരാബാദ് ബിരിയാണി ടൂർ',
+    lang: 'te',
   },
   {
     reelId: 102,
@@ -35,6 +36,7 @@ const initialReels: Reel[] = [
     titleTe: 'ఆంధ్రప్రదేశ్‌లో భారీ వర్షాలు',
     titleHi: 'आंध्र प्रदेश में भारी बारिश',
     titleMl: 'ആന്ധ്രാപ്രദേശിൽ കനത്ത മഴ',
+    lang: 'te',
   },
   {
     reelId: 103,
@@ -46,6 +48,7 @@ const initialReels: Reel[] = [
     titleTe: 'కొత్త సినిమా టీజర్ రివ్యూ',
     titleHi: 'नया मूवी टीज़र रिव्यू',
     titleMl: 'പുതിയ സിനിമ ടീസർ റിവ്യൂ',
+    lang: 'te',
   },
   {
     reelId: 104,
@@ -57,6 +60,7 @@ const initialReels: Reel[] = [
     titleTe: 'కాళేశ్వరం ప్రాజెక్ట్ అప్‌డేట్',
     titleHi: 'कालेश्वरम परियोजना अपडेट',
     titleMl: 'കലേശ്വരം പദ്ധതി അപ്ഡേറ്റ്',
+    lang: 'te',
   },
   {
     reelId: 105,
@@ -68,6 +72,7 @@ const initialReels: Reel[] = [
     titleTe: 'భక్తి గీతాలాపన',
     titleHi: 'భక్తి గీతాలాపన',
     titleMl: 'ഭക്തിഗാനങ്ങൾ',
+    lang: 'te',
   },
 ];
 
@@ -100,6 +105,7 @@ export function useReelsController() {
     videoUrl: '',
     videoId: '',
     isPublished: false,
+    lang: 'te',
   };
   const [form, setForm] = useState(emptyForm);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -125,6 +131,7 @@ export function useReelsController() {
 
           const rawVidId = item.video_id || (item.videoUrl ? extractYouTubeVideoId(item.videoUrl) : item.video_url ? extractYouTubeVideoId(item.video_url) : '');
           const rawVidUrl = item.videoUrl || item.video_url || item.url || item.postUrl || (rawVidId ? `https://www.youtube.com/watch?v=${rawVidId}` : '');
+          const itemLang = item.lang || item.language_code || filterLang || 'te';
 
           return {
             reelId,
@@ -142,6 +149,8 @@ export function useReelsController() {
             channelTitle: item.publisher || item.channel_title,
             url: rawVidUrl,
             publishedAt: item.createdAt || item.published_at || item.created,
+            lang: itemLang,
+            language: itemLang,
           };
         });
 
@@ -231,6 +240,7 @@ export function useReelsController() {
       videoUrl: reel.videoUrl || reel.url || '',
       videoId: reel.videoId || '',
       isPublished: reel.isPublished,
+      lang: reel.lang || reel.language || filterLang || 'te',
     });
     setUploadedImage(reel.imageUrl || null);
     setErrors({});
@@ -283,7 +293,10 @@ export function useReelsController() {
   const handleCloseDrawer = () => {
     setDrawerOpen(false);
     setEditingId(null);
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+      lang: filterLang || 'te',
+    });
     setUploadedImage(null);
     setErrors({});
     setSubmitted(false);
@@ -309,6 +322,7 @@ export function useReelsController() {
     const derivedVidId = submitForm.videoId || extractYouTubeVideoId(submitForm.videoUrl);
     const derivedVidUrl = submitForm.videoUrl || (derivedVidId ? `https://www.youtube.com/watch?v=${derivedVidId}` : '');
     const derivedThumbnail = uploadedImage || (derivedVidId ? `https://i.ytimg.com/vi/${derivedVidId}/maxresdefault.jpg` : '');
+    const selectedLang = submitForm.lang || filterLang || 'te';
 
     const payload: CreateYouTubeVideoPayload = {
       videoUrl: derivedVidUrl,
@@ -329,7 +343,8 @@ export function useReelsController() {
       content: '',
       gallery: [],
       isPublish: submitForm.isPublished,
-      lang: filterLang || 'te',
+      lang: selectedLang,
+      language: selectedLang,
       video_id: derivedVidId,
       videoId: derivedVidId,
       titleEn: submitForm.titleEn,
@@ -339,7 +354,11 @@ export function useReelsController() {
     };
 
     try {
-      await ReelsService.createYouTubeVideo(payload);
+      if (isEditMode && editingId !== null) {
+        await ReelsService.updateYouTubeVideo(editingId, payload);
+      } else {
+        await ReelsService.createYouTubeVideo(payload);
+      }
     } catch {
       // Graceful fallback for offline / mock testing
     }
@@ -361,6 +380,8 @@ export function useReelsController() {
                 videoUrl: derivedVidUrl,
                 videoId: derivedVidId,
                 url: derivedVidUrl,
+                lang: selectedLang,
+                language: selectedLang,
               }
             : r
         )
@@ -382,6 +403,8 @@ export function useReelsController() {
           videoUrl: derivedVidUrl,
           videoId: derivedVidId,
           url: derivedVidUrl,
+          lang: selectedLang,
+          language: selectedLang,
         },
         ...prev,
       ]);

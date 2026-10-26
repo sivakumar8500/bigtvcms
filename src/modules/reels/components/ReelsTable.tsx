@@ -192,8 +192,8 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                   </Typography>
                 </Box>
 
-                {/* Source */}
-                <Box sx={cellStyle}>
+                {/* Source & Language */}
+                <Box sx={{ ...cellStyle, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
                   <Chip
                     icon={
                       isYouTube ? (
@@ -214,6 +214,18 @@ export const ReelsTable: React.FC<ReelsTableProps> = ({
                         : 'rgba(28,20,69,0.08)',
                       color: isYouTube ? '#ff3333' : isDark ? '#a6e2f5' : '#1c1445',
                       border: `1px solid ${isYouTube ? 'rgba(255,0,0,0.25)' : 'rgba(0,0,0,0.1)'}`,
+                    }}
+                  />
+                  <Chip
+                    label={(reel.lang || reel.language || 'te').toUpperCase()}
+                    size="small"
+                    sx={{
+                      height: '18px',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      backgroundColor: isDark ? 'rgba(166,226,245,0.12)' : 'rgba(28,20,69,0.06)',
+                      color: isDark ? '#a6e2f5' : '#1c1445',
+                      border: isDark ? '1px solid rgba(166,226,245,0.3)' : '1px solid rgba(28,20,69,0.15)',
                     }}
                   />
                 </Box>

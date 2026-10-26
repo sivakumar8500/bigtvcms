@@ -14,6 +14,8 @@ export interface Reel {
   channelTitle?: string;
   url?: string;
   publishedAt?: string;
+  lang?: string;
+  language?: string;
 }
 
 export interface CreateYouTubeVideoPayload {
@@ -36,6 +38,7 @@ export interface CreateYouTubeVideoPayload {
   gallery?: string[];
   isPublish?: boolean;
   lang?: string;
+  language?: string;
   video_id?: string;
   videoId?: string;
   titleEn?: string;
@@ -79,6 +82,8 @@ export interface YouTubeShortItem {
   linkURLAndroid?: string;
   linkURLIos?: string;
   language_code?: string;
+  lang?: string;
+  language?: string;
   post_type?: string;
   is_sticky?: boolean;
   video_id?: string;
@@ -162,6 +167,8 @@ export interface UploadedReel {
   videoUrl: string;
   thumbnailUrl: string;
   durationSeconds: number;
+  language?: string;
+  lang?: string;
   brand?: BrandInfo;
   publishing?: PublishingInfo;
   analytics?: AnalyticsInfo;

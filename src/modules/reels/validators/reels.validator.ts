@@ -8,6 +8,7 @@ export const reelSchema = z.object({
   duration: z.string().trim().min(1, 'Duration is required'),
   videoUrl: z.string().trim().optional(),
   videoId: z.string().trim().optional(),
+  lang: z.string().trim().optional(),
 });
 
 export type ReelFormData = z.infer<typeof reelSchema>;

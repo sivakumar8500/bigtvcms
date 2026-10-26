@@ -78,7 +78,21 @@ export const InhouseReelsTable: React.FC<InhouseReelsTableProps> = ({
                   </Box>
                 </TableCell>
                 <TableCell sx={{ color: isDark ? '#ffffff' : '#1c1445', maxWidth: 300 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{row.title}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.title}</Typography>
+                    <Chip
+                      label={(row.language || row.lang || 'te').toUpperCase()}
+                      size="small"
+                      sx={{
+                        height: '18px',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        backgroundColor: isDark ? 'rgba(166,226,245,0.12)' : 'rgba(28,20,69,0.06)',
+                        color: isDark ? '#a6e2f5' : '#1c1445',
+                        border: isDark ? '1px solid rgba(166,226,245,0.3)' : '1px solid rgba(28,20,69,0.15)',
+                      }}
+                    />
+                  </Box>
                   <Typography variant="caption" sx={{ color: isDark ? '#d0caeb' : '#5c548a', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {row.description || 'No description'}
                   </Typography>

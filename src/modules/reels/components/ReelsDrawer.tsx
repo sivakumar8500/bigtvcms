@@ -9,6 +9,8 @@ import {
   InputAdornment,
   Switch,
   Button,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Movie,
@@ -30,6 +32,8 @@ const drawerTranslations = {
     videoIdPlaceholder: 'e.g. GSgLMsux9zM',
     durationLabel: '⏱ Duration (e.g. 0:30) *',
     durationPlaceholder: 'e.g. 0:30',
+    languageLabel: '🌐 Language (Selection Code) *',
+    languagePlaceholder: 'Select Language',
   },
   te: {
     videoUrlLabel: '🔗 యూట్యూబ్ వీడియో పూర్తి URL',
@@ -38,6 +42,8 @@ const drawerTranslations = {
     videoIdPlaceholder: 'ఉదా: GSgLMsux9zM',
     durationLabel: '⏱ వ్యవధి (ఉదా: 0:30) *',
     durationPlaceholder: 'ఉదా: 0:30',
+    languageLabel: '🌐 భాష (ఎంపిక కోడ్) *',
+    languagePlaceholder: 'భాషను ఎంచుకోండి',
   },
   hi: {
     videoUrlLabel: '🔗 यूट्यूब वीडियो फुल URL',
@@ -46,6 +52,8 @@ const drawerTranslations = {
     videoIdPlaceholder: 'उदा: GSgLMsux9zM',
     durationLabel: '⏱ अवधि (उदा: 0:30) *',
     durationPlaceholder: 'उदा: 0:30',
+    languageLabel: '🌐 भाषा (चयन कोड) *',
+    languagePlaceholder: 'भाषा चुनें',
   },
   ml: {
     videoUrlLabel: '🔗 യൂറ്റ്യൂബ് വീഡിയോ ഫുൾ URL',
@@ -54,13 +62,15 @@ const drawerTranslations = {
     videoIdPlaceholder: 'ഉദാ: GSgLMsux9zM',
     durationLabel: '⏱ ദൈർഘ്യം (ഉദാ: 0:30) *',
     durationPlaceholder: 'ഉദാ: 0:30',
+    languageLabel: '🌐 ഭാഷ (തിരഞ്ഞെടുക്കൽ കോഡ്) *',
+    languagePlaceholder: 'ഭാഷ തിരഞ്ഞെടുക്കുക',
   },
 };
 
 interface ReelsDrawerProps {
   open: boolean;
   isEditMode: boolean;
-  form: ReelFormData & { isPublished: boolean };
+  form: ReelFormData & { isPublished: boolean; lang?: string };
   uploadedImage: string | null;
   errors: Record<string, string>;
   onFieldChange: (field: string, val: string | boolean) => void;
@@ -214,6 +224,50 @@ export const ReelsDrawer: React.FC<ReelsDrawerProps> = ({
         </Box>
 
         <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+
+        {/* Language Selection */}
+        <Box>
+          <Typography variant="caption" sx={{ color: isDark ? '#a6e2f5' : '#1c1445', fontWeight: 700, display: 'block', mb: 0.6 }}>
+            {dt.languageLabel}
+          </Typography>
+          <Select
+            fullWidth
+            size="small"
+            value={form.lang || 'te'}
+            onChange={(e) => onFieldChange('lang', e.target.value as string)}
+            sx={{
+              color: isDark ? '#ffffff' : '#1c1445',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+              borderRadius: '10px',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '& .MuiSelect-icon': {
+                color: isDark ? '#d0caeb' : '#5c548a',
+              },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: isDark ? '#1a1140' : '#ffffff',
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  borderRadius: '12px',
+                },
+              },
+            }}
+          >
+            <MenuItem value="te">🇮🇳 Telugu (తెలుగు) - te</MenuItem>
+            <MenuItem value="en">🇬🇧 English - en</MenuItem>
+            <MenuItem value="hi">🇮🇳 Hindi (हिंदी) - hi</MenuItem>
+            <MenuItem value="ml">🇮🇳 Malayalam (മലയാളം) - ml</MenuItem>
+          </Select>
+        </Box>
 
         {/* YouTube Video Full URL */}
         <Box>

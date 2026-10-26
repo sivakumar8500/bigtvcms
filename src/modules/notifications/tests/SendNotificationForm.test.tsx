@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SendNotificationForm } from '../components/SendNotificationForm';
 import { NotificationRepository } from '../repositories/notification.repository';
+import { useLanguageStore } from '@/core/storage/language-store';
 
 jest.mock('../repositories/notification.repository', () => ({
   NotificationRepository: {
@@ -36,6 +37,7 @@ describe('SendNotificationForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useLanguageStore.setState({ language: 'te' });
   });
 
   it('renders input fields and submits form successfully with mandatory fields', async () => {

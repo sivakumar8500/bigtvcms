@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Drawer,
   Box,
@@ -15,6 +15,7 @@ import {
 import { Close, Send as SendIcon } from '@mui/icons-material';
 import { SendNotificationDto } from '../dto/notification.dto';
 import { NotificationRepository } from '../repositories/notification.repository';
+import { useLanguageStore } from '@/core/storage/language-store';
 
 interface SendNotificationFormProps {
   open: boolean;
@@ -31,6 +32,9 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
   isDark,
   t,
 }) => {
+  const { language } = useLanguageStore();
+  const defaultLan = language === 'en' ? 'en' : language === 'ml' ? 'ml' : 'te';
+
   const [title, setTitle] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [postId, setPostId] = useState<string>('');
@@ -38,8 +42,14 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
   const [imageUrl, setImageUrl] = useState<string>('');
   const [brandName, setBrandName] = useState<string>('BigTV');
   const [brandLogo, setBrandLogo] = useState<string>('www.logo.com');
-  const [lan, setLan] = useState<string>('te');
+  const [lan, setLan] = useState<string>(defaultLan);
   const [sendTime, setSendTime] = useState<string>('');
+
+  useEffect(() => {
+    if (open) {
+      setLan(defaultLan);
+    }
+  }, [open, defaultLan]);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -117,7 +127,7 @@ export const SendNotificationForm: React.FC<SendNotificationFormProps> = ({
       setPostId('');
       setLink('');
       setImageUrl('');
-      setLan('te');
+      setLan(defaultLan);
       setSendTime('');
       onSuccess();
       onClose();

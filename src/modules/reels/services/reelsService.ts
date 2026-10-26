@@ -17,6 +17,16 @@ export class ReelsService {
   }
 
   /**
+   * Update an existing YouTube Video record
+   */
+  static async updateYouTubeVideo(
+    id: string | number,
+    payload: Partial<CreateYouTubeVideoPayload>
+  ): Promise<YouTubeShortItem> {
+    return apiClient.put<YouTubeShortItem, Partial<CreateYouTubeVideoPayload>>(`/youtube/videos/${id}`, payload);
+  }
+
+  /**
    * Fetch paginated YouTube Videos / Shorts list
    */
   static async fetchYouTubeShorts(skip: number = 0, limit: number = 20, lang?: string): Promise<YouTubeShortsResponse> {
@@ -82,8 +92,12 @@ export class ReelsService {
   /**
    * Fetch paginated custom uploaded reels
    */
-  static async fetchUploadedReels(skip: number = 0, limit: number = 20): Promise<{ data: UploadedReel[]; total: number }> {
-    return apiClient.get('/reels', { skip, limit });
+  static async fetchUploadedReels(skip: number = 0, limit: number = 20, language?: string): Promise<{ data: UploadedReel[]; total: number }> {
+    const params: Record<string, unknown> = { skip, limit };
+    if (language) {
+      params.language = language;
+    }
+    return apiClient.get('/reels', params);
   }
 
   /**

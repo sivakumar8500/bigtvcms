@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -224,6 +224,32 @@ export const NotificationsPage: React.FC = () => {
   const t = translations[language] || translations.en;
 
   const recordsPerPage = 20;
+
+  const getEffectiveNotificationLanguage = (): NotificationLanguage => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (
+          params.get('lang') ||
+          params.get('language') ||
+          params.get('lan') ||
+          params.get('from') ||
+          ''
+        ).toLowerCase();
+        if (urlLang === 'ml' || urlLang === 'malayala' || urlLang === 'malayalam') return 'ml';
+        if (urlLang === 'en' || urlLang === 'english') return 'en';
+        if (urlLang === 'te' || urlLang === 'telugu') return 'te';
+      } catch {
+        // Fallback
+      }
+    }
+    if (language === 'ml') return 'ml';
+    if (language === 'en') return 'en';
+    return 'te';
+  };
+
+  const initialLang = getEffectiveNotificationLanguage();
+
   const {
     notifications,
     total,
@@ -234,7 +260,12 @@ export const NotificationsPage: React.FC = () => {
     loading,
     error,
     fetchNotifications,
-  } = useNotificationsController(0, recordsPerPage, 'te');
+  } = useNotificationsController(0, recordsPerPage, initialLang);
+
+  useEffect(() => {
+    const nextLang = getEffectiveNotificationLanguage();
+    handleLanguageChange(nextLang);
+  }, [language]);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
@@ -506,7 +537,7 @@ export const NotificationsPage: React.FC = () => {
             </Box>
           ) : (
             <>
-              {/* ── Language Filter Tabs ── */}
+              {/* ── Language Filter Tab (Only ONE tab based on selected language) ── */}
               <Box
                 sx={{
                   display: 'flex',
@@ -516,20 +547,25 @@ export const NotificationsPage: React.FC = () => {
                   flexWrap: 'wrap',
                 }}
               >
-                {[
-                  { code: 'te' as NotificationLanguage, label: t.tabTelugu },
-                  { code: 'en' as NotificationLanguage, label: t.tabEnglish },
-                  { code: 'ml' as NotificationLanguage, label: t.tabMalayalam },
-                  { code: 'all' as NotificationLanguage, label: t.tabAll },
-                ].map((tab) => {
-                  const isActive = selectedLanguage === tab.code;
+                {(() => {
+                  const effectiveLang: NotificationLanguage =
+                    selectedLanguage && selectedLanguage !== 'all'
+                      ? selectedLanguage
+                      : getEffectiveNotificationLanguage();
+
+                  const tabLabel =
+                    effectiveLang === 'en'
+                      ? t.tabEnglish || 'English (en)'
+                      : effectiveLang === 'ml'
+                      ? t.tabMalayalam || 'Malayalam (ml)'
+                      : t.tabTelugu || 'Telugu (te)';
+
                   return (
                     <Button
-                      key={tab.code}
-                      id={`notification-lang-tab-${tab.code}`}
-                      variant={isActive ? 'contained' : 'outlined'}
+                      id={`notification-lang-tab-${effectiveLang}`}
+                      variant="contained"
                       size="small"
-                      onClick={() => handleLanguageChange(tab.code)}
+                      onClick={() => handleLanguageChange(effectiveLang)}
                       sx={{
                         textTransform: 'none',
                         fontWeight: 700,
@@ -537,28 +573,20 @@ export const NotificationsPage: React.FC = () => {
                         borderRadius: '10px',
                         px: 2,
                         py: 0.6,
-                        backgroundColor: isActive
-                          ? (isDark ? '#a6e2f5' : '#1c1445')
-                          : (isDark ? 'rgba(255,255,255,0.04)' : '#ffffff'),
-                        color: isActive
-                          ? (isDark ? '#1c1445' : '#ffffff')
-                          : (isDark ? '#d0caeb' : '#5c548a'),
-                        borderColor: isActive
-                          ? 'transparent'
-                          : (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'),
+                        backgroundColor: isDark ? '#a6e2f5' : '#1c1445',
+                        color: isDark ? '#1c1445' : '#ffffff',
+                        borderColor: 'transparent',
                         boxShadow: 'none',
                         '&:hover': {
-                          backgroundColor: isActive
-                            ? (isDark ? '#8cd5ed' : '#2d2270')
-                            : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
+                          backgroundColor: isDark ? '#8cd5ed' : '#2d2270',
                           boxShadow: 'none',
                         },
                       }}
                     >
-                      {tab.label}
+                      {tabLabel}
                     </Button>
                   );
-                })}
+                })()}
               </Box>
 
               {/* ── Single-Line Filter Panel with Send Notification Button ── */}

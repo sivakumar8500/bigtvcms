@@ -12,6 +12,10 @@ import {
   Autocomplete,
   Chip,
   CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   Movie,
@@ -44,6 +48,7 @@ export const InhouseReelsDrawer: React.FC<InhouseReelsDrawerProps> = ({
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    language: 'te',
     videoUrl: '',
     thumbnailUrl: '',
     durationSeconds: '',
@@ -63,6 +68,7 @@ export const InhouseReelsDrawer: React.FC<InhouseReelsDrawerProps> = ({
         setFormData({
           title: selectedReel.title || '',
           description: selectedReel.description || '',
+          language: selectedReel.language || selectedReel.lang || 'te',
           videoUrl: selectedReel.videoUrl || '',
           thumbnailUrl: selectedReel.thumbnailUrl || '',
           durationSeconds: selectedReel.durationSeconds ? String(selectedReel.durationSeconds) : '',
@@ -76,6 +82,7 @@ export const InhouseReelsDrawer: React.FC<InhouseReelsDrawerProps> = ({
         setFormData({
           title: '',
           description: '',
+          language: 'te',
           videoUrl: '',
           thumbnailUrl: '',
           durationSeconds: '',
@@ -146,6 +153,8 @@ export const InhouseReelsDrawer: React.FC<InhouseReelsDrawerProps> = ({
     const payload: Partial<UploadedReel> = {
       title: formData.title,
       description: formData.description,
+      language: formData.language || 'te',
+      lang: formData.language || 'te',
       videoUrl: formData.videoUrl,
       thumbnailUrl: formData.thumbnailUrl,
       durationSeconds: parseInt(formData.durationSeconds) || 0,
@@ -282,6 +291,47 @@ export const InhouseReelsDrawer: React.FC<InhouseReelsDrawerProps> = ({
             </Button>
           )}
         </Box>
+
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+          <InputLabel sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}>Language (Selection Code) *</InputLabel>
+          <Select
+            label="Language (Selection Code) *"
+            name="language"
+            value={formData.language}
+            onChange={(e) => setFormData(p => ({ ...p, language: e.target.value as string }))}
+            sx={{
+              color: isDark ? '#ffffff' : '#1c1445',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+              borderRadius: '10px',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)',
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark ? '#a6e2f5' : '#1c1445',
+              },
+              '& .MuiSelect-icon': {
+                color: isDark ? '#d0caeb' : '#5c548a',
+              },
+            }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: isDark ? '#1a1140' : '#ffffff',
+                  color: isDark ? '#ffffff' : '#1c1445',
+                  borderRadius: '12px',
+                },
+              },
+            }}
+          >
+            <MenuItem value="te">🇮🇳 Telugu (తెలుగు) - te</MenuItem>
+            <MenuItem value="en">🇬🇧 English - en</MenuItem>
+            <MenuItem value="hi">🇮🇳 Hindi (हिंदी) - hi</MenuItem>
+            <MenuItem value="ml">🇮🇳 Malayalam (മലയാളം) - ml</MenuItem>
+          </Select>
+        </FormControl>
 
         <TextField label="Title *" name="title" value={formData.title} onChange={handleChange} {...textFieldProps} />
         <TextField label="Description" name="description" value={formData.description} onChange={handleChange} multiline rows={3} {...textFieldProps} />

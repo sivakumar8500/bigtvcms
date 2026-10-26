@@ -192,6 +192,16 @@ describe('ReelsService API Methods', () => {
     expect(res).toEqual(mockRes);
   });
 
+  it('should call updateYouTubeVideo with PUT /youtube/videos/:id and correct payload including lang', async () => {
+    const mockRes = { id: '1', title: 'Updated Title', lang: 'ml' };
+    (apiClient.put as jest.Mock).mockResolvedValueOnce(mockRes);
+
+    const payload = { title: 'Updated Title', lang: 'ml' };
+    const res = await ReelsService.updateYouTubeVideo(1, payload);
+    expect(apiClient.put).toHaveBeenCalledWith('/youtube/videos/1', payload);
+    expect(res).toEqual(mockRes);
+  });
+
   it('should call uploaded reels CRUD methods in ReelsService', async () => {
     const mockReel = { title: 'Test Reel', description: 'Desc', videoUrl: 'http://video.mp4', thumbnailUrl: 'http://img.jpg', durationSeconds: 30 };
 
@@ -201,8 +211,8 @@ describe('ReelsService API Methods', () => {
     expect(created).toEqual(mockReel);
 
     (apiClient.get as jest.Mock).mockResolvedValueOnce({ data: [mockReel], total: 1 });
-    const fetched = await ReelsService.fetchUploadedReels(0, 20);
-    expect(apiClient.get).toHaveBeenCalledWith('/reels', { skip: 0, limit: 20 });
+    const fetched = await ReelsService.fetchUploadedReels(0, 20, 'ml');
+    expect(apiClient.get).toHaveBeenCalledWith('/reels', { skip: 0, limit: 20, language: 'ml' });
     expect(fetched.total).toBe(1);
 
     (apiClient.get as jest.Mock).mockResolvedValueOnce(mockReel);
@@ -403,5 +413,67 @@ describe('useReelsController hook', () => {
     expect(result.current.rows[0].views).toBe('18');
     expect(result.current.rows[0].isPublished).toBe(true);
     expect(result.current.rows[0].imageUrl).toBe('https://i.ytimg.com/vi/-TxWeXwuPx8/maxresdefault.jpg');
+  });
+
+  it('should send selected language code in create reel API call', async () => {
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({ id: '999', title: 'Malayalam Reel', lang: 'ml' });
+
+    const { result } = renderHook(() => useReelsController());
+    act(() => {
+      result.current.handleFieldChange('titleEn', 'Malayalam News');
+      result.current.handleFieldChange('titleTe', 'మలయాళం న్యూస్');
+      result.current.handleFieldChange('titleHi', 'मलयालम समाचार');
+      result.current.handleFieldChange('titleMl', 'മലയാളം വാർത്തകൾ');
+      result.current.handleFieldChange('duration', '0:45');
+      result.current.handleFieldChange('lang', 'ml');
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/youtube/videos',
+      expect.objectContaining({
+        lang: 'ml',
+        language: 'ml',
+        titleEn: 'Malayalam News',
+      })
+    );
+    expect(result.current.rows[0].lang).toBe('ml');
+  });
+
+  it('should send updated language code in update reel API call', async () => {
+    (apiClient.put as jest.Mock).mockResolvedValueOnce({ id: '101', title: 'Updated Reel', lang: 'en' });
+
+    const { result } = renderHook(() => useReelsController());
+    const targetReel = result.current.rows[0];
+
+    act(() => {
+      result.current.handleEditClick(targetReel);
+    });
+
+    expect(result.current.isEditMode).toBe(true);
+    expect(result.current.form.lang).toBe(targetReel.lang || 'te');
+
+    act(() => {
+      result.current.handleFieldChange('lang', 'en');
+      result.current.handleFieldChange('titleEn', 'Updated English Title');
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(apiClient.put).toHaveBeenCalledWith(
+      `/youtube/videos/${targetReel.reelId}`,
+      expect.objectContaining({
+        lang: 'en',
+        language: 'en',
+        titleEn: 'Updated English Title',
+      })
+    );
+    const updated = result.current.rows.find((r) => r.reelId === targetReel.reelId);
+    expect(updated?.lang).toBe('en');
   });
 });

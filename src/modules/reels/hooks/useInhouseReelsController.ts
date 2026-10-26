@@ -9,12 +9,14 @@ export const useInhouseReelsController = () => {
 
   const [page, setPage] = useState(1);
   const [filterTitle, setFilterTitle] = useState('');
+  const [filterLang, setFilterLang] = useState<string>('te');
   const recordsPerPage = 10;
 
   const fetchReels = async () => {
     setLoading(true);
     try {
-      const response = await eventsApiClient.get<any>('/reels');
+      const params = filterLang && filterLang !== 'all' ? { language: filterLang } : {};
+      const response = await eventsApiClient.get<any>('/reels', params);
       let reelsArray: UploadedReel[] = [];
       if (Array.isArray(response)) {
         reelsArray = response;
@@ -32,7 +34,7 @@ export const useInhouseReelsController = () => {
 
   useEffect(() => {
     fetchReels();
-  }, []);
+  }, [filterLang]);
 
   const filteredData = useMemo(() => {
     let result = Array.isArray(data) ? data : [];
@@ -111,6 +113,8 @@ export const useInhouseReelsController = () => {
     setPage,
     filterTitle,
     setFilterTitle,
+    filterLang,
+    setFilterLang,
     fetchReels,
     drawerOpen,
     isEditMode,

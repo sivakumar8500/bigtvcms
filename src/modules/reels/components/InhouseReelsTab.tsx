@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, TextField, InputAdornment, IconButton, Typography, Pagination, Button } from '@mui/material';
+import { Box, TextField, InputAdornment, IconButton, Typography, Pagination, Button, Select, MenuItem } from '@mui/material';
 import { Search, Add } from '@mui/icons-material';
 import { useInhouseReelsController } from '../hooks/useInhouseReelsController';
 import { InhouseReelsTable } from './InhouseReelsTable';
@@ -19,6 +19,8 @@ export const InhouseReelsTab: React.FC<InhouseReelsTabProps> = ({ isDark, t }) =
     setPage,
     filterTitle,
     setFilterTitle,
+    filterLang,
+    setFilterLang,
     drawerOpen,
     isEditMode,
     selectedReel,
@@ -62,6 +64,45 @@ export const InhouseReelsTab: React.FC<InhouseReelsTabProps> = ({ isDark, t }) =
             ) : null,
           }}
         />
+
+        <Select
+          size="small"
+          value={filterLang}
+          onChange={(e) => setFilterLang(e.target.value as string)}
+          sx={{
+            minWidth: '170px',
+            color: isDark ? '#ffffff' : '#1c1445',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+            borderRadius: '12px',
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? '#a6e2f5' : '#1c1445',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark ? '#a6e2f5' : '#1c1445',
+            },
+            '& .MuiSelect-icon': {
+              color: isDark ? '#d0caeb' : '#5c548a',
+            },
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                backgroundColor: isDark ? '#1a1140' : '#ffffff',
+                color: isDark ? '#ffffff' : '#1c1445',
+                borderRadius: '12px',
+              },
+            },
+          }}
+        >
+          <MenuItem value="te">🇮🇳 Telugu (తెలుగు) - te</MenuItem>
+          <MenuItem value="en">🇬🇧 English - en</MenuItem>
+          <MenuItem value="hi">🇮🇳 Hindi (हिंदी) - hi</MenuItem>
+          <MenuItem value="ml">🇮🇳 Malayalam (മലയാളം) - ml</MenuItem>
+        </Select>
+
         <Box sx={{ flexGrow: 1 }} />
         <Button
           variant="contained"
