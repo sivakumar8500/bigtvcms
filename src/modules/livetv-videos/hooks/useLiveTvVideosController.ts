@@ -1,15 +1,32 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { VideoTag, TagVideo } from '../domain/LiveTvVideo';
-import { liveTvVideosRepository } from '../repositories/live-tv-videos.repository';
+import {
+  VideoTag,
+  TagVideo,
+  LanguageCode,
+  TagLanguage,
+  SegregatedVideoTags,
+} from '../domain/LiveTvVideo';
+import {
+  liveTvVideosRepository,
+  CreateVideoTagDto,
+  UpdateVideoTagDto,
+} from '../repositories/live-tv-videos.repository';
 
 export function useLiveTvVideosController() {
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>('te');
   const [tags, setTags] = useState<VideoTag[]>([]);
+  const [segregatedTags, setSegregatedTags] = useState<SegregatedVideoTags>({
+    te: [],
+    ml: [],
+    en: [],
+  });
   const [selectedTagSlug, setSelectedTagSlug] = useState<string>('');
-  
+
   const [videos, setVideos] = useState<TagVideo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -21,33 +38,62 @@ export function useLiveTvVideosController() {
   const [createTagModalOpen, setCreateTagModalOpen] = useState(false);
   const [editTagModalOpen, setEditTagModalOpen] = useState(false);
   const [playerModalOpen, setPlayerModalOpen] = useState(false);
-  
+
   const [activeTagForEdit, setActiveTagForEdit] = useState<VideoTag | null>(null);
   const [activeVideoForPlayer, setActiveVideoForPlayer] = useState<TagVideo | null>(null);
 
   const [editVideoModalOpen, setEditVideoModalOpen] = useState(false);
   const [activeVideoForEdit, setActiveVideoForEdit] = useState<TagVideo | null>(null);
 
-  // 1. Fetch tags on mount
-  const fetchTags = useCallback(async () => {
-    try {
-      const fetchedTags = await liveTvVideosRepository.getVideoTags();
-      setTags(fetchedTags);
-      if (fetchedTags.length > 0 && !selectedTagSlug) {
-        setSelectedTagSlug(fetchedTags[0].slug);
+  // 1. Fetch tags for current language
+  const fetchTags = useCallback(
+    async (lang: LanguageCode = selectedLanguage) => {
+      setLoading(true);
+      try {
+        if (lang === 'all') {
+          const [allTags, segregated] = await Promise.all([
+            liveTvVideosRepository.getVideoTags('all'),
+            liveTvVideosRepository.getSegregatedVideoTags(),
+          ]);
+          setTags(allTags || []);
+          setSegregatedTags(segregated || { te: [], ml: [], en: [] });
+          if (allTags && allTags.length > 0) {
+            setSelectedTagSlug((prev) => (allTags.some((t) => t.slug === prev) ? prev : allTags[0].slug));
+          } else {
+            setSelectedTagSlug('');
+            setVideos([]);
+          }
+        } else {
+          const fetchedTags = await liveTvVideosRepository.getVideoTags(lang);
+          setTags(fetchedTags || []);
+          if (fetchedTags && fetchedTags.length > 0) {
+            setSelectedTagSlug((prev) =>
+              fetchedTags.some((t) => t.slug === prev) ? prev : fetchedTags[0].slug
+            );
+          } else {
+            setSelectedTagSlug('');
+            setVideos([]);
+          }
+        }
+      } catch (err: any) {
+        setActionError(err.message || 'Failed to load video tags');
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setActionError('Failed to load video tags');
-    }
-  }, [selectedTagSlug]);
+    },
+    [selectedLanguage]
+  );
 
   useEffect(() => {
-    fetchTags();
-  }, [fetchTags]);
+    fetchTags(selectedLanguage);
+  }, [selectedLanguage, fetchTags]);
 
   // 2. Fetch videos when selected tag changes
   const loadTagVideos = useCallback(async (slug: string) => {
-    if (!slug) return;
+    if (!slug) {
+      setVideos([]);
+      return;
+    }
     setLoading(true);
     setActionError(null);
     try {
@@ -62,7 +108,11 @@ export function useLiveTvVideosController() {
   }, []);
 
   useEffect(() => {
-    loadTagVideos(selectedTagSlug);
+    if (selectedTagSlug) {
+      loadTagVideos(selectedTagSlug);
+    } else {
+      setVideos([]);
+    }
   }, [selectedTagSlug, loadTagVideos]);
 
   // Filtered and paginated videos
@@ -83,32 +133,74 @@ export function useLiveTvVideosController() {
   }, [videos]);
 
   // Actions
+  const handleLanguageChange = (lang: LanguageCode) => {
+    setSelectedLanguage(lang);
+    setPage(1);
+    setSearchQuery('');
+  };
+
   const handleTagSelect = (slug: string) => {
     setSelectedTagSlug(slug);
     setPage(1);
   };
 
-  const handleCreateTag = async (name: string, slug: string, file?: File | null) => {
+  const handleCreateTag = async (
+    nameOrPayload: CreateVideoTagDto | string,
+    slug?: string,
+    file?: File | null
+  ) => {
     setActionError(null);
     try {
-      const newTag = await liveTvVideosRepository.createVideoTag(name, slug, file);
-      setTags((prev) => [...prev, newTag]);
+      const payload: CreateVideoTagDto =
+        typeof nameOrPayload === 'string'
+          ? {
+              name: nameOrPayload,
+              slug: slug || '',
+              description: '',
+              language: (selectedLanguage === 'all' ? 'te' : selectedLanguage) as TagLanguage,
+              thumbnail: file || null,
+            }
+          : nameOrPayload;
+
+      const newTag = await liveTvVideosRepository.createVideoTag(payload);
+
+      // If matches current filter or in 'all', append
+      if (selectedLanguage === 'all' || newTag.language === selectedLanguage) {
+        setTags((prev) => [...prev, newTag]);
+      }
       setSelectedTagSlug(newTag.slug); // Auto-select new tag
       setActionSuccess('Video tag created successfully');
       setCreateTagModalOpen(false);
+      return newTag;
     } catch (err: any) {
       setActionError(err.message || 'Failed to create video tag');
       throw err;
     }
   };
 
-  const handleUpdateTag = async (slug: string, name: string, file?: File | null) => {
+  const handleUpdateTag = async (
+    slug: string,
+    nameOrPayload: UpdateVideoTagDto | string,
+    file?: File | null
+  ) => {
     setActionError(null);
     try {
-      const updatedTag = await liveTvVideosRepository.updateVideoTag(slug, name, file);
-      setTags((prev) => prev.map((t) => (t.slug === slug ? updatedTag : t)));
+      const payload: UpdateVideoTagDto =
+        typeof nameOrPayload === 'string'
+          ? {
+              name: nameOrPayload,
+              thumbnail: file || null,
+            }
+          : nameOrPayload;
+
+      const updatedTag = await liveTvVideosRepository.updateVideoTag(slug, payload);
+
+      setTags((prev) =>
+        prev.map((t) => (t.slug === slug ? { ...t, ...updatedTag } : t))
+      );
       setActionSuccess('Video tag updated successfully');
       setEditTagModalOpen(false);
+      return updatedTag;
     } catch (err: any) {
       setActionError(err.message || 'Failed to update video tag');
       throw err;
@@ -127,6 +219,21 @@ export function useLiveTvVideosController() {
       setActionSuccess('Video tag deleted successfully');
     } catch (err: any) {
       setActionError(err.message || 'Failed to delete video tag');
+    }
+  };
+
+  const handleDailySync = async (slug: string) => {
+    if (!slug) return;
+    setIsSyncing(true);
+    setActionError(null);
+    try {
+      const res = await liveTvVideosRepository.syncTagVideos(slug);
+      setActionSuccess(res?.message || `Videos synced successfully for ${slug}`);
+      await loadTagVideos(slug);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to sync videos');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -161,7 +268,12 @@ export function useLiveTvVideosController() {
     if (!selectedTagSlug) return;
     setActionError(null);
     try {
-      const updatedVideo = await liveTvVideosRepository.updateVideoFromTag(selectedTagSlug, videoId, fileName, viewCount);
+      const updatedVideo = await liveTvVideosRepository.updateVideoFromTag(
+        selectedTagSlug,
+        videoId,
+        fileName,
+        viewCount
+      );
       setVideos((prev) => prev.map((v) => (v.id === videoId ? updatedVideo : v)));
       setActionSuccess('Video updated successfully');
       setEditVideoModalOpen(false);
@@ -172,11 +284,15 @@ export function useLiveTvVideosController() {
   };
 
   return {
+    selectedLanguage,
+    setSelectedLanguage: handleLanguageChange,
     tags,
+    segregatedTags,
     selectedTagSlug,
     handleTagSelect,
     videos,
     loading,
+    isSyncing,
     actionError,
     actionSuccess,
     setActionError,
@@ -204,10 +320,13 @@ export function useLiveTvVideosController() {
     handleCreateTag,
     handleUpdateTag,
     handleDeleteTag,
+    handleDailySync,
     handlePlayVideo,
     handleDeleteVideo,
     handleOpenEditTagModal,
     handleOpenEditVideoModal,
     handleUpdateVideo,
+    fetchTags,
+    loadTagVideos,
   };
 }

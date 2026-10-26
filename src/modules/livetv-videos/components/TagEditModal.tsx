@@ -12,15 +12,21 @@ import {
   IconButton,
   Box,
   CircularProgress,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Alert,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { VideoTag } from '../domain/LiveTvVideo';
+import { VideoTag, TagLanguage } from '../domain/LiveTvVideo';
+import { UpdateVideoTagDto } from '../repositories/live-tv-videos.repository';
 
 interface TagEditModalProps {
   open: boolean;
   onClose: () => void;
   tag: VideoTag | null;
-  onSave: (slug: string, name: string, file?: File | null) => Promise<void>;
+  onSave: (slug: string, payload: UpdateVideoTagDto | string, file?: File | null) => Promise<any>;
   isDark: boolean;
   t: Record<string, string>;
 }
@@ -34,6 +40,8 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
   t,
 }) => {
   const [name, setName] = useState('');
+  const [language, setLanguage] = useState<TagLanguage>('te');
+  const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,11 +58,14 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
 
   useEffect(() => {
     if (tag) {
-      setName(tag.name);
-      // If tag has a thumbnailUrl, set it as preview initially
+      setName(tag.name || '');
+      setLanguage(tag.language || 'te');
+      setDescription(tag.description || '');
       setPreview(tag.thumbnailUrl || null);
     } else {
       setName('');
+      setLanguage('te');
+      setDescription('');
       setPreview(null);
     }
     setFile(null);
@@ -62,7 +73,6 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
   }, [tag, open]);
 
   useEffect(() => {
-    // Cleanup object URL
     if (!open) {
       if (preview && preview.startsWith('blob:')) URL.revokeObjectURL(preview);
     }
@@ -77,7 +87,12 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      await onSave(tag.slug, name.trim(), file);
+      await onSave(tag.slug, {
+        name: name.trim(),
+        language,
+        description: description.trim(),
+        thumbnail: file,
+      });
       setFile(null);
     } catch (err: any) {
       setError(err.message || 'Failed to edit tag');
@@ -86,11 +101,13 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
     }
   };
 
+  const isLanguageChanged = tag && tag.language && tag.language !== language;
+
   return (
     <Dialog
       open={open}
       onClose={isSubmitting ? undefined : onClose}
-      maxWidth="xs"
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
@@ -109,10 +126,11 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
           <TextField
             label={t.tagNameLabel || 'Tag Name'}
             fullWidth
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={isSubmitting}
@@ -126,12 +144,13 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
               },
             }}
           />
+
           <TextField
             label={t.tagSlugLabel || 'Tag Slug'}
             fullWidth
             value={tag?.slug || ''}
             disabled
-            helperText={t.tagSlugEditHelper || 'Slug cannot be changed to prevent folder desync.'}
+            helperText={t.tagSlugEditHelper || 'Slug identifier cannot be edited.'}
             FormHelperTextProps={{ style: { color: isDark ? '#94a3b8' : undefined } }}
             InputLabelProps={{ style: { color: isDark ? '#94a3b8' : undefined } }}
             InputProps={{
@@ -143,7 +162,67 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
               },
             }}
           />
-          
+
+          <FormControl fullWidth>
+            <InputLabel id="edit-tag-language-select-label" sx={{ color: isDark ? '#94a3b8' : undefined }}>
+              {t.language || 'Language'}
+            </InputLabel>
+            <Select
+              labelId="edit-tag-language-select-label"
+              value={language}
+              label={t.language || 'Language'}
+              onChange={(e) => setLanguage(e.target.value as TagLanguage)}
+              disabled={isSubmitting}
+              sx={{
+                color: isDark ? '#ffffff' : '#1c1445',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : undefined,
+                },
+                '& .MuiSvgIcon-root': {
+                  color: isDark ? '#ffffff' : undefined,
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: isDark ? '#1a1340' : '#ffffff',
+                    color: isDark ? '#ffffff' : '#1c1445',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="te">{t.teluguOption || 'Telugu (te)'}</MenuItem>
+              <MenuItem value="ml">{t.malayalamOption || 'Malayalam (ml)'}</MenuItem>
+              <MenuItem value="en">{t.englishOption || 'English (en)'}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {isLanguageChanged && (
+            <Alert severity="info" sx={{ borderRadius: '12px' }}>
+              {t.slugChangeWarning ||
+                'Changing language will automatically relocate the show folder on the server.'}
+            </Alert>
+          )}
+
+          <TextField
+            label={t.descriptionLabel || 'Description'}
+            fullWidth
+            multiline
+            rows={2}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={isSubmitting}
+            InputLabelProps={{ style: { color: isDark ? '#94a3b8' : undefined } }}
+            InputProps={{
+              style: { color: isDark ? '#ffffff' : undefined },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : undefined },
+              },
+            }}
+          />
+
           <Box>
             <Typography variant="body2" sx={{ mb: 1, color: isDark ? '#94a3b8' : undefined }}>
               {t.tagImageLabel || 'Thumbnail Image (Optional)'}
@@ -154,14 +233,25 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
             </Button>
             {preview && (
               <Box sx={{ mt: 2, position: 'relative', width: 100, height: 100 }}>
-                <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
+                <img
+                  src={preview}
+                  alt="Preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }}
+                />
                 <IconButton
                   size="small"
                   onClick={() => {
                     setFile(null);
                     setPreview(null);
                   }}
-                  sx={{ position: 'absolute', top: -8, right: -8, backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' } }}
+                  sx={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    color: 'white',
+                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
+                  }}
                 >
                   <Close fontSize="small" />
                 </IconButton>
@@ -185,7 +275,7 @@ export const TagEditModal: React.FC<TagEditModalProps> = ({
           disabled={isSubmitting}
           sx={{ backgroundColor: '#2563eb', '&:hover': { backgroundColor: '#1d4ed8' } }}
         >
-          {isSubmitting ? <CircularProgress size={24} /> : (t.save || 'Save')}
+          {isSubmitting ? <CircularProgress size={24} /> : t.save || 'Save'}
         </Button>
       </DialogActions>
     </Dialog>

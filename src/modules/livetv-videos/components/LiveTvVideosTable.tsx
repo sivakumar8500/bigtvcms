@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography, IconButton, Tooltip } from '@mui/material';
-import { PlayCircleOutline, LiveTv, DeleteOutline, Edit } from '@mui/icons-material';
+import { Box, Typography, IconButton, Tooltip, Chip } from '@mui/material';
+import { PlayCircleOutline, LiveTv, DeleteOutline, Edit, FolderOpen, Visibility } from '@mui/icons-material';
 import { TagVideo } from '../domain/LiveTvVideo';
 
 interface LiveTvVideosTableProps {
@@ -71,10 +71,11 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
         }}
       >
         <Box sx={colStyle(0.6)}>#</Box>
-        <Box sx={colStyle(4.0)}>{t.colFileName || 'File Name'}</Box>
-        <Box sx={colStyle(1.5)}>{t.colSize || 'Size'}</Box>
-        <Box sx={colStyle(2.0)}>{t.colDate || 'Created At'}</Box>
-        <Box sx={colStyle(1.0)}>{t.colActions || 'Actions'}</Box>
+        <Box sx={colStyle(3.5)}>{t.colFileName || 'File Name'}</Box>
+        <Box sx={colStyle(1.2)}>{t.folder || 'Folder'}</Box>
+        <Box sx={colStyle(1.3)}>{t.colSize || 'Size'}</Box>
+        <Box sx={colStyle(1.8)}>{t.colDate || 'Created At'}</Box>
+        <Box sx={colStyle(1.6)}>{t.colActions || 'Actions'}</Box>
       </Box>
 
       {/* Table Body */}
@@ -103,31 +104,62 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
               </Box>
 
               {/* File Name */}
-              <Box sx={colStyle(4.0)}>
-                <Box onClick={() => onPlay(item)} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={colStyle(3.5)}>
+                <Box
+                  onClick={() => onPlay(item)}
+                  sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5 }}
+                >
                   <LiveTv sx={{ fontSize: 24, color: isDark ? '#a5b4fc' : '#2563eb' }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-all', '&:hover': { color: '#2563eb' } }}>
-                    {item.fileName}
-                  </Typography>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, wordBreak: 'break-all', '&:hover': { color: '#2563eb' } }}
+                    >
+                      {item.fileName}
+                    </Typography>
+                    {item.viewCount !== undefined && item.viewCount > 0 && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.2 }}>
+                        <Visibility sx={{ fontSize: 13, opacity: 0.6 }} />
+                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                          {item.viewCount} {t.views || 'views'}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               </Box>
 
+              {/* Folder */}
+              <Box sx={colStyle(1.2)}>
+                <Chip
+                  icon={<FolderOpen sx={{ fontSize: '14px !important' }} />}
+                  label={item.folder || 'root'}
+                  size="small"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                    backgroundColor: isDark ? 'rgba(165,180,252,0.12)' : 'rgba(37,99,235,0.08)',
+                    color: isDark ? '#a5b4fc' : '#2563eb',
+                  }}
+                />
+              </Box>
+
               {/* Size */}
-              <Box sx={colStyle(1.5)}>
+              <Box sx={colStyle(1.3)}>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {formatSize(item.sizeBytes)}
                 </Typography>
               </Box>
 
               {/* Date */}
-              <Box sx={colStyle(2.0)}>
+              <Box sx={colStyle(1.8)}>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
                   {formatDate(item.createdAt)}
                 </Typography>
               </Box>
 
               {/* Actions */}
-              <Box sx={colStyle(1.0)}>
+              <Box sx={colStyle(1.6)}>
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   <Tooltip title={t.playStream || 'Play Stream / View'}>
                     <IconButton
@@ -154,7 +186,11 @@ export const LiveTvVideosTable: React.FC<LiveTvVideosTableProps> = ({
                       <IconButton
                         size="small"
                         onClick={() => {
-                          if (window.confirm(t.confirmDeleteVideo || 'Are you sure you want to delete this video?')) {
+                          if (
+                            window.confirm(
+                              t.confirmDeleteVideo || 'Are you sure you want to delete this video?'
+                            )
+                          ) {
                             onDeleteVideo(item.fileName);
                           }
                         }}

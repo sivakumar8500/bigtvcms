@@ -161,20 +161,25 @@ export class ApiClient {
               config.params?.skip_lang_param;
 
             if (isBypassLangApi) {
+              const isVideoTags = config.url?.includes('/video-tags');
               if (config.headers) {
                 delete config.headers['Accept-Language'];
                 delete config.headers['accept-language'];
               }
               if (config.params) {
                 delete config.params.lang;
-                delete config.params.language;
+                if (!isVideoTags) {
+                  delete config.params.language;
+                }
                 delete config.params.language_code;
                 if ('skip_lang_param' in config.params) {
                   delete config.params.skip_lang_param;
                 }
               }
               if (config.data && typeof config.data === 'object' && !Array.isArray(config.data)) {
-                delete (config.data as any).language;
+                if (!isVideoTags) {
+                  delete (config.data as any).language;
+                }
                 delete (config.data as any).language_code;
                 delete (config.data as any).lang;
               }
