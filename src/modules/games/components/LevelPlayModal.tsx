@@ -178,6 +178,89 @@ const playTranslations: Record<SupportedLanguage, Record<string, string>> = {
 };
 
 // ─────────────────────────────────────────────
+// BIGTV WATERMARK OVERLAYS (Shown upon completion)
+// ─────────────────────────────────────────────
+const BigTVBoardWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => (
+  <Box
+    data-testid="bigtv-board-watermark"
+    sx={{
+      position: 'absolute',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      pointerEvents: 'none',
+      zIndex: 10,
+      animation: 'watermarkStampIn 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+      '@keyframes watermarkStampIn': {
+        '0%': {
+          opacity: 0,
+          transform: 'scale(0.65) rotate(-12deg)',
+        },
+        '100%': {
+          opacity: 1,
+          transform: 'scale(1) rotate(-6deg)',
+        },
+      },
+    }}
+  >
+    <Box
+      component="img"
+      src="/bigtv_logo.png"
+      alt="BigTV Watermark"
+      sx={{
+        width: '74%',
+        maxHeight: '62%',
+        objectFit: 'contain',
+        opacity: isDark ? 0.38 : 0.30,
+        filter: isDark
+          ? 'drop-shadow(0 4px 16px rgba(0,0,0,0.85))'
+          : 'drop-shadow(0 4px 12px rgba(0,0,0,0.35))',
+        userSelect: 'none',
+      }}
+    />
+  </Box>
+);
+
+const BigTVBackgroundWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => (
+  <Box
+    data-testid="bigtv-bg-watermark"
+    sx={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '92%',
+      maxWidth: '520px',
+      height: '80%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      pointerEvents: 'none',
+      zIndex: 0,
+      opacity: isDark ? 0.08 : 0.05,
+      animation: 'fadeInBgWatermark 0.8s ease-out forwards',
+      '@keyframes fadeInBgWatermark': {
+        from: { opacity: 0 },
+        to: { opacity: isDark ? 0.08 : 0.05 },
+      },
+    }}
+  >
+    <Box
+      component="img"
+      src="/bigtv_logo.png"
+      alt="BigTV Background Watermark"
+      sx={{
+        width: '100%',
+        maxHeight: '100%',
+        objectFit: 'contain',
+        userSelect: 'none',
+      }}
+    />
+  </Box>
+);
+
+// ─────────────────────────────────────────────
 // SUDOKU PLAYER (6×6 and 9×9)
 // ─────────────────────────────────────────────
 const SudokuPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, string> }> = ({
@@ -248,7 +331,8 @@ const SudokuPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, 
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, position: 'relative' }}>
+      {solved && <BigTVBackgroundWatermark isDark={isDark} />}
       {solved && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4caf50' }}>
           <CheckCircle />
@@ -259,9 +343,11 @@ const SudokuPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, 
       {/* Grid */}
       <Box
         sx={{
+          position: 'relative',
           border: isDark ? '2px solid rgba(166,226,245,0.6)' : '2px solid #1c1445',
           borderRadius: '4px',
           display: 'inline-block',
+          overflow: 'hidden',
         }}
       >
         {Array.from({ length: rows }, (_, r) => (
@@ -322,6 +408,7 @@ const SudokuPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, 
             })}
           </Box>
         ))}
+        {solved && <BigTVBoardWatermark isDark={isDark} />}
       </Box>
 
       {/* Number Pad */}
@@ -917,9 +1004,10 @@ const PatchPlayer: React.FC<{
 
   return (
     <Box
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: 1.5 }}
+      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: 1.5, position: 'relative' }}
       onMouseUp={handleMouseUp}
     >
+      {solved && <BigTVBackgroundWatermark isDark={isDark} />}
       {/* Title & Difficulty Pill Badge */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
         <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: isDark ? '#ffffff' : '#292524' }}>
@@ -973,6 +1061,7 @@ const PatchPlayer: React.FC<{
             <IconButton
               size="small"
               onClick={handleHint}
+              aria-label="Hint / Solution"
               sx={{
                 border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #d6cfc5',
                 borderRadius: '8px',
@@ -1204,6 +1293,7 @@ const PatchPlayer: React.FC<{
                 height,
                 boxSizing: 'border-box',
                 bgcolor: patch.color,
+                opacity: solved ? 0.92 : 1,
                 borderRadius: '8px',
                 border: '1.5px solid rgba(255,255,255,0.42)',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.22)',
@@ -1278,6 +1368,9 @@ const PatchPlayer: React.FC<{
             </Box>
           );
         })()}
+
+        {/* BigTV Watermark Stamp over completed board */}
+        {solved && <BigTVBoardWatermark isDark={isDark} />}
       </Box>
     </Box>
   );
@@ -1499,9 +1592,10 @@ const ZipPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, str
 
   return (
     <Box
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%' }}
+      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', position: 'relative' }}
       onMouseUp={handleMouseUp}
     >
+      {solved && <BigTVBackgroundWatermark isDark={isDark} />}
       {/* Rules banner */}
       <Box
         sx={{
@@ -1754,6 +1848,9 @@ const ZipPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, str
             );
           })}
         </svg>
+
+        {/* BigTV Watermark Stamp over completed board */}
+        {solved && <BigTVBoardWatermark isDark={isDark} />}
       </Box>
 
       {/* Control Buttons */}

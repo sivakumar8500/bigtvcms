@@ -804,6 +804,41 @@ describe('Games Module - Comprehensive Test Suite', () => {
       expect(screen.getByText(/Drag/)).toBeInTheDocument();
       expect(screen.getByLabelText('Reset')).toBeInTheDocument();
     });
+
+    it('displays BigTV watermark upon solving puzzle', () => {
+      const onClose = jest.fn();
+      const patchLevel = {
+        id: 'patch-1',
+        levelId: 'patch_001',
+        gameId: 'patch',
+        gameType: 'patch',
+        levelNumber: 1,
+        title: 'Patch Level 1',
+        difficulty: 'medium',
+        status: 'draft',
+        content: {
+          rows: 6,
+          columns: 6,
+        },
+      };
+
+      render(
+        <LevelPlayModal
+          open={true}
+          onClose={onClose}
+          level={patchLevel}
+          gameType="patch"
+          isDark={true}
+        />
+      );
+
+      const hintBtn = screen.getByLabelText('Hint / Solution');
+      fireEvent.click(hintBtn);
+
+      expect(screen.getByText('Board Complete! 🎉')).toBeInTheDocument();
+      expect(screen.getByTestId('bigtv-board-watermark')).toBeInTheDocument();
+      expect(screen.getByTestId('bigtv-bg-watermark')).toBeInTheDocument();
+    });
   });
 
   describe('PatchLevelValidator', () => {
