@@ -55,6 +55,7 @@ export interface LevelItem {
   status: 'draft' | 'published' | 'archived' | string;
   sortOrder?: number;
   content: Record<string, unknown>;
+  publishedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

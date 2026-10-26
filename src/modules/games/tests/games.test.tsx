@@ -68,6 +68,7 @@ const mockLevelsData = [
     difficulty: 'easy',
     status: 'published',
     content: { grid: { rows: 6, columns: 6 } },
+    publishedAt: '2026-10-22T10:30:00Z',
     createdAt: '2026-10-22T10:00:00Z',
   },
   {
@@ -79,6 +80,7 @@ const mockLevelsData = [
     difficulty: 'hard',
     status: 'draft',
     content: { grid: { rows: 9, columns: 9 } },
+    publishedAt: null,
     createdAt: '2026-10-22T11:00:00Z',
   },
 ];
@@ -397,6 +399,8 @@ describe('Games Module - Comprehensive Test Suite', () => {
 
       expect(screen.getByText('Level 1')).toBeInTheDocument();
       expect(screen.getByText('Level 2')).toBeInTheDocument();
+      expect(screen.getByText('Published At')).toBeInTheDocument();
+      expect(screen.getByText('Not Published')).toBeInTheDocument();
 
       // Publish / Unpublish icon clicks
       const unpublishBtns = screen.getAllByTitle('Unpublish (Revert to Draft)');
@@ -532,6 +536,7 @@ describe('Games Module - Comprehensive Test Suite', () => {
       );
 
       expect(screen.getByText(/Level 1/i)).toBeInTheDocument();
+      expect(screen.getByText(/Published At/i)).toBeInTheDocument();
       expect(screen.getByText(/Level Content & Solutions/i)).toBeInTheDocument();
     });
   });

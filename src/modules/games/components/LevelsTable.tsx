@@ -89,6 +89,7 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colLevelTitle}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colDifficulty}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colStatus}</TableCell>
+            <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colPublishedAt}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>{t.colCreatedAt}</TableCell>
             <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }} align="center">
               {t.colActions}
@@ -98,7 +99,7 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} align="center" sx={{ py: 6, color: isDark ? '#d0caeb' : '#5c548a' }}>
+              <TableCell colSpan={7} align="center" sx={{ py: 6, color: isDark ? '#d0caeb' : '#5c548a' }}>
                 <Typography>{t.noLevels}</Typography>
               </TableCell>
             </TableRow>
@@ -166,7 +167,28 @@ export const LevelsTable: React.FC<LevelsTableProps> = ({
                     />
                   </TableCell>
                   <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontSize: '0.82rem' }}>
-                    {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A'}
+                    {row.publishedAt ? (
+                      <Tooltip title={new Date(row.publishedAt).toLocaleString()} arrow>
+                        <span>{new Date(row.publishedAt).toLocaleDateString()}</span>
+                      </Tooltip>
+                    ) : isPublished && row.createdAt ? (
+                      <Tooltip title={new Date(row.createdAt).toLocaleString()} arrow>
+                        <span>{new Date(row.createdAt).toLocaleDateString()}</span>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="caption" sx={{ color: isDark ? '#94a3b8' : '#9ca3af' }}>
+                        {t.notPublished || 'Not Published'}
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontSize: '0.82rem' }}>
+                    {row.createdAt ? (
+                      <Tooltip title={new Date(row.createdAt).toLocaleString()} arrow>
+                        <span>{new Date(row.createdAt).toLocaleDateString()}</span>
+                      </Tooltip>
+                    ) : (
+                      'N/A'
+                    )}
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', alignItems: 'center' }}>

@@ -61,25 +61,25 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
 
       <DialogContent sx={{ mt: 2 }}>
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={6} sm={2.4}>
             <Typography variant="caption" sx={{ color: colorLabel }}>
-              Level Number
+              {t?.colLevelNumber || 'Level Number'}
             </Typography>
             <Typography variant="body1" sx={{ color: colorText, fontWeight: 700 }}>
               #{level.levelNumber}
             </Typography>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={6} sm={2.4}>
             <Typography variant="caption" sx={{ color: colorLabel }}>
-              Difficulty
+              {t?.colDifficulty || 'Difficulty'}
             </Typography>
             <Box sx={{ mt: 0.5 }}>
               <Chip label={level.difficulty?.toUpperCase()} size="small" color="primary" />
             </Box>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={6} sm={2.4}>
             <Typography variant="caption" sx={{ color: colorLabel }}>
-              Status
+              {t?.colStatus || 'Status'}
             </Typography>
             <Box sx={{ mt: 0.5 }}>
               <Chip
@@ -88,6 +88,26 @@ export const LevelViewDialog: React.FC<LevelViewDialogProps> = ({
                 color={level.status === 'published' ? 'success' : 'default'}
               />
             </Box>
+          </Grid>
+          <Grid item xs={6} sm={2.4}>
+            <Typography variant="caption" sx={{ color: colorLabel }}>
+              {t?.colPublishedAt || 'Published Date'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: colorText, mt: 0.5, fontWeight: 600 }}>
+              {level.publishedAt
+                ? new Date(level.publishedAt).toLocaleDateString()
+                : level.status === 'published' && level.createdAt
+                ? new Date(level.createdAt).toLocaleDateString()
+                : t?.notPublished || 'Not Published'}
+            </Typography>
+          </Grid>
+          <Grid item xs={6} sm={2.4}>
+            <Typography variant="caption" sx={{ color: colorLabel }}>
+              {t?.colCreatedAt || 'Created Date'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: colorText, mt: 0.5, fontWeight: 500 }}>
+              {level.createdAt ? new Date(level.createdAt).toLocaleDateString() : 'N/A'}
+            </Typography>
           </Grid>
         </Grid>
 
