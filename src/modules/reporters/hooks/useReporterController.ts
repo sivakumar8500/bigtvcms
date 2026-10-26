@@ -11,8 +11,8 @@ import { reportersRepository } from '../repositories/reporters.repository';
 
 export type { Reporter, ReporterLanguage, ReporterLanguageCode, SegregatedReporters };
 
-export const useReporterController = () => {
-  const [selectedLanguage, setSelectedLanguage] = useState<ReporterLanguageCode>('te');
+export const useReporterController = (initialLanguage?: ReporterLanguageCode) => {
+  const [selectedLanguage, setSelectedLanguage] = useState<ReporterLanguageCode>(initialLanguage || 'te');
   const [data, setData] = useState<Reporter[]>([]);
   const [segregatedData, setSegregatedData] = useState<SegregatedReporters>({
     te: [],

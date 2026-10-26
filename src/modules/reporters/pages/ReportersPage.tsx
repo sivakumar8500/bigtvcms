@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -196,6 +196,31 @@ export const ReportersPage: React.FC = () => {
   const isDark = mode === 'dark';
   const t = translations[language] || translations.en;
 
+  const getEffectiveReporterLanguage = (): ReporterLanguageCode => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (
+          params.get('lang') ||
+          params.get('language') ||
+          params.get('lan') ||
+          params.get('from') ||
+          ''
+        ).toLowerCase();
+        if (urlLang === 'ml' || urlLang === 'malayala' || urlLang === 'malayalam') return 'ml';
+        if (urlLang === 'en' || urlLang === 'english') return 'en';
+        if (urlLang === 'te' || urlLang === 'telugu') return 'te';
+      } catch {
+        // Fallback
+      }
+    }
+    if (language === 'ml') return 'ml';
+    if (language === 'en') return 'en';
+    return 'te';
+  };
+
+  const initialLang = getEffectiveReporterLanguage();
+
   const {
     selectedLanguage,
     setSelectedLanguage,
@@ -220,7 +245,12 @@ export const ReportersPage: React.FC = () => {
     handleDelete,
     handleStatusToggle,
     fetchReporters,
-  } = useReporterController();
+  } = useReporterController(initialLang);
+
+  useEffect(() => {
+    const nextLang = getEffectiveReporterLanguage();
+    setSelectedLanguage(nextLang);
+  }, [language]);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [reporterToDelete, setReporterToDelete] = useState<string | null>(null);
@@ -289,102 +319,67 @@ export const ReportersPage: React.FC = () => {
         <Header title={t.pageTitle} />
 
         <Box sx={{ pt: 2, px: { xs: 2, sm: 3 }, pb: 4, flex: 1, overflowY: 'auto' }}>
-          {/* Top-Level Language Tabs */}
+          {/* Top-Level Language Tab (Only ONE tab based on selected language) */}
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: 1.5,
-              p: 1.5,
+              gap: 1,
               mb: 3,
-              borderRadius: '18px',
-              backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
-              border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.03)',
+              alignItems: 'center',
+              flexWrap: 'wrap',
             }}
           >
-            <Tabs
-              value={selectedLanguage}
-              onChange={(_, val: ReporterLanguageCode) => setSelectedLanguage(val)}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                minHeight: '44px',
-                '& .MuiTab-root': {
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.92rem',
-                  minHeight: '44px',
-                  borderRadius: '12px',
-                  mr: 1,
-                  color: isDark ? '#a5b4fc' : '#5c548a',
-                  transition: 'all 0.2s ease',
-                  '&.Mui-selected': {
-                    color: '#ffffff',
+            {(() => {
+              const currentLang: ReporterLanguageCode =
+                selectedLanguage && selectedLanguage !== 'all'
+                  ? selectedLanguage
+                  : getEffectiveReporterLanguage();
+
+              const tabLabel =
+                currentLang === 'en'
+                  ? t.englishTab || 'English (en)'
+                  : currentLang === 'ml'
+                  ? t.malayalamTab || 'Malayalam (ml)'
+                  : t.teluguTab || 'Telugu (te) ★Default';
+
+              const count = languageCounts[currentLang] || 0;
+
+              return (
+                <Button
+                  id={`reporter-lang-tab-${currentLang}`}
+                  variant="contained"
+                  size="small"
+                  onClick={() => setSelectedLanguage(currentLang)}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    borderRadius: '12px',
+                    px: 2.2,
+                    py: 0.9,
                     backgroundColor: '#2563eb',
+                    color: '#ffffff',
                     boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
-                  },
-                },
-                '& .MuiTabs-indicator': {
-                  display: 'none',
-                },
-              }}
-            >
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.allLanguagesTab}</span>
-                    <Chip
-                      size="small"
-                      label={languageCounts.all}
-                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                    />
-                  </Box>
-                }
-                value="all"
-                icon={<LanguageIcon sx={{ fontSize: '1.1rem' }} />}
-                iconPosition="start"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.teluguTab}</span>
-                    <Chip
-                      size="small"
-                      label={languageCounts.te}
-                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                    />
-                  </Box>
-                }
-                value="te"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.englishTab}</span>
-                    <Chip
-                      size="small"
-                      label={languageCounts.en}
-                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                    />
-                  </Box>
-                }
-                value="en"
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{t.malayalamTab}</span>
-                    <Chip
-                      size="small"
-                      label={languageCounts.ml}
-                      sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }}
-                    />
-                  </Box>
-                }
-                value="ml"
-              />
-            </Tabs>
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <span>{tabLabel}</span>
+                  <Chip
+                    size="small"
+                    label={count}
+                    sx={{
+                      height: 20,
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                      color: '#ffffff',
+                    }}
+                  />
+                </Button>
+              );
+            })()}
           </Box>
 
           {/* Toolbar */}

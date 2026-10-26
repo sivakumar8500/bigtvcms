@@ -93,6 +93,7 @@ const mockEnglishReporters: Reporter[] = [
       designation: 'Political Correspondent',
       bureau: 'New Delhi',
       workPhone: '9123456789',
+      workEmail: 'sarah@bigtv.com',
     },
   },
 ];
@@ -141,6 +142,9 @@ describe('Reporters Module - Multi-Language System', () => {
           },
         });
       }
+      if (url.startsWith('/reporters/rep-en')) {
+        return Promise.resolve({ data: mockEnglishReporters[0] });
+      }
       if (url.startsWith('/reporters/')) {
         return Promise.resolve({ data: mockTeluguReporters[0] });
       }
@@ -175,7 +179,7 @@ describe('Reporters Module - Multi-Language System', () => {
     });
   });
 
-  it('renders page header, default Telugu language tab with count, and table', async () => {
+  it('renders page header, single English language tab with count, and table', async () => {
     await act(async () => {
       render(
         <ThemeProvider>
@@ -188,54 +192,88 @@ describe('Reporters Module - Multi-Language System', () => {
       expect(screen.getByText('Reporters')).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/Telugu \(te\) ★Default/i)).toBeInTheDocument();
-    expect(screen.getAllByText('Rahul Sharma').length).toBeGreaterThan(0);
-    expect(screen.getByText('Senior Reporter')).toBeInTheDocument();
-    expect(screen.getByText('Hyderabad, Telangana')).toBeInTheDocument();
+    // Only English tab is shown, others are not
+    expect(screen.getByText(/English \(en\)/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Telugu \(te\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Malayalam \(ml\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/All Languages/i)).not.toBeInTheDocument();
+
+    expect(screen.getAllByText('Sarah Jenkins').length).toBeGreaterThan(0);
+    expect(screen.getByText('Political Correspondent')).toBeInTheDocument();
   });
 
-  it('switches between English, Malayalam, and All Languages tabs', async () => {
+  it('shows only one language tab based on active language', async () => {
+    // English mode
+    act(() => {
+      useLanguageStore.setState({ language: 'en' });
+    });
+
+    let rerenderFn: any;
     await act(async () => {
-      render(
+      const { rerender } = render(
+        <ThemeProvider>
+          <ReportersPage />
+        </ThemeProvider>
+      );
+      rerenderFn = rerender;
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Reporters')).toBeInTheDocument();
+    });
+
+    // In English mode, shows only English tab
+    expect(screen.getByText(/English \(en\)/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Telugu \(te\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Malayalam \(ml\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/All Languages/i)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
+    });
+
+    // Switch to Telugu mode
+    act(() => {
+      useLanguageStore.setState({ language: 'te' });
+    });
+    await act(async () => {
+      rerenderFn(
         <ThemeProvider>
           <ReportersPage />
         </ThemeProvider>
       );
     });
 
+    // In Telugu mode, shows only Telugu tab
+    await waitFor(() => {
+      expect(screen.getByText(/తెలుగు \(te\) ★డిఫాల్ట్/i)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/English \(en\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Malayalam \(ml\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/All Languages/i)).not.toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
     });
 
-    // Switch to English tab
-    const enTab = screen.getByText(/English \(en\)/i);
+    // Switch to Malayalam mode
+    act(() => {
+      useLanguageStore.setState({ language: 'ml' });
+    });
     await act(async () => {
-      fireEvent.click(enTab);
+      rerenderFn(
+        <ThemeProvider>
+          <ReportersPage />
+        </ThemeProvider>
+      );
     });
 
+    // In Malayalam mode, shows only Malayalam tab
     await waitFor(() => {
-      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
+      expect(screen.getByText(/മലയാളം \(ml\)/i)).toBeInTheDocument();
     });
-
-    // Switch to Malayalam tab
-    const mlTab = screen.getByText(/Malayalam \(ml\)/i);
-    await act(async () => {
-      fireEvent.click(mlTab);
-    });
-
+    expect(screen.queryByText(/തെലുങ്ക് \(te\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ഇംഗ്ലീഷ് \(en\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/എല്ലാ ഭാഷകളും/i)).not.toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText('Anand Kumar')).toBeInTheDocument();
-    });
-
-    // Switch to All Languages tab
-    const allTab = screen.getByText(/All Languages/i);
-    await act(async () => {
-      fireEvent.click(allTab);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
-      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
       expect(screen.getByText('Anand Kumar')).toBeInTheDocument();
     });
   });
@@ -250,14 +288,14 @@ describe('Reporters Module - Multi-Language System', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
     });
 
     const searchInput = screen.getByPlaceholderText(/Filter by Name/i);
-    fireEvent.change(searchInput, { target: { value: 'Rahul' } });
+    fireEvent.change(searchInput, { target: { value: 'Sarah' } });
 
     await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
     });
 
     const clearBtn = screen.getByRole('button', { name: /Clear Filters/i });
@@ -276,7 +314,7 @@ describe('Reporters Module - Multi-Language System', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
     });
 
     const activeChip = screen.getByText('Active');
@@ -285,7 +323,7 @@ describe('Reporters Module - Multi-Language System', () => {
     });
 
     expect(eventsApiClient.patch).toHaveBeenCalledWith(
-      '/reporters/rep-te-1',
+      '/reporters/rep-en-1',
       expect.objectContaining({ isActive: false })
     );
   });
@@ -300,7 +338,7 @@ describe('Reporters Module - Multi-Language System', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
     });
 
     const viewBtn = screen.getAllByTestId('VisibilityIcon')[0].closest('button')!;
@@ -308,8 +346,8 @@ describe('Reporters Module - Multi-Language System', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Reporter Details')).toBeInTheDocument();
-      expect(screen.getAllByText('Senior Reporter').length).toBeGreaterThan(0);
-      expect(screen.getByText('rahul@bigtv.com')).toBeInTheDocument();
+      expect(screen.getAllByText('Political Correspondent').length).toBeGreaterThan(0);
+      expect(screen.getByText('sarah@bigtv.com')).toBeInTheDocument();
     });
 
     const closeBtn = screen.getByRole('button', { name: 'Close' });
@@ -326,7 +364,7 @@ describe('Reporters Module - Multi-Language System', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
+      expect(screen.getByText('Sarah Jenkins')).toBeInTheDocument();
     });
 
     const tableDeleteBtn = screen.getByRole('button', { name: 'Delete' });
@@ -342,7 +380,7 @@ describe('Reporters Module - Multi-Language System', () => {
       fireEvent.click(confirmDeleteBtn);
     });
 
-    expect(eventsApiClient.delete).toHaveBeenCalledWith('/reporters/rep-te-1');
+    expect(eventsApiClient.delete).toHaveBeenCalledWith('/reporters/rep-en-1');
   });
 
   it('supports multilingual text switching across Telugu, Hindi, and Malayalam', async () => {
