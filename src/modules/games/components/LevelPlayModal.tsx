@@ -190,7 +190,7 @@ const BigTVBoardWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => (
       alignItems: 'center',
       justifyContent: 'center',
       pointerEvents: 'none',
-      zIndex: 10,
+      zIndex: 25,
       animation: 'watermarkStampIn 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
       '@keyframes watermarkStampIn': {
         '0%': {
@@ -209,13 +209,13 @@ const BigTVBoardWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => (
       src="/bigtv_logo.png"
       alt="BigTV Watermark"
       sx={{
-        width: '74%',
-        maxHeight: '62%',
+        width: '78%',
+        maxHeight: '66%',
         objectFit: 'contain',
-        opacity: isDark ? 0.38 : 0.30,
+        opacity: isDark ? 0.46 : 0.38,
         filter: isDark
-          ? 'drop-shadow(0 4px 16px rgba(0,0,0,0.85))'
-          : 'drop-shadow(0 4px 12px rgba(0,0,0,0.35))',
+          ? 'drop-shadow(0 4px 18px rgba(0,0,0,0.92))'
+          : 'drop-shadow(0 4px 14px rgba(0,0,0,0.35))',
         userSelect: 'none',
       }}
     />
@@ -230,20 +230,24 @@ const BigTVBackgroundWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => 
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      width: '92%',
-      maxWidth: '520px',
-      height: '80%',
+      width: '100%',
+      maxWidth: '650px',
+      height: '90%',
+      maxHeight: '520px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       pointerEvents: 'none',
       zIndex: 0,
-      opacity: isDark ? 0.08 : 0.05,
       animation: 'fadeInBgWatermark 0.8s ease-out forwards',
       '@keyframes fadeInBgWatermark': {
         from: { opacity: 0 },
-        to: { opacity: isDark ? 0.08 : 0.05 },
+        to: { opacity: 1 },
       },
+      borderRadius: '24px',
+      background: isDark
+        ? 'radial-gradient(circle, rgba(239,68,68,0.14) 0%, rgba(26,17,64,0) 75%)'
+        : 'radial-gradient(circle, rgba(239,68,68,0.09) 0%, rgba(255,255,255,0) 75%)',
     }}
   >
     <Box
@@ -251,9 +255,13 @@ const BigTVBackgroundWatermark: React.FC<{ isDark: boolean }> = ({ isDark }) => 
       src="/bigtv_logo.png"
       alt="BigTV Background Watermark"
       sx={{
-        width: '100%',
-        maxHeight: '100%',
+        width: '88%',
+        maxHeight: '78%',
         objectFit: 'contain',
+        opacity: isDark ? 0.24 : 0.18,
+        filter: isDark
+          ? 'drop-shadow(0 0 45px rgba(220, 38, 38, 0.45))'
+          : 'drop-shadow(0 0 30px rgba(220, 38, 38, 0.25))',
         userSelect: 'none',
       }}
     />
@@ -450,14 +458,42 @@ const SudokuPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, 
         </Button>
       </Box>
 
-      <Button
-        startIcon={<RestartAlt />}
-        onClick={reset}
-        size="small"
-        sx={{ textTransform: 'none', color: isDark ? '#d0caeb' : '#5c548a' }}
-      >
-        {t.reset}
-      </Button>
+      <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Button
+          startIcon={<RestartAlt />}
+          onClick={reset}
+          size="small"
+          variant="outlined"
+          sx={{
+            textTransform: 'none',
+            borderRadius: '8px',
+            borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+            color: isDark ? '#d0caeb' : '#475569',
+          }}
+        >
+          {t.reset}
+        </Button>
+        {solution.length > 0 && (
+          <Button
+            startIcon={<Visibility />}
+            size="small"
+            variant="text"
+            onClick={() => {
+              setGrid(solution);
+              setErrors(new Set());
+              setSolved(true);
+            }}
+            sx={{
+              textTransform: 'none',
+              borderRadius: '8px',
+              color: isDark ? '#a6e2f5' : '#2563eb',
+              fontWeight: 600,
+            }}
+          >
+            {t.showSolution || 'Show Solution'}
+          </Button>
+        )}
+      </Box>
     </Box>
   );
 };
@@ -1894,7 +1930,17 @@ const ZipPlayer: React.FC<{ content: any; isDark: boolean; t: Record<string, str
         {solutionPath.length > 0 && (
           <Button
             startIcon={showSolution ? <VisibilityOff /> : <Visibility />}
-            onClick={() => setShowSolution((prev) => !prev)}
+            onClick={() => {
+              const nextState = !showSolution;
+              setShowSolution(nextState);
+              if (nextState) {
+                setPath(solutionPath);
+                setSolved(true);
+                setWarningMessage(null);
+              } else {
+                setSolved(false);
+              }
+            }}
             size="small"
             variant="text"
             sx={{
