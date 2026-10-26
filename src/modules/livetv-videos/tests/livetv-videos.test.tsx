@@ -224,8 +224,7 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
       expect(screen.getByText('Video Tags & Stream Management')).toBeInTheDocument();
     });
 
-    // Default Telugu tab active
-    expect(screen.getByText(/Telugu \(te\) ★Default/i)).toBeInTheDocument();
+    // Default Telugu active
     expect(screen.getAllByText('DNA Daily News').length).toBeGreaterThan(0);
 
     await waitFor(() => {
@@ -233,13 +232,15 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
     });
   });
 
-  it('switches between Malayalam, English, and All Languages tabs', async () => {
+  it('switches between Malayalam and English views via language store', async () => {
+    let rerenderFn: any;
     await act(async () => {
-      render(
+      const { rerender } = render(
         <ThemeProvider>
           <LiveTvVideosPage />
         </ThemeProvider>
       );
+      rerenderFn = rerender;
     });
 
     await waitFor(() => {
@@ -247,35 +248,35 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
     });
 
     // Switch to Malayalam
-    const mlTab = screen.getByText(/Malayalam \(ml\)/i);
+    act(() => {
+      useLanguageStore.setState({ language: 'ml' });
+    });
     await act(async () => {
-      fireEvent.click(mlTab);
+      rerenderFn(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
     });
 
     await waitFor(() => {
       expect(screen.getAllByText('Kerala News Express').length).toBeGreaterThan(0);
     });
 
-    // Switch to English
-    const enTab = screen.getByText(/English \(en\)/i);
+    // Switch back to Telugu
+    act(() => {
+      useLanguageStore.setState({ language: 'te' });
+    });
     await act(async () => {
-      fireEvent.click(enTab);
+      rerenderFn(
+        <ThemeProvider>
+          <LiveTvVideosPage />
+        </ThemeProvider>
+      );
     });
 
     await waitFor(() => {
-      expect(screen.getAllByText('Prime World English').length).toBeGreaterThan(0);
-    });
-
-    // Switch to All Languages
-    const allTab = screen.getByText(/All Languages/i);
-    await act(async () => {
-      fireEvent.click(allTab);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Telugu Shows (Default)')).toBeInTheDocument();
-      expect(screen.getByText('Malayalam Shows')).toBeInTheDocument();
-      expect(screen.getByText('English Shows')).toBeInTheDocument();
+      expect(screen.getAllByText('DNA Daily News').length).toBeGreaterThan(0);
     });
   });
 
@@ -1335,8 +1336,8 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
     expect(screen.queryByText(/English \(en\)/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/എല്ലാ ഭാഷകളും/i)).not.toBeInTheDocument();
 
-    // Verify Malayalam tab IS present
-    expect(screen.getByText(/മലയാളം \(ml\)/i)).toBeInTheDocument();
+    // Verify top language bar is not present
+    expect(screen.queryByText(/മലയാളം \(ml\)/i)).not.toBeInTheDocument();
 
     // Open Create Tag Modal
     const createBtn = screen.getByRole('button', { name: /\+ പുതിയ വീഡിയോ ടാഗ്/i });
@@ -1375,7 +1376,7 @@ describe('LiveTvVideos Module - Multi-Language Video Tags System', () => {
     expect(screen.queryByText(/ఇంగ్లీష్ \(en\)/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/అన్ని భాషలు/i)).not.toBeInTheDocument();
 
-    // Verify Telugu tab IS present
-    expect(screen.getByText(/తెలుగు \(te\) ★డిఫాల్ట్/i)).toBeInTheDocument();
+    // Verify Telugu full bar is removed
+    expect(screen.queryByText(/తెలుగు \(te\) ★డిఫాల్ట్/i)).not.toBeInTheDocument();
   });
 });

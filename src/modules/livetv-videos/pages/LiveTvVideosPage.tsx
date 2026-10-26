@@ -542,60 +542,7 @@ export const LiveTvVideosPage: React.FC = () => {
                 </Alert>
               )}
 
-              {/* Top-Level Language Filter Tabs */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1.5,
-                  p: 1.5,
-                  borderRadius: '18px',
-                  backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
-                  border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-                  boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.03)',
-                }}
-              >
-                <Tabs
-                  value={tabValue}
-                  onChange={(_, val: LanguageCode) => setSelectedLanguage(val)}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  sx={{
-                    minHeight: '44px',
-                    '& .MuiTab-root': {
-                      textTransform: 'none',
-                      fontWeight: 700,
-                      fontSize: '0.92rem',
-                      minHeight: '44px',
-                      borderRadius: '12px',
-                      mr: 1,
-                      color: isDark ? '#a5b4fc' : '#5c548a',
-                      transition: 'all 0.2s ease',
-                      '&.Mui-selected': {
-                        color: '#ffffff',
-                        backgroundColor: '#2563eb',
-                        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
-                      },
-                    },
-                    '& .MuiTabs-indicator': {
-                      display: 'none',
-                    },
-                  }}
-                >
-                  {allowedLanguages.length > 1 && (
-                    <Tab label={t.allLanguagesTab} value="all" icon={<LanguageIcon />} iconPosition="start" />
-                  )}
-                  {allowedLanguages.includes('te') && (
-                    <Tab label={t.teluguTab} value="te" />
-                  )}
-                  {allowedLanguages.includes('ml') && (
-                    <Tab label={t.malayalamTab} value="ml" />
-                  )}
-                  {allowedLanguages.includes('en') && (
-                    <Tab label={t.englishTab} value="en" />
-                  )}
-                </Tabs>
-              </Box>
+
 
               {/* Categorized Accordions if "All Languages" is selected */}
               {selectedLanguage === 'all' && (
@@ -786,203 +733,86 @@ export const LiveTvVideosPage: React.FC = () => {
                 </Box>
               )}
 
-              {/* Selected Tag Card & Stream Actions */}
+              {/* Selected Tag Single-Line Toolbar: Tag Name, Search Bar & Actions (No Card Styling) */}
               {selectedTag ? (
                 <Box
                   sx={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2.5,
-                    p: 3,
-                    borderRadius: '20px',
-                    backgroundColor: isDark ? 'rgba(38,28,86,0.4)' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
-                    boxShadow: isDark
-                      ? '0 8px 32px rgba(0,0,0,0.2)'
-                      : '0 8px 32px rgba(0,0,0,0.04)',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: { xs: 'wrap', md: 'nowrap' },
+                    gap: 2,
+                    py: 0.5,
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: { xs: 'column', md: 'row' },
-                      justifyContent: 'space-between',
-                      alignItems: { xs: 'flex-start', md: 'center' },
-                      gap: 3,
-                    }}
-                  >
-                    {/* Tag Details */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, flexWrap: 'wrap' }}>
-                      {selectedTag.thumbnailUrl ? (
-                        <Avatar
-                          src={selectedTag.thumbnailUrl}
-                          variant="rounded"
-                          sx={{ width: 56, height: 56, borderRadius: '14px' }}
-                        />
-                      ) : (
-                        <Avatar
-                          variant="rounded"
-                          sx={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: '14px',
-                            backgroundColor: isDark ? 'rgba(147,197,253,0.15)' : 'rgba(37,99,235,0.1)',
-                            color: isDark ? '#93c5fd' : '#2563eb',
-                          }}
-                        >
-                          <LiveTv fontSize="medium" />
-                        </Avatar>
-                      )}
-
-                      <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                            {selectedTag.name}
-                          </Typography>
-                          {renderLanguageBadge(selectedTag.language)}
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.3 }}>
-                          <Typography variant="caption" sx={{ opacity: 0.7, fontFamily: 'monospace' }}>
-                            slug: {selectedTag.slug}
-                          </Typography>
-                          {selectedTag.description && (
-                            <>
-                              <Typography variant="caption" sx={{ opacity: 0.4 }}>
-                                •
-                              </Typography>
-                              <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                                {selectedTag.description}
-                              </Typography>
-                            </>
-                          )}
-                        </Box>
-                      </Box>
-
-                      <Box
+                  {/* Left: Tag Name & Badges */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+                    {selectedTag.thumbnailUrl ? (
+                      <Avatar
+                        src={selectedTag.thumbnailUrl}
+                        variant="rounded"
+                        sx={{ width: 38, height: 38, borderRadius: '10px' }}
+                      />
+                    ) : (
+                      <Avatar
+                        variant="rounded"
                         sx={{
-                          width: '1px',
-                          height: '36px',
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-                          display: { xs: 'none', sm: 'block' },
+                          width: 38,
+                          height: 38,
+                          borderRadius: '10px',
+                          backgroundColor: isDark ? 'rgba(147,197,253,0.15)' : 'rgba(37,99,235,0.1)',
+                          color: isDark ? '#93c5fd' : '#2563eb',
+                        }}
+                      >
+                        <LiveTv fontSize="small" />
+                      </Avatar>
+                    )}
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.15rem' }}>
+                        {selectedTag.name}
+                      </Typography>
+                      {renderLanguageBadge(selectedTag.language)}
+                      <Chip
+                        size="small"
+                        label={`${stats.total || 0}`}
+                        title={t.totalVideos}
+                        sx={{
+                          fontWeight: 700,
+                          height: 22,
+                          fontSize: '0.72rem',
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                          color: isDark ? '#cbd5e1' : '#475569',
                         }}
                       />
-
-                      {/* Video Stats */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 40,
-                            height: 40,
-                            borderRadius: '10px',
-                            backgroundColor: isDark
-                              ? 'rgba(147,197,253,0.15)'
-                              : 'rgba(37,99,235,0.1)',
-                            color: isDark ? '#93c5fd' : '#2563eb',
-                          }}
-                        >
-                          <LiveTv fontSize="small" />
-                        </Box>
-                        <Box>
-                          <Typography
-                            variant="caption"
-                            sx={{ opacity: 0.7, textTransform: 'uppercase', fontWeight: 700 }}
-                          >
-                            {t.totalVideos}
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1, mt: 0.3 }}>
-                            {stats.total}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-
-                    {/* Actions: Daily Sync, Edit, Delete */}
-                    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                      <Button
-                        variant="outlined"
-                        startIcon={isSyncing ? <CircularProgress size={16} /> : <Sync />}
-                        disabled={isSyncing}
-                        onClick={() => handleDailySync(selectedTag.slug)}
-                        sx={{
-                          borderRadius: '12px',
-                          textTransform: 'none',
-                          fontWeight: 700,
-                          borderColor: isDark ? 'rgba(147,197,253,0.4)' : 'rgba(37,99,235,0.4)',
-                          color: isDark ? '#93c5fd' : '#2563eb',
-                          '&:hover': {
-                            borderColor: '#2563eb',
-                            backgroundColor: isDark
-                              ? 'rgba(37,99,235,0.1)'
-                              : 'rgba(37,99,235,0.06)',
-                          },
-                        }}
-                      >
-                        {isSyncing ? t.syncingBtn : t.dailySyncBtn}
-                      </Button>
-
-                      <Button
-                        variant="outlined"
-                        startIcon={<Edit />}
-                        onClick={() => handleOpenEditTagModal(selectedTag)}
-                        sx={{
-                          borderRadius: '12px',
-                          textTransform: 'none',
-                          fontWeight: 700,
-                          borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                          color: isDark ? '#ffffff' : '#1c1445',
-                          '&:hover': {
-                            borderColor: isDark ? '#ffffff' : '#1c1445',
-                            backgroundColor: isDark
-                              ? 'rgba(255,255,255,0.05)'
-                              : 'rgba(0,0,0,0.04)',
-                          },
-                        }}
-                      >
-                        {t.editTag}
-                      </Button>
-
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        startIcon={<DeleteSweep />}
-                        onClick={() => setDeleteConfirmOpen(true)}
-                        sx={{
-                          borderRadius: '12px',
-                          textTransform: 'none',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {t.deleteTag}
-                      </Button>
                     </Box>
                   </Box>
 
-                  {/* Search Bar */}
+                  {/* Middle: Search Bar */}
                   <TextField
-                    fullWidth
+                    size="small"
                     placeholder={t.searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search sx={{ color: isDark ? '#a5b4fc' : '#64748b' }} />
+                          <Search sx={{ color: isDark ? '#a5b4fc' : '#64748b', fontSize: 20 }} />
                         </InputAdornment>
                       ),
                     }}
                     sx={{
+                      flex: { xs: '1 1 100%', md: '1 1 auto' },
+                      maxWidth: { md: 400 },
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: '14px',
-                        backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : '#f8fafc',
+                        borderRadius: '12px',
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
                         color: isDark ? '#ffffff' : '#1c1445',
                         '& fieldset': {
-                          borderColor: 'transparent',
+                          borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
                         },
                         '&:hover fieldset': {
-                          borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                          borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
                         },
                         '&.Mui-focused fieldset': {
                           borderColor: '#2563eb',
@@ -990,15 +820,81 @@ export const LiveTvVideosPage: React.FC = () => {
                       },
                     }}
                   />
+
+                  {/* Right: Action Buttons */}
+                  <Box sx={{ display: 'flex', gap: 1.2, alignItems: 'center', flexShrink: 0 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={isSyncing ? <CircularProgress size={14} /> : <Sync sx={{ fontSize: 18 }} />}
+                      disabled={isSyncing}
+                      onClick={() => handleDailySync(selectedTag.slug)}
+                      sx={{
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        height: 38,
+                        px: 1.8,
+                        borderColor: isDark ? 'rgba(147,197,253,0.4)' : 'rgba(37,99,235,0.4)',
+                        color: isDark ? '#93c5fd' : '#2563eb',
+                        '&:hover': {
+                          borderColor: '#2563eb',
+                          backgroundColor: isDark
+                            ? 'rgba(37,99,235,0.1)'
+                            : 'rgba(37,99,235,0.06)',
+                        },
+                      }}
+                    >
+                      {isSyncing ? t.syncingBtn : t.dailySyncBtn}
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Edit sx={{ fontSize: 18 }} />}
+                      onClick={() => handleOpenEditTagModal(selectedTag)}
+                      sx={{
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        height: 38,
+                        px: 1.8,
+                        borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                        color: isDark ? '#ffffff' : '#1c1445',
+                        '&:hover': {
+                          borderColor: isDark ? '#ffffff' : '#1c1445',
+                          backgroundColor: isDark
+                            ? 'rgba(255,255,255,0.05)'
+                            : 'rgba(0,0,0,0.04)',
+                        },
+                      }}
+                    >
+                      {t.editTag}
+                    </Button>
+
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteSweep sx={{ fontSize: 18 }} />}
+                      onClick={() => setDeleteConfirmOpen(true)}
+                      sx={{
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        height: 38,
+                        px: 1.8,
+                      }}
+                    >
+                      {t.deleteTag}
+                    </Button>
+                  </Box>
                 </Box>
               ) : (
                 <Box
                   sx={{
-                    p: 4,
+                    py: 3,
                     textAlign: 'center',
-                    borderRadius: '20px',
-                    backgroundColor: isDark ? 'rgba(38,28,86,0.35)' : '#ffffff',
-                    border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
                   }}
                 >
                   <Typography variant="body1" sx={{ opacity: 0.7 }}>
