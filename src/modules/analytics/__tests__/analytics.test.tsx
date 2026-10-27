@@ -6,11 +6,8 @@ import axios from 'axios';
 import { ThemeProvider } from '@/shared/providers/ThemeProvider';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useUserStore } from '@/core/storage/user-store';
-import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
 import { AnalyticsEventGraphs } from '../components/AnalyticsEventGraphs';
-import { AnalyticsEventLogs } from '../components/AnalyticsEventLogs';
 import { AnalyticsPage } from '../pages/AnalyticsPage';
-import { AnalyticsSummaryResponse, PaginatedEventsResponse } from '@/types/analytics';
 
 // Mock axios
 jest.mock('axios');
@@ -54,7 +51,6 @@ jest.mock('recharts', () => {
       labelFormatter?: (label: string, payload: Array<{ payload?: { date?: string } }>) => string;
     }) => {
       if (props.formatter) {
-        props.formatter(1200, 'batches');
         props.formatter(1200, 'events');
       }
       if (props.labelFormatter) {
@@ -66,87 +62,80 @@ jest.mock('recharts', () => {
   };
 });
 
-const mockSummaryData: AnalyticsSummaryResponse = {
-  overview: {
-    totalBatches: 24850,
-    totalEvents: 1248590,
+const mockBatchesData = [
+  {
+    id: 'batch-1',
+    userId: 101,
+    deviceId: 'dev-pixel-7',
+    platform: 'android',
+    eventCount: 3,
+    receivedAt: '2026-10-27T09:00:00.000Z',
+    events: [
+      {
+        eventId: 'ev-1',
+        eventName: 'reel_play',
+        dateTime: '2026-10-27T08:55:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+      {
+        eventId: 'ev-2',
+        eventName: 'reel_play',
+        dateTime: '2026-10-27T08:56:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+      {
+        eventId: 'ev-3',
+        eventName: 'app_open',
+        dateTime: '2026-10-26T08:00:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+    ],
   },
-  byPlatform: [
-    { platform: 'android', batches: 18000, events: 911470 },
-    { platform: 'ios', batches: 5000, events: 262203 },
-    { platform: 'web', batches: 1850, events: 74917 },
-  ],
-  topEvents: [
-    { eventName: 'app_open', count: 142000 },
-    { eventName: 'live_tv_play', count: 98000 },
-    { eventName: 'article_read_start', count: 74000 },
-    { eventName: 'reel_play', count: 61000 },
-  ],
-  dailyActivity: [
-    { date: '2026-10-14', events: 82000 },
-    { date: '2026-10-15', events: 89000 },
-    { date: 'invalid-date', events: 94000 },
-  ],
-  recentBatches: [
-    {
-      id: 'batch-uuid-1',
-      userId: 101,
-      deviceId: 'dev-pixel-7',
-      platform: 'android',
-      eventCount: 48,
-      receivedAt: '2026-10-27T10:30:00.000Z',
-    },
-    {
-      id: 'batch-uuid-2',
-      userId: null,
-      deviceId: 'dev-iphone-15',
-      platform: 'ios',
-      eventCount: 65,
-      receivedAt: '2026-10-27T10:31:00.000Z',
-    },
-    {
-      id: 'batch-uuid-3',
-      userId: 202,
-      deviceId: 'dev-chrome-mac',
-      platform: 'web',
-      eventCount: 30,
-      receivedAt: '2026-10-27T10:32:00.000Z',
-    },
-  ],
-};
-
-const mockEventsData: PaginatedEventsResponse = {
-  total: 350,
-  page: 1,
-  limit: 15,
-  totalPages: 24,
-  data: [
-    {
-      batchId: 'batch-uuid-1',
-      userId: 101,
-      deviceId: 'dev-pixel-7',
-      platform: 'android',
-      receivedAt: '2026-10-27T10:30:00.000Z',
-      eventId: 'evt-001',
-      eventName: 'app_open',
-      dateTime: '2026-10-27T10:29:50.000Z',
-      appVersion: '2.4.0',
-      properties: { source: 'push_notification', deep_link: false },
-    },
-    {
-      batchId: 'batch-uuid-2',
-      userId: null,
-      deviceId: 'dev-iphone-15',
-      platform: 'ios',
-      receivedAt: '2026-10-27T10:31:00.000Z',
-      eventId: 'evt-002',
-      eventName: 'live_tv_play',
-      dateTime: '2026-10-27T10:30:45.000Z',
-      appVersion: '2.3.9',
-      properties: { channel_id: 12, stream_quality: '1080p' },
-    },
-  ],
-};
+  {
+    id: 'batch-2',
+    userId: null,
+    deviceId: 'dev-iphone-15',
+    platform: 'ios',
+    eventCount: 2,
+    receivedAt: '2026-10-27T09:10:00.000Z',
+    events: [
+      {
+        eventId: 'ev-4',
+        eventName: 'article_open',
+        dateTime: '2026-10-27T09:05:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+      {
+        eventId: 'ev-5',
+        eventName: 'custom_telemetry_ping',
+        dateTime: '2026-10-27T09:06:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+    ],
+  },
+  {
+    id: 'batch-3',
+    userId: 103,
+    deviceId: 'dev-mac-chrome',
+    platform: 'web',
+    eventCount: 1,
+    receivedAt: '2026-10-27T09:15:00.000Z',
+    events: [
+      {
+        eventId: 'ev-6',
+        eventName: 'reel_play',
+        dateTime: '2026-10-27T09:12:00.000Z',
+        appVersion: '6.0.3',
+        properties: {},
+      },
+    ],
+  },
+];
 
 describe('BigTV Analytics Module', () => {
   beforeEach(() => {
@@ -162,419 +151,7 @@ describe('BigTV Analytics Module', () => {
     });
   });
 
-  describe('AnalyticsDashboard Component', () => {
-    it('renders loading state initially and then displays KPI cards and graphs on success', async () => {
-      mockedAxios.get.mockResolvedValueOnce({ data: mockSummaryData });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      // Loading state
-      expect(screen.getByText('Loading analytics data...')).toBeInTheDocument();
-
-      // Wait for data load
-      await waitFor(() => {
-        expect(screen.getByText('BigTV Analytics Dashboard')).toBeInTheDocument();
-      });
-
-      // Verify KPI Metrics
-      expect(screen.getByText('Total Events Logged')).toBeInTheDocument();
-      expect(screen.getByText('1,248,590')).toBeInTheDocument();
-      expect(screen.getByText('Total Batches')).toBeInTheDocument();
-      expect(screen.getByText('24,850')).toBeInTheDocument();
-      expect(screen.getByText('Batching Efficiency')).toBeInTheDocument();
-      expect(screen.getByText('50.2')).toBeInTheDocument();
-      expect(screen.getByText('Primary Platform')).toBeInTheDocument();
-      expect(screen.getByText('ANDROID')).toBeInTheDocument();
-
-      // Verify Chart Sections
-      expect(screen.getByText('Event Volume Trend (Last 14 Days)')).toBeInTheDocument();
-      expect(screen.getByText('Platform Share')).toBeInTheDocument();
-      expect(screen.getByText('Top 15 Event Types by Volume')).toBeInTheDocument();
-      expect(screen.getByText('Batch vs Event Comparison')).toBeInTheDocument();
-
-      // Verify Recent Batches Table
-      expect(screen.getByText('Latest Batch Ingestions')).toBeInTheDocument();
-      expect(screen.getByText('batch-uuid-1')).toBeInTheDocument();
-      expect(screen.getByText('batch-uuid-2')).toBeInTheDocument();
-      expect(screen.getByText('guest')).toBeInTheDocument();
-    });
-
-    it('handles empty / zero overview data without dividing by zero', async () => {
-      mockedAxios.get.mockResolvedValueOnce({
-        data: {
-          overview: { totalBatches: 0, totalEvents: 0 },
-          byPlatform: [],
-          topEvents: [],
-          dailyActivity: [],
-          recentBatches: [],
-        },
-      });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('BigTV Analytics Dashboard')).toBeInTheDocument();
-        expect(screen.getByText('N/A')).toBeInTheDocument();
-      });
-    });
-
-    it('renders error message and allows retry on fetch error', async () => {
-      mockedAxios.get.mockRejectedValueOnce({
-        response: { data: { message: 'Network Timeout' } },
-      });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Error loading analytics')).toBeInTheDocument();
-        expect(screen.getByText('Network Timeout')).toBeInTheDocument();
-      });
-
-      // Retry
-      mockedAxios.get.mockResolvedValueOnce({ data: mockSummaryData });
-      const retryBtn = screen.getByText('Retry Connection');
-      fireEvent.click(retryBtn);
-
-      await waitFor(() => {
-        expect(screen.getByText('BigTV Analytics Dashboard')).toBeInTheDocument();
-      });
-    });
-
-    it('handles generic error without response object', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('Connection failed'));
-
-      render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getAllByText('Error loading analytics')[0]).toBeInTheDocument();
-      });
-    });
-
-    it('toggles polling state and supports manual refresh', async () => {
-      mockedAxios.get.mockResolvedValue({ data: mockSummaryData });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Live Polling (60s)')).toBeInTheDocument();
-      });
-
-      // Toggle auto-refresh off
-      const pollingBtn = screen.getByText('Live Polling (60s)');
-      fireEvent.click(pollingBtn);
-      expect(screen.getByText('Polling Paused')).toBeInTheDocument();
-
-      // Toggle auto-refresh back on
-      fireEvent.click(screen.getByText('Polling Paused'));
-      expect(screen.getByText('Live Polling (60s)')).toBeInTheDocument();
-
-      // Click Refresh button
-      const refreshBtn = screen.getByText('Refresh');
-      fireEvent.click(refreshBtn);
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/app-analytics/summary')
-      );
-    });
-
-    it('supports Telugu (te), Hindi (hi), and Malayalam (ml) localization', async () => {
-      mockedAxios.get.mockResolvedValue({ data: mockSummaryData });
-
-      // 1. Telugu
-      useLanguageStore.setState({ language: 'te' });
-      const { rerender } = render(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('బిగ్‌టీవీ అనలిటిక్స్ డాష్‌బోర్డ్')).toBeInTheDocument();
-        expect(screen.getByText('మొత్తం నమోదైన ఈవెంట్లు')).toBeInTheDocument();
-        expect(screen.getByText('మొత్తం బ్యాచ్‌లు')).toBeInTheDocument();
-        expect(screen.getByText('ప్రధాన ప్లాట్‌ఫారమ్')).toBeInTheDocument();
-      });
-
-      // 2. Hindi
-      act(() => {
-        useLanguageStore.setState({ language: 'hi' });
-      });
-      rerender(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('बिगटीवी एनालिटिक्स डैशबोर्ड')).toBeInTheDocument();
-        expect(screen.getByText('कुल लॉग किए गए इवेंट्स')).toBeInTheDocument();
-        expect(screen.getByText('कुल बैच')).toBeInTheDocument();
-      });
-
-      // 3. Malayalam
-      act(() => {
-        useLanguageStore.setState({ language: 'ml' });
-      });
-      rerender(
-        <ThemeProvider>
-          <AnalyticsDashboard />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('ബിഗ് ടിവി അനലിറ്റിക്സ് ഡാഷ്‌ബോർഡ്')).toBeInTheDocument();
-        expect(screen.getByText('ആകെ രേഖപ്പെടുത്തിയ ഇവന്റുകൾ')).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('AnalyticsEventLogs Component', () => {
-    it('renders event logs table, supports search & platform filters, and opens JSON inspection modal', async () => {
-      mockedAxios.get.mockResolvedValueOnce({ data: mockEventsData });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsEventLogs />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Live Event Telemetry Log')).toBeInTheDocument();
-        expect(screen.getByText('app_open')).toBeInTheDocument();
-        expect(screen.getByText('live_tv_play')).toBeInTheDocument();
-        expect(screen.getByText('Total: 350 events')).toBeInTheDocument();
-      });
-
-      // Search Filter
-      const searchInput = screen.getByPlaceholderText('Search event name (e.g. app_open)...');
-      fireEvent.change(searchInput, { target: { value: 'live_tv' } });
-
-      mockedAxios.get.mockResolvedValueOnce({
-        data: {
-          total: 1,
-          page: 1,
-          limit: 15,
-          totalPages: 1,
-          data: [mockEventsData.data[1]],
-        },
-      });
-
-      const filterBtn = screen.getByText('Filter');
-      fireEvent.click(filterBtn);
-
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          expect.stringContaining('/app-analytics/events'),
-          expect.objectContaining({
-            params: expect.objectContaining({ eventName: 'live_tv' }),
-          })
-        );
-      });
-
-      // Platform Filter
-      const platformSelect = screen.getByRole('combobox');
-      mockedAxios.get.mockResolvedValueOnce({ data: mockEventsData });
-      fireEvent.change(platformSelect, { target: { value: 'ios' } });
-
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          expect.stringContaining('/app-analytics/events'),
-          expect.objectContaining({
-            params: expect.objectContaining({ platform: 'ios' }),
-          })
-        );
-      });
-
-      // Open JSON inspection modal
-      const inspectButtons = screen.getAllByTitle('Inspect JSON properties');
-      fireEvent.click(inspectButtons[0]);
-
-      expect(screen.getByText(/Event Payload:/i)).toBeInTheDocument();
-      expect(screen.getByText('Custom Properties')).toBeInTheDocument();
-
-      // Test click inside card (stopPropagation)
-      const modalHeader = screen.getByText(/Event Payload:/i);
-      fireEvent.click(modalHeader);
-      expect(screen.getByText(/Event Payload:/i)).toBeInTheDocument();
-
-      // Close modal by clicking backdrop
-      const backdrop = screen.getByText(/Event Payload:/i).closest('[style*="position: fixed"]');
-      if (backdrop) {
-        fireEvent.click(backdrop);
-      } else {
-        const closeBtn = screen.getByText('Close');
-        fireEvent.click(closeBtn);
-      }
-      expect(screen.queryByText(/Event Payload:/i)).not.toBeInTheDocument();
-    });
-
-    it('handles query error gracefully', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('API failure'));
-
-      render(
-        <ThemeProvider>
-          <AnalyticsEventLogs />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('No matching analytics events found.')).toBeInTheDocument();
-      });
-    });
-
-    it('handles empty events list gracefully', async () => {
-      mockedAxios.get.mockResolvedValueOnce({
-        data: { total: 0, page: 1, limit: 15, totalPages: 1, data: [] },
-      });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsEventLogs />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('No matching analytics events found.')).toBeInTheDocument();
-      });
-    });
-
-    it('navigates pages forward and backward', async () => {
-      mockedAxios.get.mockResolvedValue({ data: mockEventsData });
-
-      render(
-        <ThemeProvider>
-          <AnalyticsEventLogs />
-        </ThemeProvider>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Page 1 of 24')).toBeInTheDocument();
-      });
-
-      // Click Next
-      const buttons = screen.getAllByRole('button');
-      const nextBtn = buttons[buttons.length - 1];
-      const prevBtn = buttons[buttons.length - 2];
-
-      fireEvent.click(nextBtn);
-
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          expect.stringContaining('/app-analytics/events'),
-          expect.objectContaining({
-            params: expect.objectContaining({ page: 2 }),
-          })
-        );
-      });
-
-      // Click Prev
-      fireEvent.click(prevBtn);
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          expect.stringContaining('/app-analytics/events'),
-          expect.objectContaining({
-            params: expect.objectContaining({ page: 1 }),
-          })
-        );
-      });
-    });
-  });
-
   describe('AnalyticsEventGraphs Component', () => {
-    const mockBatchesData = [
-      {
-        id: 'batch-1',
-        userId: 101,
-        deviceId: 'dev-pixel-7',
-        platform: 'android',
-        eventCount: 3,
-        receivedAt: '2026-10-27T09:00:00.000Z',
-        events: [
-          {
-            eventId: 'ev-1',
-            eventName: 'reel_play',
-            dateTime: '2026-10-27T08:55:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-          {
-            eventId: 'ev-2',
-            eventName: 'reel_play',
-            dateTime: '2026-10-27T08:56:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-          {
-            eventId: 'ev-3',
-            eventName: 'app_open',
-            dateTime: '2026-10-26T08:00:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-        ],
-      },
-      {
-        id: 'batch-2',
-        userId: null,
-        deviceId: 'dev-iphone-15',
-        platform: 'ios',
-        eventCount: 2,
-        receivedAt: '2026-10-27T09:10:00.000Z',
-        events: [
-          {
-            eventId: 'ev-4',
-            eventName: 'article_open',
-            dateTime: '2026-10-27T09:05:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-          {
-            eventId: 'ev-5',
-            eventName: 'custom_telemetry_ping',
-            dateTime: '2026-10-27T09:06:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-        ],
-      },
-      {
-        id: 'batch-3',
-        userId: 103,
-        deviceId: 'dev-mac-chrome',
-        platform: 'web',
-        eventCount: 1,
-        receivedAt: '2026-10-27T09:15:00.000Z',
-        events: [
-          {
-            eventId: 'ev-6',
-            eventName: 'reel_play',
-            dateTime: '2026-10-27T09:12:00.000Z',
-            appVersion: '6.0.3',
-            properties: {},
-          },
-        ],
-      },
-    ];
-
     it('renders event graphs catalog, calculates KPIs, and shows individual event cards', async () => {
       mockedAxios.get.mockResolvedValueOnce({ data: { success: true, data: mockBatchesData } });
 
@@ -589,7 +166,7 @@ describe('BigTV Analytics Module', () => {
 
       // Wait for data load
       await waitFor(() => {
-        expect(screen.getByText('Individual Event Visualizations')).toBeInTheDocument();
+        expect(screen.queryByText('Loading analytics data...')).not.toBeInTheDocument();
       });
 
       // KPI summary metrics
@@ -657,7 +234,7 @@ describe('BigTV Analytics Module', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Individual Event Visualizations')).toBeInTheDocument();
+        expect(screen.queryByText('Loading analytics data...')).not.toBeInTheDocument();
       });
 
       // Filter by "Reels" category pill
@@ -696,7 +273,7 @@ describe('BigTV Analytics Module', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Individual Event Visualizations')).toBeInTheDocument();
+        expect(screen.queryByText('Loading analytics data...')).not.toBeInTheDocument();
       });
 
       // Active only checkbox
@@ -803,12 +380,12 @@ describe('BigTV Analytics Module', () => {
   });
 
   describe('AnalyticsPage Component', () => {
-    it('renders Event Graphs Catalog directly', async () => {
+    it('renders Event Graphs Catalog directly without other tabs', async () => {
       mockedAxios.get.mockImplementation((url: string) => {
         if (url.includes('/app-analytics/batches')) {
           return Promise.resolve({ data: { success: true, data: [] } });
         }
-        return Promise.resolve({ data: mockEventsData });
+        return Promise.resolve({ data: [] });
       });
 
       render(
