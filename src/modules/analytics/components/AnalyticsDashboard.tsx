@@ -29,7 +29,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.REACT_APP_API_URL ||
-  'http://localhost:11000/api/v1';
+  'https://api.pravasamedia.com/api/v1';
 
 // Theme Colors
 const COLORS = {
@@ -64,10 +64,11 @@ export const AnalyticsDashboard: React.FC = () => {
   const fetchSummary = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get<AnalyticsSummaryResponse>(
+      const res = await axios.get<any>(
         `${API_BASE_URL}/app-analytics/summary`
       );
-      setData(res.data);
+      const payload = res.data?.data && res.data?.data?.overview ? res.data.data : res.data;
+      setData(payload);
       setError(null);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };

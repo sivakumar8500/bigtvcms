@@ -70,4 +70,43 @@ export interface AnalyticsFilterParams {
   to?: string; // ISO string
   page?: number;
   limit?: number;
+  days?: number;
+}
+
+export interface BatchEnvelope {
+  id: string;
+  userId: number | null;
+  deviceId: string;
+  platform: PlatformType | string;
+  eventCount: number;
+  receivedAt: string;
+  events?: FlattenedEventItem[];
+}
+
+export interface BatchesApiResponse {
+  success: boolean;
+  data: BatchEnvelope[];
+}
+
+export interface EventDayData {
+  date: string;
+  displayDate: string;
+  count: number;
+}
+
+export interface EventMetricData {
+  eventName: string;
+  displayName: string;
+  category: string;
+  totalHits: number;
+  platforms: {
+    android: number;
+    ios: number;
+    web: number;
+    [key: string]: number;
+  };
+  dailyTrend: EventDayData[];
+  peakDay?: string;
+  peakCount: number;
+  avgDaily: number;
 }

@@ -4,12 +4,13 @@
 
 import React, { useState } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
-import { BarChart, FormatListBulleted } from '@mui/icons-material';
+import { BarChart, FormatListBulleted, Timeline } from '@mui/icons-material';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { AnalyticsDashboard } from '../components/AnalyticsDashboard';
+import { AnalyticsEventGraphs } from '../components/AnalyticsEventGraphs';
 import { AnalyticsEventLogs } from '../components/AnalyticsEventLogs';
 import { analyticsTranslations } from '../translations';
 import '@/styles/analytics-theme.css';
@@ -86,6 +87,11 @@ export const AnalyticsPage: React.FC = () => {
               label={t.tabDashboard}
             />
             <Tab
+              icon={<Timeline sx={{ fontSize: '1.2rem' }} />}
+              iconPosition="start"
+              label={t.tabEventGraphs}
+            />
+            <Tab
               icon={<FormatListBulleted sx={{ fontSize: '1.2rem' }} />}
               iconPosition="start"
               label={t.tabEvents}
@@ -102,7 +108,8 @@ export const AnalyticsPage: React.FC = () => {
           }}
         >
           {activeTab === 0 && <AnalyticsDashboard />}
-          {activeTab === 1 && <AnalyticsEventLogs />}
+          {activeTab === 1 && <AnalyticsEventGraphs />}
+          {activeTab === 2 && <AnalyticsEventLogs />}
         </Box>
       </Box>
     </Box>
