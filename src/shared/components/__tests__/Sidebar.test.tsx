@@ -64,7 +64,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Create News')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
-    expect(screen.getByText('Movies')).toBeInTheDocument();
+    expect(screen.queryByText('Movies')).not.toBeInTheDocument();
     expect(screen.getByText('Events')).toBeInTheDocument();
     expect(screen.getByText('Live TV Videos')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
@@ -240,4 +240,44 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.queryByText('Languages')).not.toBeInTheDocument();
     expect(screen.queryByText('Settings')).not.toBeInTheDocument();
   });
+
+  it('hides Movies tab in side menu for admin and superadmin', () => {
+    useLanguageStore.setState({ language: 'en' });
+    useUserStore.setState({
+      user: {
+        username: 'admin_user',
+        name: 'Admin User',
+        role: 'admin',
+        isLoggedIn: true,
+      },
+    });
+
+    const { rerender } = render(
+      <ThemeProvider>
+        <Sidebar activeHref="/dashboard" />
+      </ThemeProvider>
+    );
+
+    expect(screen.queryByText('Movies')).not.toBeInTheDocument();
+
+    act(() => {
+      useUserStore.setState({
+        user: {
+          username: 'superadmin_user',
+          name: 'Super Admin',
+          role: 'superadmin',
+          isLoggedIn: true,
+        },
+      });
+    });
+
+    rerender(
+      <ThemeProvider>
+        <Sidebar activeHref="/dashboard" />
+      </ThemeProvider>
+    );
+
+    expect(screen.queryByText('Movies')).not.toBeInTheDocument();
+  });
 });
+
