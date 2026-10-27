@@ -73,7 +73,18 @@ export const createNewsPostSchema = z.preprocess((val: any) => {
     input.video_platform = 'Twitter';
   }
 
-  if (input.type === 'StandardLink' || input.post_type === 'StandardLink' || input.type === 'Standard Link') {
+  if (
+    input.type === 'BulletPost' ||
+    input.post_type === 'BulletPost' ||
+    input.type === 'Bullet Post' ||
+    input.type === 'bulletpost' ||
+    input.subType === 'BulletPost' ||
+    input.subType === 'bulletpost'
+  ) {
+    input.type = 'Standed';
+    input.post_type = 'Standed';
+    input.subType = 'BulletPost';
+  } else if (input.type === 'StandardLink' || input.post_type === 'StandardLink' || input.type === 'Standard Link') {
     input.type = 'Standed';
     input.post_type = 'Standed';
     input.subType = 'StandardLink';

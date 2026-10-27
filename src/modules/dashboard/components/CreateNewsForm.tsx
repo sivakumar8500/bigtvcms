@@ -1613,8 +1613,18 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       aitag_ids: aitagIds,
       morefollowTagIds,
       morefollow_tag_ids: morefollowTagIds,
-      subType: initialData?.subType || '',
-      sub_type: (initialData as any)?.sub_type || '',
+      subType:
+        type.toLowerCase() === 'bulletpost' || type.toLowerCase() === 'bullet post' || type.toLowerCase() === 'bulite post'
+          ? 'BulletPost'
+          : type.toLowerCase() === 'bulletin'
+          ? 'Bulletin'
+          : initialData?.subType || '',
+      sub_type:
+        type.toLowerCase() === 'bulletpost' || type.toLowerCase() === 'bullet post' || type.toLowerCase() === 'bulite post'
+          ? 'BulletPost'
+          : type.toLowerCase() === 'bulletin'
+          ? 'Bulletin'
+          : (initialData as any)?.sub_type || '',
       postType: type,
       isSticky,
       isStickyPost: isSticky,

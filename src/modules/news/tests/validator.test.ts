@@ -200,6 +200,31 @@ describe('News Validator - Create Post Validation', () => {
       ]);
     });
 
+    it('should pre-process type BulletPost into Standed and BulletPost subType', () => {
+      const bulletPostInput = {
+        ...validStandardPostBody,
+        type: 'BulletPost',
+        bulletPoints: ['Point A', 'Point B'],
+      };
+      const validated = validateCreateNewsPost(bulletPostInput);
+      expect(validated.type).toBe('Standed');
+      expect(validated.subType).toBe('BulletPost');
+      expect(validated.bulletPoints).toEqual(['Point A', 'Point B']);
+    });
+
+    it('should successfully validate Bulletin post with bulletPoints', () => {
+      const bulletinInput = {
+        ...validStandardPostBody,
+        type: 'Bulletin',
+        subType: 'Bulletin',
+        bulletPoints: ['Bulletin 1', 'Bulletin 2'],
+      };
+      const validated = validateCreateNewsPost(bulletinInput);
+      expect(validated.type).toBe('Bulletin');
+      expect(validated.subType).toBe('Bulletin');
+      expect(validated.bulletPoints).toEqual(['Bulletin 1', 'Bulletin 2']);
+    });
+
     it('should successfully validate StandardLink with links array of objects', () => {
       const linkPayload = {
         ...validStandardPostBody,

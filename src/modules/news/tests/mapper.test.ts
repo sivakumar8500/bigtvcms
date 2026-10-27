@@ -270,5 +270,36 @@ describe('NewsMapper', () => {
     expect(createDto.notificationtitle).toBe('Distinct Notification Title');
     expect(createDto.imagetitel).toBe('Distinct Image Title');
   });
+
+  it('should map BulletPost to type Standed and subType BulletPost with bulletPoints in toCreateDto', () => {
+    const rawPartial = {
+      title: 'Bullet Headline',
+      type: 'BulletPost',
+      content: 'Bullet body',
+      bulletPoints: ['Point A', 'Point B'],
+    };
+
+    const createDto = NewsMapper.toCreateDto(rawPartial as any);
+    expect(createDto.type).toBe('Standed');
+    expect(createDto.subType).toBe('BulletPost');
+    expect(createDto.bulletPoints).toEqual(['Point A', 'Point B']);
+    expect(createDto.isWebPost).toBe(false);
+  });
+
+  it('should map Bulletin to type Bulletin and subType Bulletin with bulletPoints in toCreateDto', () => {
+    const rawPartial = {
+      title: 'Bulletin Headline',
+      type: 'Bulletin',
+      content: 'Bulletin body',
+      bulletPoints: ['Point 1', 'Point 2'],
+    };
+
+    const createDto = NewsMapper.toCreateDto(rawPartial as any);
+    expect(createDto.type).toBe('Bulletin');
+    expect(createDto.subType).toBe('Bulletin');
+    expect(createDto.bulletPoints).toEqual(['Point 1', 'Point 2']);
+    expect(createDto.isWebPost).toBe(false);
+  });
 });
+
 

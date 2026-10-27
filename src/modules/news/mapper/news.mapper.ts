@@ -70,7 +70,7 @@ export class NewsMapper {
       rawType = 'Standed';
       subTypeVal = 'BulletPost';
     } else if (rawType.toLowerCase() === 'bulletin') {
-      rawType = 'Standed';
+      rawType = 'Bulletin';
       subTypeVal = 'Bulletin';
     } else if (rawType.toLowerCase() === 'standardlink' || rawType.toLowerCase() === 'standard link') {
       rawType = 'Standed';
@@ -105,7 +105,7 @@ export class NewsMapper {
     const webUrlVal = (domain as any).web_post_url || (domain as any).webPostUrl || (domain as any).webUrl || domain.postUrl || '';
 
     let bulletsVal: string[] = [];
-    if (subTypeVal === 'BulletPost') {
+    if (subTypeVal === 'BulletPost' || subTypeVal === 'Bulletin') {
       const formatted = formatBulletPostContentAndBullets(domain.content || '', domain.bulletPoints);
       bulletsVal = formatted.bulletPoints;
       cleanContent = formatted.content;

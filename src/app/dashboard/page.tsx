@@ -817,11 +817,16 @@ export default function DashboardPage() {
     let resolvedType = data.type || 'Standed';
     let resolvedSubType = (data as any).subType || '';
     if (
-      resolvedType.toLowerCase() === 'bulletin' ||
       resolvedType.toLowerCase() === 'bulletpost' ||
       resolvedType.toLowerCase() === 'bullet post' ||
-      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedType.toLowerCase() === 'bulite post' ||
       resolvedSubType.toLowerCase() === 'bulletpost'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BulletPost';
+    } else if (
+      resolvedType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletin'
     ) {
       resolvedType = 'Bulletin';
       resolvedSubType = 'Bulletin';
@@ -860,11 +865,10 @@ export default function DashboardPage() {
     let finalContent = resolvedContent;
 
     if (
+      resolvedSubType === 'BulletPost' ||
+      resolvedSubType.toLowerCase() === 'bulletpost' ||
       resolvedType.toLowerCase() === 'bulletin' ||
-      resolvedType.toLowerCase() === 'bulletpost' ||
-      resolvedType.toLowerCase() === 'bullet post' ||
-      resolvedSubType.toLowerCase() === 'bulletin' ||
-      resolvedSubType.toLowerCase() === 'bulletpost'
+      resolvedSubType.toLowerCase() === 'bulletin'
     ) {
       const explicit = Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
         ? (data as any).bulletPoints
@@ -898,7 +902,7 @@ export default function DashboardPage() {
       rawVideoPlatform = 'Twitter';
     }
 
-    const isWebPostVal = (resolvedSubType === 'BulletPost' || resolvedSubType === 'StandardLink' || resolvedSubType === 'BigBlackStandard' || resolvedSubType === 'BigBlackStanded' || resolvedType === 'Video' || resolvedType === 'Image')
+    const isWebPostVal = (resolvedSubType === 'BulletPost' || resolvedSubType === 'Bulletin' || resolvedSubType === 'StandardLink' || resolvedSubType === 'BigBlackStandard' || resolvedSubType === 'BigBlackStanded' || resolvedType === 'Video' || resolvedType === 'Image')
       ? false
       : Boolean(data.isWebPost || (data as any).is_web_post || (data as any).isWebpost);
 
@@ -1007,13 +1011,18 @@ export default function DashboardPage() {
     let resolvedSubType = (data as any).subType || (data as any).sub_type || '';
 
     if (
-      resolvedType === 'Bulletin' ||
       resolvedType === 'BulletPost' ||
-      resolvedType.toLowerCase() === 'bulletin' ||
       resolvedType.toLowerCase() === 'bulletpost' ||
       resolvedType.toLowerCase() === 'bullet post' ||
-      resolvedSubType.toLowerCase() === 'bulletin' ||
+      resolvedType.toLowerCase() === 'bulite post' ||
       resolvedSubType.toLowerCase() === 'bulletpost'
+    ) {
+      resolvedType = 'Standed';
+      resolvedSubType = 'BulletPost';
+    } else if (
+      resolvedType === 'Bulletin' ||
+      resolvedType.toLowerCase() === 'bulletin' ||
+      resolvedSubType.toLowerCase() === 'bulletin'
     ) {
       resolvedType = 'Bulletin';
       resolvedSubType = 'Bulletin';
@@ -1056,11 +1065,10 @@ export default function DashboardPage() {
     let finalContent = resolvedContent;
 
     if (
+      resolvedSubType === 'BulletPost' ||
+      resolvedSubType.toLowerCase() === 'bulletpost' ||
       resolvedType.toLowerCase() === 'bulletin' ||
-      resolvedType.toLowerCase() === 'bulletpost' ||
-      resolvedType.toLowerCase() === 'bullet post' ||
-      resolvedSubType.toLowerCase() === 'bulletin' ||
-      resolvedSubType.toLowerCase() === 'bulletpost'
+      resolvedSubType.toLowerCase() === 'bulletin'
     ) {
       const explicit = Array.isArray((data as any).bulletPoints) && (data as any).bulletPoints.length > 0
         ? (data as any).bulletPoints
@@ -1103,6 +1111,7 @@ export default function DashboardPage() {
 
     const isWebPostVal = (
       resolvedSubType === 'BulletPost' ||
+      resolvedSubType === 'Bulletin' ||
       resolvedSubType === 'StandardLink' ||
       resolvedSubType === 'BigBlackStandard' ||
       resolvedSubType === 'BigBlackStanded' ||
