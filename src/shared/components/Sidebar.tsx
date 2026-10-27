@@ -22,6 +22,7 @@ import {
   AssignmentInd,
   GraphicEq as GraphicEqIcon,
   SportsEsports,
+  Analytics as AnalyticsIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,6 +33,7 @@ import { useUserStore } from '@/core/storage/user-store';
 
 const sidebarTranslations = {
   en: {
+    menuAnalytics: 'Analytics',
     menuCreate: 'Create News',
     menuNotifications: 'Notifications',
     menuReels: 'Reels',
@@ -55,6 +57,7 @@ const sidebarTranslations = {
     menuTts: 'Telugu TTS',
   },
   te: {
+    menuAnalytics: 'అనలిటిక్స్',
     menuCreate: 'వార్తలను సృష్టించండి',
     menuNotifications: 'నోటిఫికేషన్లు',
     menuReels: 'రీల్స్',
@@ -78,6 +81,7 @@ const sidebarTranslations = {
     menuTts: 'తెలుగు TTS',
   },
   hi: {
+    menuAnalytics: 'एनालिटिक्स',
     menuCreate: 'समाचार बनाएं',
     menuNotifications: 'सूचनाएं',
     menuReels: 'रील्स',
@@ -101,6 +105,7 @@ const sidebarTranslations = {
     menuTts: 'तेलुगु टीटीएस',
   },
   ml: {
+    menuAnalytics: 'അനലിറ്റിക്‌സ്',
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
     menuNotifications: 'അറിയിപ്പുകൾ',
     menuReels: 'റീലുകൾ',
@@ -140,6 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const t = sidebarTranslations[language] || sidebarTranslations.en;
 
   const allMenuItems = [
+    { text: t.menuAnalytics, icon: <AnalyticsIcon />, href: '/analytics' },
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
@@ -183,6 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
   const adsDynapixCreatorHrefs = ['/ads-dynapix'];
   
   const adminHrefs = [
+    '/analytics',
     '/dashboard',
     '/notifications',
     '/reels',

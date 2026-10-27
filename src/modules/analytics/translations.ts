@@ -1,0 +1,304 @@
+// src/modules/analytics/translations.ts
+
+export const analyticsTranslations: Record<string, Record<string, string>> = {
+  en: {
+    pageTitle: 'BigTV Analytics Dashboard',
+    subtitle: 'Real-time telemetry, user event volume, and device distribution metrics',
+    tabDashboard: 'Executive Visual Charts',
+    tabEvents: 'Live Event Logs & Drill-Down',
+
+    // KPI Cards
+    totalEvents: 'Total Events Logged',
+    cumulativeTelemetry: 'Cumulative telemetry',
+    totalBatches: 'Total Batches',
+    networkSyncPayloads: 'Network sync payloads',
+    batchingEfficiency: 'Batching Efficiency',
+    optimalCompression: 'Optimal compression',
+    primaryPlatform: 'Primary Platform',
+    leadingTrafficSource: 'Leading traffic source',
+
+    // Charts
+    eventTrendTitle: 'Event Volume Trend (Last 14 Days)',
+    eventTrendSubtitle: 'Daily sum of user engagement and telemetry events',
+    platformShareTitle: 'Platform Share',
+    platformShareSubtitle: 'Distribution across Android, iOS & Web',
+    topEventsTitle: 'Top 15 Event Types by Volume',
+    topEventsSubtitle: 'Most frequent user interactions across all sessions',
+    batchesVsEventsTitle: 'Batch vs Event Comparison',
+    batchesVsEventsSubtitle: 'Grouping efficiency by operating system',
+    batchesLabel: 'Batches',
+    eventsLabel: 'Events',
+    hitsLabel: 'Hits',
+    observationTitle: 'Observation',
+    observationNote:
+      'Mobile apps batch ~40–80 events per request, reducing HTTP socket overhead and battery drain.',
+    activeOsCount: 'Active OS',
+
+    // Recent Batches Feed
+    latestBatchesTitle: 'Latest Batch Ingestions',
+    latestBatchesSubtitle: 'Most recent sync batches received by the API',
+    showingLast5: 'Showing last 5 batches',
+    colBatchId: 'Batch ID',
+    colPlatform: 'Platform',
+    colUserId: 'User ID',
+    colDeviceId: 'Device ID',
+    colEventCount: 'Event Count',
+    colReceivedAt: 'Received At',
+    guestUser: 'guest',
+
+    // Controls & State
+    livePolling: 'Live Polling (60s)',
+    pollingPaused: 'Polling Paused',
+    refresh: 'Refresh',
+    loadingData: 'Loading analytics data...',
+    errorLoading: 'Error loading analytics',
+    retryConnection: 'Retry Connection',
+
+    // Event Logs Table
+    eventLogsTitle: 'Live Event Telemetry Log',
+    eventLogsSubtitle: 'Cross-batch flattened event records with property payloads',
+    searchPlaceholder: 'Search event name (e.g. app_open)...',
+    allPlatforms: 'All Platforms',
+    filterBtn: 'Filter',
+    colEventName: 'Event Name',
+    colAppVersion: 'App Version',
+    colClientTime: 'Client Time',
+    colAction: 'Action',
+    loadingEvents: 'Loading events...',
+    noEventsFound: 'No matching analytics events found.',
+    totalEventsCount: 'Total: {count} events',
+    pageOf: 'Page {page} of {totalPages}',
+    inspectTooltip: 'Inspect JSON properties',
+
+    // Modal
+    payloadTitle: 'Event Payload',
+    customProperties: 'Custom Properties',
+    closeBtn: 'Close',
+    anonymousUser: 'anon',
+  },
+  te: {
+    pageTitle: 'బిగ్‌టీవీ అనలిటిక్స్ డాష్‌బోర్డ్',
+    subtitle: 'రియల్-టైమ్ టెలిమెట్రీ, వినియోగదారు ఈవెంట్ పరిమాణం మరియు పరికర పంపిణీ కొలమానాలు',
+    tabDashboard: 'ఎగ్జిక్యూటివ్ విజువల్ చార్ట్‌లు',
+    tabEvents: 'లైవ్ ఈవెంట్ లాగ్‌లు & డ్రిల్-డౌన్',
+
+    // KPI Cards
+    totalEvents: 'మొత్తం నమోదైన ఈవెంట్లు',
+    cumulativeTelemetry: 'సంచిత టెలిమెట్రీ',
+    totalBatches: 'మొత్తం బ్యాచ్‌లు',
+    networkSyncPayloads: 'నెట్‌వర్క్ సింక్ పేలోడ్‌లు',
+    batchingEfficiency: 'బ్యాచ్ సామర్థ్యం',
+    optimalCompression: 'సరైన కుదింపు',
+    primaryPlatform: 'ప్రధాన ప్లాట్‌ఫారమ్',
+    leadingTrafficSource: 'అగ్రగామి ట్రాఫిక్ మూలం',
+
+    // Charts
+    eventTrendTitle: 'ఈవెంట్ పరిమాణ ధోరణి (గత 14 రోజులు)',
+    eventTrendSubtitle: 'వినియోగదారు ఎంగేజ్‌మెంట్ మరియు టెలిమెట్రీ ఈవెంట్‌ల రోజువారీ మొత్తం',
+    platformShareTitle: 'ప్లాట్‌ఫారమ్ వాటా',
+    platformShareSubtitle: 'Android, iOS & Web అంతటా పంపిణీ',
+    topEventsTitle: 'పరిమాణం ప్రకారం టాప్ 15 ఈవెంట్ రకాలు',
+    topEventsSubtitle: 'అన్ని సెషన్‌లలో అత్యంత తరచుగా జరిగే వినియోగదారు పరస్పర చర్యలు',
+    batchesVsEventsTitle: 'బ్యాచ్ వర్సెస్ ఈవెంట్ పోలిక',
+    batchesVsEventsSubtitle: 'ఆపరేటింగ్ సిస్టమ్ వారీగా సమూహ సామర్థ్యం',
+    batchesLabel: 'బ్యాచ్‌లు',
+    eventsLabel: 'ఈవెంట్‌లు',
+    hitsLabel: 'హిట్‌లు',
+    observationTitle: 'గమనిక',
+    observationNote:
+      'మొబైల్ యాప్‌లు ఒక్కో అభ్యర్థనకు ~40–80 ఈవెంట్‌లను బ్యాచ్ చేస్తాయి, HTTP సాకెట్ ఓవర్‌హెడ్ మరియు బ్యాటరీ డ్రెయిన్‌ను తగ్గిస్తాయి.',
+    activeOsCount: 'యాక్టివ్ ఆపరేటింగ్ సిస్టమ్‌లు',
+
+    // Recent Batches Feed
+    latestBatchesTitle: 'తాజా బ్యాచ్ ఇన్‌జెషన్లు',
+    latestBatchesSubtitle: 'API ద్వారా స్వీకరించబడిన ఇటీవలి సమకాలీకరణ బ్యాచ్‌లు',
+    showingLast5: 'చివరి 5 బ్యాచ్‌లను చూపుతోంది',
+    colBatchId: 'బ్యాచ్ ID',
+    colPlatform: 'ప్లాట్‌ఫారమ్',
+    colUserId: 'వినియోగదారు ID',
+    colDeviceId: 'పరికర ID',
+    colEventCount: 'ఈవెంట్ లెక్కింపు',
+    colReceivedAt: 'స్వీకరించిన సమయం',
+    guestUser: 'అతిథి',
+
+    // Controls & State
+    livePolling: 'లైవ్ పోలింగ్ (60సె)',
+    pollingPaused: 'పోలింగ్ పాజ్ చేయబడింది',
+    refresh: 'రిఫ్రెష్ చేయండి',
+    loadingData: 'అనలిటిక్స్ డేటా లోడ్ అవుతోంది...',
+    errorLoading: 'అనలిటిక్స్ లోడ్ చేయడంలో లోపం',
+    retryConnection: 'కనెక్షన్‌ని మళ్లీ ప్రయత్నించండి',
+
+    // Event Logs Table
+    eventLogsTitle: 'లైవ్ ఈవెంట్ టెలిమెట్రీ లాగ్',
+    eventLogsSubtitle: 'ప్రాపర్టీ పేలోడ్‌లతో క్రాస్-బ్యాచ్ ఫ్లాట్ చేయబడిన ఈవెంట్ రికార్డులు',
+    searchPlaceholder: 'ఈవెంట్ పేరును శోధించండి (ఉదా. app_open)...',
+    allPlatforms: 'అన్ని ప్లాట్‌ఫారమ్‌లు',
+    filterBtn: 'ఫిల్టర్',
+    colEventName: 'ఈవెంట్ పేరు',
+    colAppVersion: 'యాప్ వెర్షన్',
+    colClientTime: 'క్లయింట్ సమయం',
+    colAction: 'చర్య',
+    loadingEvents: 'ఈవెంట్‌లు లోడ్ అవుతున్నాయి...',
+    noEventsFound: 'సరిపోలే అనలిటిక్స్ ఈవెంట్‌లు ఏవీ కనుగొనబడలేదు.',
+    totalEventsCount: 'మొత్తం: {count} ఈవెంట్‌లు',
+    pageOf: 'పేజీ {page} / {totalPages}',
+    inspectTooltip: 'JSON లక్షణాలను పరిశీలించండి',
+
+    // Modal
+    payloadTitle: 'ఈవెంట్ పేలోడ్',
+    customProperties: 'అనుకూల లక్షణాలు',
+    closeBtn: 'మూసివేయి',
+    anonymousUser: 'అజ్ఞాత',
+  },
+  hi: {
+    pageTitle: 'बिगटीवी एनालिटिक्स डैशबोर्ड',
+    subtitle: 'वास्तविक समय टेलीमेट्री, उपयोगकर्ता इवेंट वॉल्यूम और डिवाइस वितरण मेट्रिक्स',
+    tabDashboard: 'कार्यकारी विज़ुअल चार्ट',
+    tabEvents: 'लाइव इवेंट लॉग और विवरण',
+
+    // KPI Cards
+    totalEvents: 'कुल लॉग किए गए इवेंट्स',
+    cumulativeTelemetry: 'संचयी टेलीमेट्री',
+    totalBatches: 'कुल बैच',
+    networkSyncPayloads: 'नेटवर्क सिंक पेलोड',
+    batchingEfficiency: 'बैचिंग दक्षता',
+    optimalCompression: 'इष्टतम संपीड़न',
+    primaryPlatform: 'प्राथमिक प्लेटफ़ॉर्म',
+    leadingTrafficSource: 'अग्रणी ट्रैफ़िक स्रोत',
+
+    // Charts
+    eventTrendTitle: 'इवेंट वॉल्यूम ट्रेंड (पिछले 14 दिन)',
+    eventTrendSubtitle: 'उपयोगकर्ता जुड़ाव और टेलीमेट्री इवेंट्स का दैनिक योग',
+    platformShareTitle: 'प्लेटफ़ॉर्म शेयर',
+    platformShareSubtitle: 'Android, iOS और Web में वितरण',
+    topEventsTitle: 'वॉल्यूम के अनुसार शीर्ष 15 इवेंट प्रकार',
+    topEventsSubtitle: 'सभी सत्रों में सबसे लगातार उपयोगकर्ता सहभागिता',
+    batchesVsEventsTitle: 'बैच बनाम इवेंट तुलना',
+    batchesVsEventsSubtitle: 'ऑपरेटिंग सिस्टम द्वारा समूहीकरण दक्षता',
+    batchesLabel: 'बैच',
+    eventsLabel: 'इवेंट्स',
+    hitsLabel: 'हिट्स',
+    observationTitle: 'अवलोकन',
+    observationNote:
+      'मोबाइल ऐप प्रति अनुरोध ~40–80 इवेंट बैच करते हैं, जिससे HTTP सॉकेट ओवरहेड और बैटरी की खपत कम होती है।',
+    activeOsCount: 'सक्रिय ओएस',
+
+    // Recent Batches Feed
+    latestBatchesTitle: 'नवीनतम बैच अंतर्ग्रहण',
+    latestBatchesSubtitle: 'एपीआई द्वारा प्राप्त नवीनतम सिंक बैच',
+    showingLast5: 'अंतिम 5 बैच दिखा रहे हैं',
+    colBatchId: 'बैच आईडी',
+    colPlatform: 'प्लेटफ़ॉर्म',
+    colUserId: 'यूज़र आईडी',
+    colDeviceId: 'डिवाइस आईडी',
+    colEventCount: 'इवेंट संख्या',
+    colReceivedAt: 'प्राप्त समय',
+    guestUser: 'अतिथि',
+
+    // Controls & State
+    livePolling: 'लाइव पोलिंग (60से)',
+    pollingPaused: 'पोलिंग रुकी हुई',
+    refresh: 'रिफ्रेश करें',
+    loadingData: 'एनालिटिक्स डेटा लोड हो रहा है...',
+    errorLoading: 'एनालिटिक्स लोड करने में त्रुटि',
+    retryConnection: 'कनेक्शन पुनः प्रयास करें',
+
+    // Event Logs Table
+    eventLogsTitle: 'लाइव इवेंट टेलीमेट्री लॉग',
+    eventLogsSubtitle: 'प्रॉपर्टी पेलोड के साथ क्रॉस-बैच फ़्लैट की गई इवेंट प्रविष्टियां',
+    searchPlaceholder: 'इवेंट का नाम खोजें (उदा. app_open)...',
+    allPlatforms: 'सभी प्लेटफ़ॉर्म',
+    filterBtn: 'फ़िल्टर',
+    colEventName: 'इवेंट का नाम',
+    colAppVersion: 'ऐप संस्करण',
+    colClientTime: 'क्लाइंट समय',
+    colAction: 'कार्रवाई',
+    loadingEvents: 'इवेंट्स लोड हो रहे हैं...',
+    noEventsFound: 'कोई मेल खाते एनालिटिक्स इवेंट नहीं मिले।',
+    totalEventsCount: 'कुल: {count} इवेंट्स',
+    pageOf: 'पृष्ठ {page} / {totalPages}',
+    inspectTooltip: 'JSON गुण जांचें',
+
+    // Modal
+    payloadTitle: 'इवेंट पेलोड',
+    customProperties: 'कस्टम गुण',
+    closeBtn: 'बंद करें',
+    anonymousUser: 'अनाम',
+  },
+  ml: {
+    pageTitle: 'ബിഗ് ടിവി അനലിറ്റിക്സ് ഡാഷ്‌ബോർഡ്',
+    subtitle: 'തത്സമയ ടെലിമെട്രി, ഉപയോക്തൃ ഇവന്റ് അളവ്, ഉപകരണ വിതരണ അളവുകൾ',
+    tabDashboard: 'എക്സിക്യൂട്ടീവ് വിഷ്വൽ ചാർട്ടുകൾ',
+    tabEvents: 'തത്സമയ ഇവന്റ് ലോഗുകൾ & വിശദാംശങ്ങൾ',
+
+    // KPI Cards
+    totalEvents: 'ആകെ രേഖപ്പെടുത്തിയ ഇവന്റുകൾ',
+    cumulativeTelemetry: 'സഞ്ചിത ടെലിമെട്രി',
+    totalBatches: 'ആകെ ബാച്ചുകൾ',
+    networkSyncPayloads: 'നെറ്റ്‌വർക്ക് സിങ്ക് പേലോഡുകൾ',
+    batchingEfficiency: 'ബാച്ചിംഗ് കാര്യക്ഷമത',
+    optimalCompression: 'ഒപ്റ്റിമൽ കംപ്രഷൻ',
+    primaryPlatform: 'പ്രധാന പ്ലാറ്റ്‌ഫോം',
+    leadingTrafficSource: 'പ്രധാന ട്രാഫിക് ഉറവിടം',
+
+    // Charts
+    eventTrendTitle: 'ഇവന്റ് വോളിയം ട്രെൻഡ് (കഴിഞ്ഞ 14 ദിവസങ്ങൾ)',
+    eventTrendSubtitle: 'ഉപയോക്തൃ ഇടപഴകലിന്റെയും ടെലിമെട്രി ഇവന്റുകളുടെയും പ്രതിദിന ആകെത്തുക',
+    platformShareTitle: 'പ്ലാറ്റ്‌ഫോം ഷെയർ',
+    platformShareSubtitle: 'Android, iOS & Web എന്നിവയിലുടനീളമുള്ള വിതരണം',
+    topEventsTitle: 'വോളിയം അനുസരിച്ച് മികച്ച 15 ഇവന്റ് തരങ്ങൾ',
+    topEventsSubtitle: 'എല്ലാ സെഷനുകളിലും ഏറ്റവും പതിവായ ഉപയോക്തൃ ഇടപെടലുകൾ',
+    batchesVsEventsTitle: 'ബാച്ച് vs ഇവന്റ് താരതമ്യം',
+    batchesVsEventsSubtitle: 'ഓപ്പറേറ്റിംഗ് സിസ്റ്റം അനുസരിച്ച് ഗ്രൂപ്പിംഗ് കാര്യക്ഷമത',
+    batchesLabel: 'ബാച്ചുകൾ',
+    eventsLabel: 'ഇവന്റുകൾ',
+    hitsLabel: 'ഹിറ്റുകൾ',
+    observationTitle: 'നിരീക്ഷണം',
+    observationNote:
+      'മൊബൈൽ ആപ്പുകൾ ഓരോ അഭ്യർത്ഥനയിലും ~40–80 ഇവന്റുകൾ ബാച്ച് ചെയ്യുന്നു, ഇത് HTTP സോക്കറ്റ് ഓവർഹെഡും ബാറ്ററി ചോർച്ചയും കുറയ്ക്കുന്നു.',
+    activeOsCount: 'സജീവ ഒ.എസ്',
+
+    // Recent Batches Feed
+    latestBatchesTitle: 'ഏറ്റവും പുതിയ ബാച്ച് ഇൻജഷനുകൾ',
+    latestBatchesSubtitle: 'API സ്വീകരിച്ച ഏറ്റവും പുതിയ സമന്വയ ബാച്ചുകൾ',
+    showingLast5: 'അവസാന 5 ബാച്ചുകൾ കാണിക്കുന്നു',
+    colBatchId: 'ബാച്ച് ഐഡി',
+    colPlatform: 'പ്ലാറ്റ്‌ഫോം',
+    colUserId: 'ഉപയോക്തൃ ഐഡി',
+    colDeviceId: 'ഉപകരണ ഐഡി',
+    colEventCount: 'ഇവന്റ് എണ്ണം',
+    colReceivedAt: 'ലഭിച്ച സമയം',
+    guestUser: 'അതിഥി',
+
+    // Controls & State
+    livePolling: 'തത്സമയ പോളിംഗ് (60സെ)',
+    pollingPaused: 'പോളിംഗ് താൽക്കാലികമായി നിർത്തി',
+    refresh: 'പുതുക്കുക',
+    loadingData: 'അനലിറ്റിക്‌സ് ഡാറ്റ ലോഡുചെയ്യുന്നു...',
+    errorLoading: 'അനലിറ്റിക്സ് ലോഡുചെയ്യുന്നതിൽ പിശക്',
+    retryConnection: 'കണക്ഷൻ വീണ്ടും ശ്രമിക്കുക',
+
+    // Event Logs Table
+    eventLogsTitle: 'തത്സമയ ഇവന്റ് ടെലിമെട്രി ലോഗ്',
+    eventLogsSubtitle: 'പ്രോപ്പർട്ടി പേലോഡുകളുള്ള ക്രോസ്-ബാച്ച് ഇവന്റ് റെക്കോർഡുകൾ',
+    searchPlaceholder: 'ഇവന്റിന്റെ പേര് തിരയുക (ഉദാ. app_open)...',
+    allPlatforms: 'എല്ലാ പ്ലാറ്റ്‌ഫോമുകളും',
+    filterBtn: 'ഫിൽട്ടർ',
+    colEventName: 'ഇവന്റിന്റെ പേര്',
+    colAppVersion: 'ആപ്പ് പതിപ്പ്',
+    colClientTime: 'ക്ലയന്റ് സമയം',
+    colAction: 'നടപടി',
+    loadingEvents: 'ഇവന്റുകൾ ലോഡുചെയ്യുന്നു...',
+    noEventsFound: 'പൊരുത്തപ്പെടുന്ന അനലിറ്റിക്‌സ് ഇവന്റുകളൊന്നും കണ്ടെത്തിയില്ല.',
+    totalEventsCount: 'ആകെ: {count} ഇവന്റുകൾ',
+    pageOf: 'പേജ് {page} / {totalPages}',
+    inspectTooltip: 'JSON പ്രോപ്പർട്ടികൾ പരിശോധിക്കുക',
+
+    // Modal
+    payloadTitle: 'ഇവന്റ് പേലോഡ്',
+    customProperties: 'ഇഷ്ടാനുസൃത ഗുണവിശേഷങ്ങൾ',
+    closeBtn: 'അടയ്ക്കുക',
+    anonymousUser: 'അജ്ഞാതൻ',
+  },
+};

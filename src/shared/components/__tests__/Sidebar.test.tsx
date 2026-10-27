@@ -62,6 +62,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.queryByText('Movies')).not.toBeInTheDocument();
@@ -96,6 +97,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
@@ -153,6 +155,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('అనలిటిక్స్')).toBeInTheDocument();
     expect(screen.getByText('విభాగాలు')).toBeInTheDocument();
     expect(screen.getByText('వెబ్ వ్యాసాలు')).toBeInTheDocument();
     expect(screen.getByText('ఈ-పేపర్లు')).toBeInTheDocument();
@@ -176,6 +179,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('एनालिटिक्स')).toBeInTheDocument();
     expect(screen.getByText('समाचार बनाएं')).toBeInTheDocument();
     expect(screen.getByText('श्रेणियां')).toBeInTheDocument();
     expect(screen.getByText('वेब लेख')).toBeInTheDocument();
@@ -200,6 +204,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
       </ThemeProvider>
     );
 
+    expect(screen.getByText('അനലിറ്റിക്‌സ്')).toBeInTheDocument();
     expect(screen.getByText('വാർത്ത സൃഷ്ടിക്കുക')).toBeInTheDocument();
     expect(screen.getByText('വിഭാഗങ്ങൾ')).toBeInTheDocument();
     expect(screen.getByText('വെബ് ലേഖനങ്ങൾ')).toBeInTheDocument();

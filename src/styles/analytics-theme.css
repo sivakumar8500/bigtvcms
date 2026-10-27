@@ -1,0 +1,25 @@
+/* src/styles/analytics-theme.css */
+
+:root {
+  /* Brand Accents */
+  --chart-primary: #3b82f6; /* Blue - Area line & highlights */
+  --chart-secondary: #06b6d4; /* Cyan - Top ranks */
+  --chart-accent: #f59e0b; /* Amber - Warnings & attention */
+
+  /* Platforms */
+  --platform-android: #10b981; /* Emerald */
+  --platform-ios: #3b82f6; /* Blue */
+  --platform-web: #8b5cf6; /* Purple */
+
+  /* Neutral Surface */
+  --chart-grid: #f1f5f9;
+  --chart-axis: #94a3b8;
+  --chart-tooltip-bg: #1e293b;
+  --chart-tooltip-text: #ffffff;
+}
+
+[data-theme='dark'] {
+  --chart-grid: #334155;
+  --chart-axis: #64748b;
+  --chart-tooltip-bg: #0f172a;
+}
