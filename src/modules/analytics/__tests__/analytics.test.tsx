@@ -803,11 +803,8 @@ describe('BigTV Analytics Module', () => {
   });
 
   describe('AnalyticsPage Component', () => {
-    it('renders with layout tabs and switches between Dashboard, Event Graphs, and Event Logs', async () => {
+    it('renders Event Graphs Catalog directly', async () => {
       mockedAxios.get.mockImplementation((url: string) => {
-        if (url.includes('/app-analytics/summary')) {
-          return Promise.resolve({ data: mockSummaryData });
-        }
         if (url.includes('/app-analytics/batches')) {
           return Promise.resolve({ data: { success: true, data: [] } });
         }
@@ -820,26 +817,11 @@ describe('BigTV Analytics Module', () => {
         </ThemeProvider>
       );
 
-      // Verify Header and All 3 Tabs
+      // Verify Header and Event Graphs Catalog content
       expect(screen.getAllByText('BigTV Analytics Dashboard')[0]).toBeInTheDocument();
-      expect(screen.getByText('Executive Visual Charts')).toBeInTheDocument();
-      expect(screen.getByText('Event Graphs Catalog')).toBeInTheDocument();
-      expect(screen.getByText('Live Event Logs & Drill-Down')).toBeInTheDocument();
-
-      // Switch to Tab 1 (Event Graphs Catalog)
-      const tabGraphs = screen.getByText('Event Graphs Catalog');
-      fireEvent.click(tabGraphs);
 
       await waitFor(() => {
         expect(screen.getByText('Individual Event Visualizations')).toBeInTheDocument();
-      });
-
-      // Switch to Tab 2 (Event Logs)
-      const tabLogs = screen.getByText('Live Event Logs & Drill-Down');
-      fireEvent.click(tabLogs);
-
-      await waitFor(() => {
-        expect(screen.getByText('Live Event Telemetry Log')).toBeInTheDocument();
       });
     });
   });
