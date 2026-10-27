@@ -56,7 +56,7 @@ import { CreateNewsPostDto } from '@/modules/news/dto/news.dto';
 import { Loader } from '@/shared/components/Loader';
 import { stripAllTagsExceptLinkTags, stripHtml } from '@/shared/utils/html.utils';
 import { extractBulletPoints, formatBulletPostContentAndBullets, formatDisplayContent } from '@/shared/utils/bullet.utils';
-import { formatLinks, formatLinksAndContent } from '@/shared/utils/link.utils';
+import { formatLinks, formatLinksAndContent, restoreLinksInContent } from '@/shared/utils/link.utils';
 
 // Dashboard component translations mapped to store state keys
 const translations = {
@@ -305,7 +305,8 @@ export default function DashboardPage() {
   // Fetch full post detail on edit to ensure aitag_ids, category_ids, location_ids, language_id and all fields are loaded
   React.useEffect(() => {
     if (editingPost && editingPost.id) {
-      NewsRepository.getById(editingPost.id)
+      const targetLang = editingPost.language_code || (editingPost.language_id === 2 ? 'te' : editingPost.language_id === 3 ? 'hi' : editingPost.language_id === 4 ? 'ml' : 'en');
+      NewsRepository.getById(editingPost.id, targetLang)
         .then((dto: any) => {
           if (dto && dto.id === editingPost.id) {
             const fetchedAitagIds = dto.aitag_ids || dto.aitagIds || [];
@@ -347,6 +348,7 @@ export default function DashboardPage() {
                 sub_type: dto.subType || dto.sub_type || prev.subType || prev.sub_type || '',
                 bulletPoints: dto.bulletPoints || dto.bullet_points || dto.bullets || prev.bulletPoints || prev.bullet_points || prev.bullets || [],
                 bullet_points: dto.bulletPoints || dto.bullet_points || dto.bullets || prev.bulletPoints || prev.bullet_points || prev.bullets || [],
+                links: dto.links || prev.links || [],
                 video_url: dto.video_url || dto.videoUrl || prev.video_url || prev.videoUrl,
                 video_platform: dto.video_platform || dto.videoSource || prev.video_platform || prev.videoSource,
               };
@@ -885,7 +887,7 @@ export default function DashboardPage() {
     }
 
     let formattedLinks: any[] = [];
-    if (resolvedSubType === 'StandardLink' || (data as any).links) {
+    if (resolvedSubType === 'StandardLink' || (data as any).links || /<a\s+[^>]*href=/i.test(resolvedContent) || /<link\d+>/i.test(resolvedContent)) {
       const formattedRes = formatLinksAndContent((data as any).links || (data as any).linkUrl || (data as any).webUrl, resolvedContent);
       formattedLinks = formattedRes.links;
       finalContent = formattedRes.content;
@@ -1080,9 +1082,10 @@ export default function DashboardPage() {
       finalContent = formatted.content || resolvedContent;
     }
 
+    const existingLinks = (data as any).links || editingPost?.links || (editingPost as any)?.links || [];
     let formattedLinks: any[] = [];
-    if (resolvedSubType === 'StandardLink' || (data as any).links) {
-      const formattedRes = formatLinksAndContent((data as any).links || (data as any).linkUrl || (data as any).webUrl, resolvedContent);
+    if (resolvedSubType === 'StandardLink' || (data as any).links || (editingPost as any)?.links || /<a\s+[^>]*href=/i.test(resolvedContent) || /<link\d+>/i.test(resolvedContent)) {
+      const formattedRes = formatLinksAndContent(existingLinks.length > 0 ? existingLinks : ((data as any).linkUrl || (data as any).webUrl), resolvedContent);
       formattedLinks = formattedRes.links;
       finalContent = formattedRes.content;
     }
@@ -1178,7 +1181,10 @@ export default function DashboardPage() {
     const updatedPost = {
       ...editingPost,
       title: resolvedTitle,
-      content: resolvedContent,
+      content: finalContent,
+      links: formattedLinks,
+      subType: resolvedSubType,
+      sub_type: resolvedSubType,
       categories: mappedCategories,
       language: data.postLanguage === 'te' ? 'Telugu' : data.postLanguage === 'hi' ? 'Hindi' : data.postLanguage === 'ml' ? 'Malayalam' : 'English',
       type: data.type,
@@ -1231,13 +1237,14 @@ export default function DashboardPage() {
               language={language as any}
               initialData={{
                 titleEn: editingPost.language === 'English' || (editingPost as any).language_id === 1 || (editingPost as any).language_code === 'en' ? editingPost.title : '',
-                bodyEn: editingPost.language === 'English' || (editingPost as any).language_id === 1 || (editingPost as any).language_code === 'en' ? editingPost.content : '',
+                bodyEn: restoreLinksInContent(editingPost.language === 'English' || (editingPost as any).language_id === 1 || (editingPost as any).language_code === 'en' ? editingPost.content : '', (editingPost as any).links),
                 titleTe: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' ? editingPost.title : '',
-                bodyTe: editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' ? editingPost.content : '',
+                bodyTe: restoreLinksInContent(editingPost.language === 'Telugu' || (editingPost as any).language_id === 2 || (editingPost as any).language_code === 'te' ? editingPost.content : '', (editingPost as any).links),
                 titleHi: editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' ? editingPost.title : '',
-                bodyHi: editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' ? editingPost.content : '',
+                bodyHi: restoreLinksInContent(editingPost.language === 'Hindi' || (editingPost as any).language_id === 3 || (editingPost as any).language_code === 'hi' ? editingPost.content : '', (editingPost as any).links),
                 titleMl: editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' ? editingPost.title : '',
-                bodyMl: editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' ? editingPost.content : '',
+                bodyMl: restoreLinksInContent(editingPost.language === 'Malayalam' || (editingPost as any).language_id === 4 || (editingPost as any).language_code === 'ml' ? editingPost.content : '', (editingPost as any).links),
+                links: (editingPost as any).links || [],
                 categories: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || (Array.isArray(editingPost.categories) && editingPost.categories.length > 0 ? editingPost.categories : ((editingPost as any).categoryName || (editingPost as any).category_id || [])),
                 category_ids: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || [],
                 categoryIds: (editingPost as any).category_ids || (editingPost as any).categoryIds || editingPost.categoryIds || [],

@@ -1,4 +1,4 @@
-import { formatLinks, formatLinksAndContent } from '../utils/link.utils';
+import { formatLinks, formatLinksAndContent, restoreLinksInContent } from '../utils/link.utils';
 import { stripAllTagsExceptLinkTags } from '../utils/html.utils';
 
 describe('formatLinksAndContent', () => {
@@ -64,4 +64,67 @@ describe('formatLinksAndContent', () => {
       },
     ]);
   });
+
+  it('should preserve existing <link1> tags and link objects when editing post without changing link', () => {
+    const content = 'Check <link1>diog</link1> today';
+    const existingLinks = [{ id: 'link1', value: 'www.google.com' }];
+    const result = formatLinksAndContent(existingLinks, content);
+    expect(result.content).toBe('Check <link1>diog</link1> today');
+    expect(result.links).toEqual([{ id: 'link1', value: 'www.google.com' }]);
+  });
+
+  it('should clean up nested <link1> tags when user wraps or edits link in editor', () => {
+    const content = 'Check <a href="https://bing.com"><link1>diog</link1></a> today';
+    const existingLinks = [{ id: 'link1', value: 'www.google.com' }];
+    const result = formatLinksAndContent(existingLinks, content);
+    expect(result.content).toBe('Check <link1>diog</link1> today');
+    expect(result.links).toEqual([{ id: 'link1', value: 'https://bing.com' }]);
+  });
+
+  it('should clean up outer <link1> tags wrapping anchor tags and duplicated tags', () => {
+    const outerContent = 'Check <link1><a href="https://bing.com">diog</a></link1> today';
+    const res1 = formatLinksAndContent([], outerContent);
+    expect(res1.content).toBe('Check <link1>diog</link1> today');
+    expect(res1.links).toEqual([{ id: 'link1', value: 'https://bing.com' }]);
+
+    const dupeContent = 'Check <link1><link1>diog</link1></link1> today';
+    const res2 = formatLinksAndContent([{ id: 'link1', value: 'https://example.com' }], dupeContent);
+    expect(res2.content).toBe('Check <link1>diog</link1> today');
+    expect(res2.links).toEqual([{ id: 'link1', value: 'https://example.com' }]);
+  });
 });
+
+describe('restoreLinksInContent', () => {
+  it('should convert <link1>innerText</link1> back into <a href="url">innerText</a>', () => {
+    const content = 'Check <link1>diog</link1> for updates';
+    const links = [{ id: 'link1', value: 'www.google.com' }];
+    const restored = restoreLinksInContent(content, links);
+    expect(restored).toBe('Check <a href="www.google.com">diog</a> for updates');
+  });
+
+  it('should handle string link inputs, object maps, and unwrap duplicated tags', () => {
+    const dupe = '<link1><link1>diog</link1></link1>';
+    const restored1 = restoreLinksInContent(dupe, 'https://example.com');
+    expect(restored1).toBe('<a href="https://example.com">diog</a>');
+
+    const restored2 = restoreLinksInContent('<link1>news</link1>', { link1: 'https://news.com' });
+    expect(restored2).toBe('<a href="https://news.com">news</a>');
+  });
+
+  it('should handle case insensitivity and multiple links', () => {
+    const content = '<link1>First</link1> and <link2>Second</link2>';
+    const links = [
+      { id: 'link1', value: 'https://first.com' },
+      { id: 'link2', value: 'https://second.com' },
+    ];
+    const restored = restoreLinksInContent(content, links);
+    expect(restored).toBe('<a href="https://first.com">First</a> and <a href="https://second.com">Second</a>');
+  });
+
+  it('should return original content if links is empty or undefined', () => {
+    expect(restoreLinksInContent('Some <link1>text</link1>', [])).toBe('Some <link1>text</link1>');
+    expect(restoreLinksInContent('Some text', null)).toBe('Some text');
+    expect(restoreLinksInContent('', [{ id: 'link1', value: 'www.google.com' }])).toBe('');
+  });
+});
+

@@ -142,7 +142,9 @@ export function formatDisplayContent(post: any): string {
   const rawContent = (typeof post === 'string' ? post : post.content || post.body || '').trim();
   const bullets = typeof post === 'object' && post ? (post.bulletPoints || post.bullet_points || post.bullets || []) : [];
 
-  let formatted = rawContent.replace(/\s+(\.|\>|\*|\_|•)\s+/g, '\n$1 ');
+  let formatted = rawContent
+    .replace(/<\/?link\d+[^>]*>/gi, '')
+    .replace(/\s+(\.|\>|\*|\_|•)\s+/g, '\n$1 ');
 
   if (Array.isArray(bullets) && bullets.length > 0) {
     const cleanBullets = bullets.map((b: any) => String(b).replace(/[\[\]]/g, '').trim()).filter(Boolean);

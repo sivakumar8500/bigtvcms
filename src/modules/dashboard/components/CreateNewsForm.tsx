@@ -40,6 +40,7 @@ import { HtmlEditor } from './HtmlEditor';
 import { Loader } from '@/shared/components/Loader';
 import { stripHtml, stripAllTagsExceptLinkTags } from '@/shared/utils/html.utils';
 import { formatBulletPostContentAndBullets } from '@/shared/utils/bullet.utils';
+import { formatLinksAndContent, restoreLinksInContent } from '@/shared/utils/link.utils';
 
 // Multilingual lists to support strict translation guidelines
 const categoriesList = [
@@ -394,6 +395,7 @@ export interface CreateNewsFormData {
   galleryImages?: string[];
   bulletPoints?: string[];
   bullet_points?: string[];
+  links?: Array<{ id: string; value: string }>;
   subType?: string;
   sub_type?: string;
   showTag?: string;
@@ -686,8 +688,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       : initialData.postLanguage === 'ml' ? initialData.bodyMl
       : initialData.bodyEn
     ) || '';
+    const restoredBody = restoreLinksInContent(rawBody, (initialData as any)?.links);
     const bullets = (initialData as any).bulletPoints || (initialData as any).bullet_points || [];
-    return combineContentAndBullets(rawBody, bullets);
+    return combineContentAndBullets(restoredBody, bullets);
   });
 
   // Reverse-map Telugu category names back to English keys for checkbox preselection
@@ -1240,8 +1243,9 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
         : initialData.postLanguage === 'hi' ? initialData.bodyHi
         : initialData.postLanguage === 'ml' ? initialData.bodyMl
         : initialData.bodyEn) || '';
+      const restoredBody = restoreLinksInContent(rawBody, (initialData as any)?.links);
       const bullets = (initialData as any).bulletPoints || (initialData as any).bullet_points || (initialData as any).bullets || [];
-      const combinedBody = combineContentAndBullets(rawBody, bullets);
+      const combinedBody = combineContentAndBullets(restoredBody, bullets);
       if (combinedBody) setBody(combinedBody);
 
       const rawCats = [
@@ -1581,6 +1585,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       }
     }
 
+    const currentLinks = formatLinksAndContent((initialData as any)?.links || [], cleanBody || body).links;
+
     onSubmit({
       titleEn: postLanguage === 'en' ? cleanTitle : '',
       bodyEn: postLanguage === 'en' ? cleanBody : '',
@@ -1628,6 +1634,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
       imageTitle: cleanImgTitle,
       bulletPoints: isBulletPost ? finalBullets : [],
       bullet_points: isBulletPost ? finalBullets : [],
+      links: currentLinks,
       showTag,
       showDay,
       showTime,

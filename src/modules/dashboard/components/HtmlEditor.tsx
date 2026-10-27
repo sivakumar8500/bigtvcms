@@ -71,9 +71,28 @@ export const HtmlEditor: React.FC<HtmlEditorProps> = ({
   };
 
   const handleLink = () => {
-    const url = prompt('Enter link URL (e.g. https://google.com):');
+    let existingUrl = '';
+    if (typeof window !== 'undefined') {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        let node: Node | null = selection.anchorNode;
+        if (node && node.nodeType === Node.TEXT_NODE) {
+          node = node.parentElement;
+        }
+        const anchor = (node as HTMLElement | null)?.closest?.('a');
+        if (anchor) {
+          existingUrl = anchor.getAttribute('href') || '';
+        }
+      }
+    }
+    const url = prompt('Enter link URL (e.g. https://google.com):', existingUrl);
     if (url !== null) {
-      executeCommand('createLink', url);
+      const trimmed = url.trim();
+      if (trimmed) {
+        executeCommand('createLink', trimmed);
+      } else {
+        executeCommand('unlink');
+      }
     }
   };
 
@@ -381,6 +400,11 @@ export const HtmlEditor: React.FC<HtmlEditorProps> = ({
                 color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
                 pointerEvents: 'none',
                 display: 'block',
+              },
+              '& a': {
+                color: isDark ? '#60a5fa' : '#2563eb',
+                textDecoration: 'underline',
+                cursor: 'pointer',
               },
             }}
           />

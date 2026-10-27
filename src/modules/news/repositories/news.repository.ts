@@ -23,8 +23,9 @@ export class NewsRepository {
     return this.getAll(skip, limit);
   }
 
-  static async getById(id: number): Promise<NewsPostDto> {
-    return apiClient.get<NewsPostDto>(`/news-posts/${id}`);
+  static async getById(id: number, langCode?: string): Promise<NewsPostDto> {
+    const params = langCode ? { language_code: langCode, lang: langCode } : undefined;
+    return apiClient.get<NewsPostDto>(`/news-posts/${id}`, params);
   }
 
   static async create(dto: CreateNewsPostDto): Promise<NewsPostDto> {
@@ -65,7 +66,11 @@ export class NewsRepository {
   }
 
   static async update(id: number, dto: UpdateNewsPostDto): Promise<NewsPostDto> {
-    return apiClient.put<NewsPostDto, UpdateNewsPostDto>(`/news-posts/${id}`, dto);
+    const lang = dto.language_code || (dto as any).lang || 'en';
+    return apiClient.put<NewsPostDto, UpdateNewsPostDto>(`/news-posts/${id}`, dto, {
+      params: { language_code: lang, lang },
+      headers: { 'Accept-Language': lang },
+    });
   }
 
   static async updateNews(id: number, dto: UpdateNewsPostDto): Promise<NewsPostDto> {
