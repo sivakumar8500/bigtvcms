@@ -173,7 +173,7 @@ export default function LanguageSelectionPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1c1445 0%, #2e2369 100%)',
+        background: 'radial-gradient(circle at 10% 20%, rgba(234, 179, 8, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.15) 0%, transparent 45%), linear-gradient(135deg, #161202 0%, #261e05 45%, #181300 100%)',
         overflow: 'hidden',
         position: 'relative',
         p: 2,
@@ -181,41 +181,51 @@ export default function LanguageSelectionPage() {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
+        '@keyframes rotate-counter': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
+        },
       }}
     >
+      {/* Top Left Corner Rotating Yellow Mandala */}
       <Box
         component="img"
-        src="/mandala.png"
+        src="/mandala_yellow.png"
         alt="Top Left Mandala decoration"
+        data-testid="top-left-sudarshana-chakra"
         sx={{
           position: 'absolute',
-          top: '-275px',
-          left: '-275px',
-          width: '550px',
+          top: { xs: '-140px', sm: '-180px', md: '-210px' },
+          left: { xs: '-140px', sm: '-180px', md: '-210px' },
+          width: { xs: '360px', sm: '460px', md: '560px' },
           height: 'auto',
-          opacity: 0.15,
+          opacity: 0.42,
           zIndex: 1,
-          animation: 'rotate-clockwise 25s linear infinite',
+          animation: 'rotate-clockwise 35s linear infinite',
           transformOrigin: 'center center',
-          filter: 'invert(1) brightness(1.5)',
+          filter: 'drop-shadow(0 0 45px rgba(250, 204, 21, 0.45))',
+          pointerEvents: 'none',
         }}
       />
 
+      {/* Bottom Right Corner Rotating Yellow Mandala */}
       <Box
         component="img"
-        src="/mandala.png"
+        src="/mandala_yellow.png"
         alt="Bottom Right Mandala decoration"
+        data-testid="bottom-right-sudarshana-chakra"
         sx={{
           position: 'absolute',
-          bottom: '-275px',
-          right: '-275px',
-          width: '550px',
+          bottom: { xs: '-140px', sm: '-180px', md: '-210px' },
+          right: { xs: '-140px', sm: '-180px', md: '-210px' },
+          width: { xs: '360px', sm: '460px', md: '560px' },
           height: 'auto',
-          opacity: 0.15,
+          opacity: 0.42,
           zIndex: 1,
-          animation: 'rotate-clockwise 25s linear infinite',
+          animation: 'rotate-counter 35s linear infinite',
           transformOrigin: 'center center',
-          filter: 'invert(1) brightness(1.5)',
+          filter: 'drop-shadow(0 0 45px rgba(250, 204, 21, 0.45))',
+          pointerEvents: 'none',
         }}
       />
 
@@ -249,17 +259,17 @@ export default function LanguageSelectionPage() {
                   filter: 'drop-shadow(0px 4px 10px rgba(0,0,0,0.3))',
                 }}
               />
-              <Typography variant="caption" sx={{ color: '#d0caeb', pl: 1 }}>
+              <Typography variant="caption" sx={{ color: '#fde68a', pl: 1, fontWeight: 500, letterSpacing: 0.5 }}>
                 Breaking News Portal
               </Typography>
             </Box>
 
             <Typography variant="h3" sx={{ fontWeight: 600, mb: 4, lineHeight: 1.2 }}>
               Enterprise Digital News & Content Hub: <br />
-              <span style={{ color: '#a6e2f5' }}>BigTV CMS™</span>
+              <span style={{ color: '#facc15', textShadow: '0 0 25px rgba(250, 204, 21, 0.4)' }}>BigTV CMS™</span>
             </Typography>
 
-            <Typography variant="body1" sx={{ color: '#d0caeb', mb: 4, lineHeight: 1.6 }}>
+            <Typography variant="body1" sx={{ color: '#fef3c7', mb: 4, lineHeight: 1.6, opacity: 0.9 }}>
               Select your language on the right panel to configure the Accept-Language API header mappings dynamically across the CMS operator workspace.
             </Typography>
           </Box>
@@ -268,21 +278,21 @@ export default function LanguageSelectionPage() {
             sx={{
               width: '100%',
               maxWidth: '540px',
-              backgroundColor: 'rgba(38, 28, 86, 0.55)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: 'rgba(28, 22, 3, 0.72)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(250, 204, 21, 0.25)',
               borderRadius: '24px',
               p: { xs: 4, md: 5 },
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(234, 179, 8, 0.12)',
             }}
           >
-            <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 700, mb: 3 }}>
+            <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 700, mb: 3, letterSpacing: 0.3 }}>
               Select Language
             </Typography>
 
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '150px', mb: 4 }}>
-                <CircularProgress sx={{ color: '#a6e2f5' }} />
+                <CircularProgress sx={{ color: '#facc15' }} />
               </Box>
             ) : (
               <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -292,16 +302,17 @@ export default function LanguageSelectionPage() {
                     <Grid item xs={12} sm={6} key={opt.key}>
                       <Card
                         sx={{
-                          backgroundColor: isSelected ? '#00a2e8' : 'rgba(255, 255, 255, 0.03)',
+                          backgroundColor: isSelected ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.04)',
                           border: '2px solid',
-                          borderColor: isSelected ? '#00c3ff' : 'rgba(255, 255, 255, 0.08)',
+                          borderColor: isSelected ? '#facc15' : 'rgba(250, 204, 21, 0.2)',
                           borderRadius: '16px',
                           color: '#ffffff',
                           transition: 'all 0.3s ease',
-                          boxShadow: isSelected ? '0 8px 30px rgba(0, 162, 232, 0.35)' : 'none',
+                          boxShadow: isSelected ? '0 8px 30px rgba(234, 179, 8, 0.35)' : 'none',
                           '&:hover': {
-                            borderColor: '#00a2e8',
+                            borderColor: '#facc15',
                             transform: 'translateY(-2px)',
+                            backgroundColor: isSelected ? 'rgba(234, 179, 8, 0.3)' : 'rgba(234, 179, 8, 0.1)',
                           },
                           height: '110px',
                           position: 'relative',
@@ -320,15 +331,16 @@ export default function LanguageSelectionPage() {
                           }}
                         >
                           <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2, color: isSelected ? '#fde047' : '#ffffff' }}>
                               {opt.nativeName}
                             </Typography>
                             <Typography
                               variant="caption"
                               sx={{
-                                color: isSelected ? 'rgba(255, 255, 255, 0.8)' : '#a6e2f5',
+                                color: isSelected ? '#fef08a' : '#fde68a',
                                 display: 'block',
                                 mt: 0.5,
+                                fontWeight: 500,
                               }}
                             >
                               {opt.name}
@@ -342,7 +354,7 @@ export default function LanguageSelectionPage() {
                               right: '12px',
                               fontSize: '3.2rem',
                               fontWeight: 800,
-                              color: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                              color: isSelected ? 'rgba(250, 204, 21, 0.25)' : 'rgba(255, 255, 255, 0.06)',
                               fontFamily: 'Arial, sans-serif',
                               lineHeight: 1,
                               userSelect: 'none',
@@ -364,15 +376,18 @@ export default function LanguageSelectionPage() {
               variant="contained"
               onClick={handleProceed}
               sx={{
-                backgroundColor: '#a6e2f5',
-                color: '#1c1445',
+                background: 'linear-gradient(135deg, #facc15 0%, #eab308 100%)',
+                color: '#1a1300',
                 py: 1.8,
                 fontSize: '1rem',
                 fontWeight: 700,
                 borderRadius: '12px',
-                boxShadow: '0 8px 25px rgba(166, 226, 245, 0.25)',
+                boxShadow: '0 8px 25px rgba(234, 179, 8, 0.35)',
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                  backgroundColor: '#8cd5ed',
+                  background: 'linear-gradient(135deg, #fde047 0%, #d97706 100%)',
+                  boxShadow: '0 12px 30px rgba(234, 179, 8, 0.5)',
+                  transform: 'translateY(-1px)',
                 },
               }}
             >

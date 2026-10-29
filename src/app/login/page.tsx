@@ -341,6 +341,12 @@ export default function LoginPage() {
             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
             fontWeight: 600,
             fontSize: '0.95rem',
+            ...(toast.severity === 'success' && {
+              background: 'linear-gradient(135deg, #b45309 0%, #d97706 100%)',
+              color: '#ffffff',
+              boxShadow: '0 8px 25px rgba(217, 119, 6, 0.4)',
+              border: '1px solid rgba(250, 204, 21, 0.4)',
+            }),
           }}
         >
           {String(toast.message || '')}
@@ -352,7 +358,7 @@ export default function LoginPage() {
                 left: 0,
                 height: '4px',
                 width: '100%',
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                backgroundColor: toast.severity === 'success' ? '#fde047' : 'rgba(255, 255, 255, 0.7)',
                 animation: 'drain 3s linear forwards',
                 '@keyframes drain': {
                   '0%': { width: '100%' },
