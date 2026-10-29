@@ -57,50 +57,54 @@ export default function LoginPage() {
         overflow: 'hidden',
         position: 'relative',
         p: 2,
-        '@keyframes float-top-left': {
-          '0%, 100%': { transform: 'rotate(25deg) scale(1)', filter: 'drop-shadow(0 0 35px rgba(234, 179, 8, 0.45))' },
-          '50%': { transform: 'rotate(28deg) scale(1.04) translateY(-8px)', filter: 'drop-shadow(0 0 50px rgba(250, 204, 21, 0.65))' },
+        '@keyframes rotate-clockwise': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
-        '@keyframes float-bottom-right': {
-          '0%, 100%': { transform: 'rotate(-45deg) scaleX(-1) scale(1)', filter: 'drop-shadow(0 0 35px rgba(234, 179, 8, 0.45))' },
-          '50%': { transform: 'rotate(-42deg) scaleX(-1) scale(1.04) translateY(8px)', filter: 'drop-shadow(0 0 50px rgba(250, 204, 21, 0.65))' },
+        '@keyframes rotate-counter': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
         },
       }}
     >
-      {/* Top Left Corner Badam Design Motif */}
+      {/* Top Left Corner Rotating Sudarshana Chakra */}
       <Box
         component="img"
-        src="/badam_design.png"
-        alt="Top Left Badam Design decoration"
-        data-testid="top-left-badam-design"
+        src="/sudarshana_chakra.png"
+        alt="Top Left Sudarshana Chakra decoration"
+        data-testid="top-left-sudarshana-chakra"
         sx={{
           position: 'absolute',
-          top: { xs: '-80px', sm: '-60px', md: '-50px' },
-          left: { xs: '-80px', sm: '-60px', md: '-50px' },
-          width: { xs: '300px', sm: '380px', md: '480px' },
+          top: { xs: '-140px', sm: '-180px', md: '-210px' },
+          left: { xs: '-140px', sm: '-180px', md: '-210px' },
+          width: { xs: '360px', sm: '460px', md: '560px' },
           height: 'auto',
-          opacity: 0.55,
+          opacity: 0.42,
           zIndex: 1,
-          animation: 'float-top-left 8s ease-in-out infinite',
+          animation: 'rotate-clockwise 35s linear infinite',
+          transformOrigin: 'center center',
+          filter: 'drop-shadow(0 0 45px rgba(250, 204, 21, 0.45))',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Bottom Right Corner Badam Design Motif */}
+      {/* Bottom Right Corner Rotating Sudarshana Chakra */}
       <Box
         component="img"
-        src="/badam_design.png"
-        alt="Bottom Right Badam Design decoration"
-        data-testid="bottom-right-badam-design"
+        src="/sudarshana_chakra.png"
+        alt="Bottom Right Sudarshana Chakra decoration"
+        data-testid="bottom-right-sudarshana-chakra"
         sx={{
           position: 'absolute',
-          bottom: { xs: '-80px', sm: '-60px', md: '-50px' },
-          right: { xs: '-80px', sm: '-60px', md: '-50px' },
-          width: { xs: '300px', sm: '380px', md: '480px' },
+          bottom: { xs: '-140px', sm: '-180px', md: '-210px' },
+          right: { xs: '-140px', sm: '-180px', md: '-210px' },
+          width: { xs: '360px', sm: '460px', md: '560px' },
           height: 'auto',
-          opacity: 0.55,
+          opacity: 0.42,
           zIndex: 1,
-          animation: 'float-bottom-right 8s ease-in-out infinite',
+          animation: 'rotate-counter 35s linear infinite',
+          transformOrigin: 'center center',
+          filter: 'drop-shadow(0 0 45px rgba(250, 204, 21, 0.45))',
           pointerEvents: 'none',
         }}
       />
