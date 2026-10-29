@@ -53,52 +53,55 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1c1445 0%, #2e2369 100%)',
+        background: 'radial-gradient(circle at 10% 20%, rgba(234, 179, 8, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.15) 0%, transparent 45%), linear-gradient(135deg, #161202 0%, #261e05 45%, #181300 100%)',
         overflow: 'hidden',
         position: 'relative',
         p: 2,
-        // Continuous rotation keyframe animations setup
-        '@keyframes rotate-clockwise': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
+        '@keyframes float-top-left': {
+          '0%, 100%': { transform: 'rotate(25deg) scale(1)', filter: 'drop-shadow(0 0 35px rgba(234, 179, 8, 0.45))' },
+          '50%': { transform: 'rotate(28deg) scale(1.04) translateY(-8px)', filter: 'drop-shadow(0 0 50px rgba(250, 204, 21, 0.65))' },
+        },
+        '@keyframes float-bottom-right': {
+          '0%, 100%': { transform: 'rotate(-45deg) scaleX(-1) scale(1)', filter: 'drop-shadow(0 0 35px rgba(234, 179, 8, 0.45))' },
+          '50%': { transform: 'rotate(-42deg) scaleX(-1) scale(1.04) translateY(8px)', filter: 'drop-shadow(0 0 50px rgba(250, 204, 21, 0.65))' },
         },
       }}
     >
-      {/* Top Left Corner Rotating Mandala (White PNG with custom color invert filter to render white outline on dark theme) */}
+      {/* Top Left Corner Badam Design Motif */}
       <Box
         component="img"
-        src="/mandala.png"
-        alt="Top Left Mandala decoration"
+        src="/badam_design.png"
+        alt="Top Left Badam Design decoration"
+        data-testid="top-left-badam-design"
         sx={{
           position: 'absolute',
-          top: '-275px', // Shift 50% (half of 550px width) up
-          left: '-275px', // Shift 50% (half of 550px width) left
-          width: '550px',
+          top: { xs: '-80px', sm: '-60px', md: '-50px' },
+          left: { xs: '-80px', sm: '-60px', md: '-50px' },
+          width: { xs: '300px', sm: '380px', md: '480px' },
           height: 'auto',
-          opacity: 0.15, // Soft opacity to fit dark theme background nicely
+          opacity: 0.55,
           zIndex: 1,
-          animation: 'rotate-clockwise 25s linear infinite',
-          transformOrigin: 'center center',
-          filter: 'invert(1) brightness(1.5)', // Invert dark blue strokes of white mandala to glowing white outlines
+          animation: 'float-top-left 8s ease-in-out infinite',
+          pointerEvents: 'none',
         }}
       />
 
-      {/* Bottom Right Corner Rotating Mandala (White PNG with custom color invert filter to render white outline on dark theme) */}
+      {/* Bottom Right Corner Badam Design Motif */}
       <Box
         component="img"
-        src="/mandala.png"
-        alt="Bottom Right Mandala decoration"
+        src="/badam_design.png"
+        alt="Bottom Right Badam Design decoration"
+        data-testid="bottom-right-badam-design"
         sx={{
           position: 'absolute',
-          bottom: '-275px', // Shift 50% (half of 550px width) down
-          right: '-275px', // Shift 50% (half of 550px width) right
-          width: '550px',
+          bottom: { xs: '-80px', sm: '-60px', md: '-50px' },
+          right: { xs: '-80px', sm: '-60px', md: '-50px' },
+          width: { xs: '300px', sm: '380px', md: '480px' },
           height: 'auto',
-          opacity: 0.15, // Soft opacity to fit dark theme background nicely
+          opacity: 0.55,
           zIndex: 1,
-          animation: 'rotate-clockwise 25s linear infinite',
-          transformOrigin: 'center center',
-          filter: 'invert(1) brightness(1.5)', // Invert dark blue strokes of white mandala to glowing white outlines
+          animation: 'float-bottom-right 8s ease-in-out infinite',
+          pointerEvents: 'none',
         }}
       />
 
@@ -134,24 +137,29 @@ export default function LoginPage() {
                   filter: 'drop-shadow(0px 4px 10px rgba(0,0,0,0.3))',
                 }}
               />
-              <Typography variant="caption" sx={{ color: '#d0caeb', pl: 1 }}>
+              <Typography variant="caption" sx={{ color: '#fde68a', pl: 1, fontWeight: 500, letterSpacing: 0.5 }}>
                 Breaking News Portal
               </Typography>
             </Box>
 
             <Typography variant="h3" sx={{ fontWeight: 600, mb: 4, lineHeight: 1.2 }}>
               Enterprise Digital News & Content Hub: <br />
-              <span style={{ color: '#a6e2f5' }}>BigTV CMS™</span>
+              <span style={{ color: '#facc15', textShadow: '0 0 25px rgba(250, 204, 21, 0.4)' }}>BigTV CMS™</span>
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-start' } }}>
               <Button
                 variant="outlined"
                 sx={{
-                  color: '#ffffff',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  '&:hover': { borderColor: '#ffffff', backgroundColor: 'rgba(255,255,255,0.1)' },
+                  color: '#fef9c3',
+                  borderColor: 'rgba(250, 204, 21, 0.4)',
+                  backgroundColor: 'rgba(234, 179, 8, 0.08)',
+                  fontWeight: 600,
+                  '&:hover': {
+                    borderColor: '#facc15',
+                    backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                    boxShadow: '0 0 15px rgba(234, 179, 8, 0.3)',
+                  },
                 }}
               >
                 What to Expect?
@@ -159,7 +167,8 @@ export default function LoginPage() {
               <Button
                 variant="text"
                 sx={{
-                  color: '#d0caeb',
+                  color: '#fde68a',
+                  fontWeight: 500,
                   '&:hover': { color: '#ffffff' },
                 }}
               >
@@ -168,29 +177,29 @@ export default function LoginPage() {
             </Box>
           </Box>
 
-          {/* Right Column Form (Glassmorphism layout) */}
+          {/* Right Column Form (Glassmorphism layout with Warm Yellow Glow) */}
           <Box
             component="form"
             onSubmit={handleLoginSubmit}
             sx={{
               width: '100%',
               maxWidth: '480px',
-              backgroundColor: 'rgba(38, 28, 86, 0.55)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: 'rgba(28, 22, 3, 0.72)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(250, 204, 21, 0.25)',
               borderRadius: '24px',
               p: { xs: 4, md: 5 },
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(234, 179, 8, 0.12)',
             }}
           >
-            <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 700, mb: 4 }}>
+            <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 700, mb: 4, letterSpacing: 0.3 }}>
               Log In to BigTV CMS™
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* Username Input */}
               <Box>
-                <Typography variant="body2" sx={{ color: '#d0caeb', mb: 1, fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: '#fde68a', mb: 1, fontWeight: 500 }}>
                   Username
                 </Typography>
                 <TextField
@@ -204,20 +213,27 @@ export default function LoginPage() {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <AccountCircle sx={{ color: '#d0caeb' }} />
+                        <AccountCircle sx={{ color: '#facc15' }} />
                       </InputAdornment>
                     ),
                   }}
                   sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                      borderRadius: '12px',
+                      '& fieldset': { borderColor: 'rgba(250, 204, 21, 0.25)' },
+                      '&:hover fieldset': { borderColor: 'rgba(250, 204, 21, 0.5)' },
+                      '&.Mui-focused fieldset': { borderColor: '#facc15', boxShadow: '0 0 10px rgba(250, 204, 21, 0.25)' },
+                    },
                     '& .MuiInputBase-input': { color: '#ffffff' },
-                    '& .MuiFormHelperText-root': { color: '#f44336' },
+                    '& .MuiFormHelperText-root': { color: '#f87171' },
                   }}
                 />
               </Box>
 
               {/* Password Input */}
               <Box>
-                <Typography variant="body2" sx={{ color: '#d0caeb', mb: 1, fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ color: '#fde68a', mb: 1, fontWeight: 500 }}>
                   Password
                 </Typography>
                 <TextField
@@ -234,17 +250,24 @@ export default function LoginPage() {
                       <InputAdornment position="end">
                         <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                           {showPassword ? (
-                            <VisibilityOff sx={{ color: '#d0caeb' }} />
+                            <VisibilityOff sx={{ color: '#facc15' }} />
                           ) : (
-                            <Visibility sx={{ color: '#d0caeb' }} />
+                            <Visibility sx={{ color: '#facc15' }} />
                           )}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                   sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                      borderRadius: '12px',
+                      '& fieldset': { borderColor: 'rgba(250, 204, 21, 0.25)' },
+                      '&:hover fieldset': { borderColor: 'rgba(250, 204, 21, 0.5)' },
+                      '&.Mui-focused fieldset': { borderColor: '#facc15', boxShadow: '0 0 10px rgba(250, 204, 21, 0.25)' },
+                    },
                     '& .MuiInputBase-input': { color: '#ffffff' },
-                    '& .MuiFormHelperText-root': { color: '#f44336' },
+                    '& .MuiFormHelperText-root': { color: '#f87171' },
                   }}
                 />
               </Box>
@@ -252,31 +275,37 @@ export default function LoginPage() {
               {/* Options */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <FormControlLabel
-                  control={<Checkbox sx={{ color: '#d0caeb', '&.Mui-checked': { color: '#a6e2f5' } }} />}
-                  label={<Typography variant="body2" sx={{ color: '#d0caeb' }}>Remember</Typography>}
+                  control={<Checkbox sx={{ color: '#fde68a', '&.Mui-checked': { color: '#facc15' } }} />}
+                  label={<Typography variant="body2" sx={{ color: '#fef3c7' }}>Remember</Typography>}
                 />
-                <Link href="#" underline="hover" sx={{ color: '#d0caeb', fontSize: '0.875rem' }}>
+                <Link href="#" underline="hover" sx={{ color: '#facc15', fontSize: '0.875rem', fontWeight: 500, '&:hover': { color: '#fde047' } }}>
                   Forgotten?
                 </Link>
               </Box>
 
-              {/* Log In Action Button */}
+              {/* Log In Action Button (Vibrant Yellow Gradient) */}
               <Button
                 fullWidth
                 type="submit"
                 variant="contained"
                 disabled={isPending}
                 sx={{
-                  backgroundColor: '#a6e2f5',
-                  color: '#1c1445',
+                  background: 'linear-gradient(135deg, #facc15 0%, #eab308 100%)',
+                  color: '#1a1300',
+                  fontWeight: 700,
+                  borderRadius: '12px',
                   py: 1.5,
                   fontSize: '1rem',
+                  boxShadow: '0 8px 25px rgba(234, 179, 8, 0.35)',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: '#8cd5ed',
+                    background: 'linear-gradient(135deg, #fde047 0%, #d97706 100%)',
+                    boxShadow: '0 12px 30px rgba(234, 179, 8, 0.5)',
+                    transform: 'translateY(-1px)',
                   },
                   '&.Mui-disabled': {
-                    backgroundColor: 'rgba(166, 226, 245, 0.3)',
-                    color: 'rgba(28, 20, 69, 0.5)',
+                    background: 'rgba(234, 179, 8, 0.35)',
+                    color: 'rgba(26, 19, 0, 0.5)',
                   },
                 }}
               >
