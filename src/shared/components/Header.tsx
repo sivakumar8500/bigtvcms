@@ -62,8 +62,11 @@ const headerTranslations = {
     copyId: 'Copy Device ID',
     copied: 'Copied!',
     regenerate: 'Regenerate ID',
-    deviceIdNote: 'This ID is stored locally and persists across sessions.',
     close: 'Close',
+    logoutConfirmTitle: 'Confirm Logout',
+    logoutConfirmMessage: 'Are you sure you want to log out of your account?',
+    cancel: 'Cancel',
+    confirmLogout: 'Log Out',
     // detail labels
     lblDeviceId: 'Device ID',
     lblBrowser: 'Browser',
@@ -97,8 +100,11 @@ const headerTranslations = {
     copyId: 'డివైస్ ID కాపీ చేయి',
     copied: 'కాపీ అయింది!',
     regenerate: 'ID మళ్ళీ రూపొందించు',
-    deviceIdNote: 'ఈ ID స్థానికంగా నిల్వ చేయబడింది మరియు సెషన్లలో కొనసాగుతుంది.',
     close: 'మూసివేయి',
+    logoutConfirmTitle: 'లాగ్ అవుట్ నిర్ధారణ',
+    logoutConfirmMessage: 'మీరు ఖచ్చితంగా మీ ఖాతా నుండి లాగ్ అవుట్ కావాలనుకుంటున్నారా?',
+    cancel: 'రద్దు చేయి',
+    confirmLogout: 'లాగ్ అవుట్',
     lblDeviceId: 'డివైస్ ID', lblBrowser: 'బ్రౌజర్', lblOS: 'ఆపరేటింగ్ సిస్టమ్',
     lblDeviceType: 'డివైస్ రకం', lblScreen: 'స్క్రీన్ రిజల్యూషన్', lblColorDepth: 'కలర్ డెప్త్',
     lblPixelRatio: 'పిక్సెల్ రేషియో', lblLanguage: 'భాష', lblTimezone: 'టైమ్‌జోన్',
@@ -119,8 +125,11 @@ const headerTranslations = {
     copyId: 'डिवाइस ID कॉपी करें',
     copied: 'कॉपी हो गया!',
     regenerate: 'ID पुनः जनरेट करें',
-    deviceIdNote: 'यह ID स्थानीय रूप से संग्रहीत है और सभी सत्रों में बनी रहती है।',
     close: 'बंद करें',
+    logoutConfirmTitle: 'लॉग आउट की पुष्टि करें',
+    logoutConfirmMessage: 'क्या आप वाकई अपने खाते से लॉग आउट करना चाहते हैं?',
+    cancel: 'रद्द करें',
+    confirmLogout: 'लॉग आउट',
     lblDeviceId: 'डिवाइस ID', lblBrowser: 'ब्राउज़र', lblOS: 'ऑपरेटिंग सिस्टम',
     lblDeviceType: 'डिवाइस प्रकार', lblScreen: 'स्क्रीन रिज़ॉल्यूशन', lblColorDepth: 'रंग गहराई',
     lblPixelRatio: 'पिक्सेल अनुपात', lblLanguage: 'भाषा', lblTimezone: 'टाइमज़ोन',
@@ -141,8 +150,11 @@ const headerTranslations = {
     copyId: 'ഡിവൈസ് ID പകർത്തുക',
     copied: 'പകർത്തി!',
     regenerate: 'ID പുനർനിർമ്മിക്കുക',
-    deviceIdNote: 'ഈ ID ലോക്കൽ ആയി സൂക്ഷിക്കുന്നു, സെഷനുകളിൽ നിലനിൽക്കുന്നു.',
     close: 'അടയ്ക്കുക',
+    logoutConfirmTitle: 'ലോഗ് ഔട്ട് സ്ഥിരീകരിക്കുക',
+    logoutConfirmMessage: 'നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്ന് തീർച്ചയായും ലോഗ് ഔട്ട് ചെയ്യാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?',
+    cancel: 'റദ്ദാക്കുക',
+    confirmLogout: 'ലോഗ് ഔട്ട്',
     lblDeviceId: 'ഡിവൈസ് ID', lblBrowser: 'ബ്രൗസർ', lblOS: 'ഓപ്പറേറ്റിംഗ് സിസ്റ്റം',
     lblDeviceType: 'ഡിവൈസ് തരം', lblScreen: 'സ്ക്രീൻ റെസല്യൂഷൻ', lblColorDepth: 'കളർ ഡെപ്ത്',
     lblPixelRatio: 'പിക്സൽ റേഷ്യോ', lblLanguage: 'ഭാഷ', lblTimezone: 'ടൈംസോൺ',
@@ -165,6 +177,7 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
   const [copySnackbar, setCopySnackbar] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const handleRegenerate = () => {
     if (typeof window !== 'undefined') {
@@ -195,13 +208,26 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
     handleCloseMenu();
+    if (!user.isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+    setLogoutDialogOpen(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setLogoutDialogOpen(false);
     logoutUser();
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
     }
     router.push('/login');
+  };
+
+  const handleCancelLogout = () => {
+    setLogoutDialogOpen(false);
   };
 
   const open = Boolean(anchorEl);
@@ -307,8 +333,9 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
         {/* Logout / Login Icon Button */}
         <IconButton
           sx={{ color: isDark ? '#d0caeb' : '#5c548a' }}
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
           aria-label={user.isLoggedIn ? t.logout : t.login}
+          data-testid="header-logout-button"
         >
           <Input />
         </IconButton>
@@ -374,8 +401,9 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
           variant="contained"
           color="error"
           startIcon={<Logout />}
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
           sx={{ borderRadius: '10px', textTransform: 'none', fontWeight: 600, py: 0.8 }}
+          data-testid="popover-logout-button"
         >
           {t.logout}
         </Button>
@@ -424,10 +452,10 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
                   <Typography sx={{ color: isDark ? '#ffffff' : '#1c1445', fontWeight: 800, fontFamily: 'monospace', fontSize: '0.92rem', letterSpacing: '0.04em', wordBreak: 'break-all', flex: 1 }}>{deviceInfo.deviceId}</Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
                     <Tooltip title={t.copyId}>
-                      <IconButton size="small" onClick={handleCopy} sx={{ color: isDark ? '#a6e2f5' : '#1c1445', backgroundColor: isDark ? 'rgba(166,226,245,0.1)' : 'rgba(28,20,69,0.07)', borderRadius: '8px', '&:hover': { backgroundColor: isDark ? 'rgba(166,226,245,0.2)' : 'rgba(28,20,69,0.12)' } }}><ContentCopy sx={{ fontSize: '0.9rem' }} /></IconButton>
+                      <IconButton aria-label={t.copyId} size="small" onClick={handleCopy} sx={{ color: isDark ? '#a6e2f5' : '#1c1445', backgroundColor: isDark ? 'rgba(166,226,245,0.1)' : 'rgba(28,20,69,0.07)', borderRadius: '8px', '&:hover': { backgroundColor: isDark ? 'rgba(166,226,245,0.2)' : 'rgba(28,20,69,0.12)' } }}><ContentCopy sx={{ fontSize: '0.9rem' }} /></IconButton>
                     </Tooltip>
                     <Tooltip title={t.regenerate}>
-                      <IconButton size="small" onClick={handleRegenerate} sx={{ color: isDark ? '#d0caeb' : '#5c548a', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderRadius: '8px', '&:hover': { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' } }}><Refresh sx={{ fontSize: '0.9rem' }} /></IconButton>
+                      <IconButton aria-label={t.regenerate} size="small" onClick={handleRegenerate} sx={{ color: isDark ? '#d0caeb' : '#5c548a', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', borderRadius: '8px', '&:hover': { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)' } }}><Refresh sx={{ fontSize: '0.9rem' }} /></IconButton>
                     </Tooltip>
                   </Box>
                 </Box>
@@ -520,6 +548,101 @@ export const Header: React.FC<HeaderProps> = ({ title }) => {
           {t.copied} <strong>{deviceInfo?.deviceId}</strong>
         </Alert>
       </Snackbar>
+      {/* ── Logout Confirmation Dialog ── */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleCancelLogout}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            backgroundColor: isDark ? '#110d29' : '#ffffff',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+            boxShadow: isDark ? '0 24px 60px rgba(0,0,0,0.7)' : '0 24px 60px rgba(0,0,0,0.15)',
+            p: 1,
+            overflow: 'hidden',
+          },
+        }}
+        data-testid="logout-confirmation-dialog"
+      >
+        <Box sx={{ p: 2.5, textAlign: 'center' }}>
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '16px',
+              mx: 'auto',
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
+              border: isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(239, 68, 68, 0.2)',
+            }}
+          >
+            <Logout sx={{ fontSize: '1.75rem', color: '#ef4444' }} />
+          </Box>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: isDark ? '#ffffff' : '#1c1445',
+              mb: 1,
+              fontSize: '1.15rem',
+            }}
+          >
+            {t.logoutConfirmTitle}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: isDark ? '#d0caeb' : '#5c548a',
+              lineHeight: 1.5,
+              mb: 3,
+            }}
+          >
+            {t.logoutConfirmMessage}
+          </Typography>
+
+          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center' }}>
+            <Button
+              variant="outlined"
+              onClick={handleCancelLogout}
+              sx={{
+                flex: 1,
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                py: 1,
+                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                color: isDark ? '#d0caeb' : '#5c548a',
+                '&:hover': {
+                  borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                },
+              }}
+            >
+              {t.cancel}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleConfirmLogout}
+              sx={{
+                flex: 1,
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                py: 1,
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.35)',
+              }}
+            >
+              {t.confirmLogout}
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Box>
   );
 };
