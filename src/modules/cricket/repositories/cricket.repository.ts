@@ -249,7 +249,7 @@ export class CricketRepository {
    */
   static async publishMatch(matchId: string): Promise<CricketPublishResponse> {
     try {
-      const response = await cricketApiClient.post<CricketPublishResponse>(`/cricket/matches/${matchId}/publish`);
+      const response = await cricketApiClient.post<CricketPublishResponse>(`/cricket/matches/${matchId}/publish`, {});
       if (response && response.success) {
         this.updateLocalMatch(matchId, true, response.data?.publishedAt || new Date().toISOString());
         return response;
@@ -276,7 +276,7 @@ export class CricketRepository {
    */
   static async unpublishMatch(matchId: string): Promise<CricketPublishResponse> {
     try {
-      const response = await cricketApiClient.post<CricketPublishResponse>(`/cricket/matches/${matchId}/unpublish`);
+      const response = await cricketApiClient.post<CricketPublishResponse>(`/cricket/matches/${matchId}/unpublish`, {});
       if (response && response.success) {
         this.updateLocalMatch(matchId, false, null);
         return response;
@@ -331,7 +331,7 @@ export class CricketRepository {
    */
   static async syncScores(): Promise<CricketSyncResponse> {
     try {
-      const response = await cricketApiClient.post<CricketSyncResponse>('/cricket/sync');
+      const response = await cricketApiClient.post<CricketSyncResponse>('/cricket/sync', {});
       if (response && response.success) {
         return response;
       }

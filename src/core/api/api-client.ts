@@ -307,15 +307,15 @@ export class ApiClient {
     return promise;
   }
 
-  public async post<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+  public async post<T, R = unknown>(url: string, data?: R, config?: { headers?: any; params?: any }): Promise<T> {
     return this.request<T>({ method: 'post', url, data, ...config });
   }
 
-  public async put<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+  public async put<T, R = unknown>(url: string, data?: R, config?: { headers?: any; params?: any }): Promise<T> {
     return this.request<T>({ method: 'put', url, data, ...config });
   }
 
-  public async patch<T, R = unknown>(url: string, data: R, config?: { headers?: any; params?: any }): Promise<T> {
+  public async patch<T, R = unknown>(url: string, data?: R, config?: { headers?: any; params?: any }): Promise<T> {
     return this.request<T>({ method: 'patch', url, data, ...config });
   }
 
