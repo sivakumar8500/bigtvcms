@@ -685,6 +685,7 @@ export class RatingsRepository {
           };
         });
 
+        this.localCricket = mapped;
         let items = mapped;
         if (filter && filter !== 'all') {
           items = items.filter((m) => m.status === filter);
@@ -731,7 +732,19 @@ export class RatingsRepository {
   static async togglePinMatch(id: number): Promise<CricketMatchItem> {
     const match = this.localCricket.find((m) => m.id === id);
     if (match) {
-      match.isPinned = !match.isPinned;
+      const nextPinned = !match.isPinned;
+      try {
+        if (match.matchId) {
+          if (nextPinned) {
+            await cricketApiClient.post(`/cricket/matches/${match.matchId}/publish`, {});
+          } else {
+            await cricketApiClient.post(`/cricket/matches/${match.matchId}/unpublish`, {});
+          }
+        }
+      } catch (err) {
+        console.warn('Backend toggle cricket status failed, updating local state:', err);
+      }
+      match.isPinned = nextPinned;
       return { ...match };
     }
     throw new Error('Match not found');

@@ -379,11 +379,11 @@ export function useRatingsController() {
         const updated = await RatingsRepository.togglePinMatch(id);
         setCricketMatches((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
         showSnackbar(
-          updated.isPinned ? 'Match pinned to App Feed!' : 'Match unpinned from App Feed',
+          updated.isPinned ? 'Match published to App Feed!' : 'Match unpublished from App Feed',
           'info'
         );
       } catch {
-        showSnackbar('Failed to update pin status', 'error');
+        showSnackbar('Failed to update match publish status', 'error');
       }
     },
     [showSnackbar]

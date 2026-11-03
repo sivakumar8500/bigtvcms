@@ -23,6 +23,9 @@ import {
   Edit,
   FiberManualRecord,
   LocationOn,
+  CheckCircle,
+  Publish,
+  VisibilityOff,
 } from '@mui/icons-material';
 import { CricketMatchItem } from '../domain/ratings.types';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -201,17 +204,17 @@ export const CricketTab: React.FC<CricketTabProps> = ({
                   width: 36,
                   height: 36,
                   borderRadius: '10px',
-                  backgroundColor: 'rgba(245,158,11,0.15)',
-                  color: '#f59e0b',
+                  backgroundColor: 'rgba(16,185,129,0.15)',
+                  color: '#10b981',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <PushPin fontSize="small" />
+                <CheckCircle fontSize="small" />
               </Box>
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#f59e0b' }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981' }}>
               {pinnedCount}
             </Typography>
           </CardContent>
@@ -358,16 +361,29 @@ export const CricketTab: React.FC<CricketTabProps> = ({
                       </Typography>
                     </Box>
 
-                    {match.isPinned && (
+                    {match.isPinned ? (
                       <Chip
-                        icon={<PushPin fontSize="small" sx={{ color: '#f59e0b !important' }} />}
+                        icon={<CheckCircle fontSize="small" sx={{ color: '#10b981 !important', fontSize: '14px !important' }} />}
                         label={t.pinnedBadge}
                         size="small"
                         sx={{
-                          height: 22,
+                          height: 24,
                           fontWeight: 700,
-                          backgroundColor: 'rgba(245,158,11,0.15)',
-                          color: '#f59e0b',
+                          backgroundColor: 'rgba(16,185,129,0.15)',
+                          color: '#10b981',
+                          border: '1px solid rgba(16,185,129,0.3)',
+                        }}
+                      />
+                    ) : (
+                      <Chip
+                        label={t.unpinnedBadge || 'Unpublished'}
+                        size="small"
+                        sx={{
+                          height: 24,
+                          fontWeight: 700,
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                          color: isDark ? '#9e96c7' : '#64748b',
+                          border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
                         }}
                       />
                     )}
@@ -496,15 +512,30 @@ export const CricketTab: React.FC<CricketTabProps> = ({
                       </Button>
                     </Box>
 
-                    <Tooltip title={match.isPinned ? t.btnUnpinMatch : t.btnPinMatch}>
-                      <IconButton
-                        size="small"
-                        onClick={() => onTogglePin(match.id)}
-                        sx={{ color: match.isPinned ? '#f59e0b' : isDark ? '#d0caeb' : '#64748b' }}
-                      >
-                        {match.isPinned ? <PushPin fontSize="small" /> : <PushPinOutlined fontSize="small" />}
-                      </IconButton>
-                    </Tooltip>
+                    <Button
+                      size="small"
+                      variant={match.isPinned ? 'outlined' : 'contained'}
+                      color={match.isPinned ? 'inherit' : 'success'}
+                      startIcon={match.isPinned ? <VisibilityOff fontSize="small" /> : <Publish fontSize="small" />}
+                      onClick={() => onTogglePin(match.id)}
+                      sx={{
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: '8px',
+                        borderColor: match.isPinned ? 'rgba(239,68,68,0.5)' : undefined,
+                        color: match.isPinned ? '#ef4444' : '#ffffff',
+                        backgroundColor: match.isPinned ? 'rgba(239,68,68,0.08)' : '#10b981',
+                        '&:hover': {
+                          backgroundColor: match.isPinned ? 'rgba(239,68,68,0.16)' : '#059669',
+                          borderColor: match.isPinned ? '#ef4444' : undefined,
+                        },
+                      }}
+                    >
+                      {match.isPinned ? t.btnUnpinMatch : t.btnPinMatch}
+                    </Button>
                   </Box>
                 </CardContent>
               </Card>
