@@ -361,5 +361,15 @@ export const gamesApiClient = new ApiClient(
   ).replace(/\/$/, '')
 );
 
+export const cricketApiClient = new ApiClient(
+  (
+    process.env.NEXT_PUBLIC_CRICKET_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_EVENTS_API_BASE_URL ||
+    'https://api.pravasamedia.com/api/v1'
+  ).replace(/\/$/, '')
+);
+
+
+
 
 

@@ -23,6 +23,8 @@ import {
   GraphicEq as GraphicEqIcon,
   SportsEsports,
   Analytics as AnalyticsIcon,
+  StarRate,
+  SportsCricket,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -36,6 +38,8 @@ const sidebarTranslations = {
     menuAnalytics: 'Analytics',
     menuCreate: 'Create News',
     menuNotifications: 'Notifications',
+    menuRatings: 'Ratings',
+    menuCricket: 'Cricket Scores',
     menuReels: 'Reels',
     menuMovies: 'Movies',
     menuEvents: 'Events',
@@ -60,6 +64,8 @@ const sidebarTranslations = {
     menuAnalytics: 'అనలిటిక్స్',
     menuCreate: 'వార్తలను సృష్టించండి',
     menuNotifications: 'నోటిఫికేషన్లు',
+    menuRatings: 'రేటింగ్స్',
+    menuCricket: 'క్రికెట్ స్కోర్లు',
     menuReels: 'రీల్స్',
     menuMovies: 'సినిమాలు',
     menuEvents: 'ఈవెంట్లు',
@@ -84,6 +90,8 @@ const sidebarTranslations = {
     menuAnalytics: 'एनालिटिक्स',
     menuCreate: 'समाचार बनाएं',
     menuNotifications: 'सूचनाएं',
+    menuRatings: 'रेटिंग्स',
+    menuCricket: 'क्रिकेट स्कोर',
     menuReels: 'रील्स',
     menuMovies: 'मूवीज',
     menuEvents: 'इवेंट्स',
@@ -108,6 +116,8 @@ const sidebarTranslations = {
     menuAnalytics: 'അനലിറ്റിക്‌സ്',
     menuCreate: 'വാർത്ത സൃഷ്ടിക്കുക',
     menuNotifications: 'അറിയിപ്പുകൾ',
+    menuRatings: 'റേറ്റിംഗുകൾ',
+    menuCricket: 'ക്രിക്കറ്റ് സ്കോറുകൾ',
     menuReels: 'റീലുകൾ',
     menuMovies: 'സിനിമകൾ',
     menuEvents: 'ഇവന്റുകൾ',
@@ -148,6 +158,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuAnalytics, icon: <AnalyticsIcon />, href: '/analytics' },
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
+    { text: t.menuRatings, icon: <StarRate />, href: '/ratings' },
+    { text: t.menuCricket, icon: <SportsCricket />, href: '/cricket' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuTts, icon: <GraphicEqIcon />, href: '/tts' },
     { text: t.menuEvents, icon: <EventIcon />, href: '/events' },
@@ -182,7 +194,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     userRole === 'adsdynapix_creator' ||
     userRole === 'ads_dynapix_creator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/tts', '/events', '/livetvvideos', '/web-articles', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/tts', '/events', '/livetvvideos', '/web-articles', '/ratings', '/cricket', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
@@ -192,6 +204,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/analytics',
     '/dashboard',
     '/notifications',
+    '/ratings',
+    '/cricket',
     '/reels',
     '/tts',
     '/events',

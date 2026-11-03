@@ -32,6 +32,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
+    expect(screen.getByText('Ratings')).toBeInTheDocument();
+    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -64,6 +66,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
+    expect(screen.getByText('Ratings')).toBeInTheDocument();
+    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.queryByText('Movies')).not.toBeInTheDocument();
     expect(screen.getByText('Events')).toBeInTheDocument();
@@ -99,6 +103,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
+    expect(screen.getByText('Ratings')).toBeInTheDocument();
+    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
@@ -131,6 +137,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
     );
 
     expect(screen.getByText('వార్తలను సృష్టించండి')).toBeInTheDocument();
+    expect(screen.getByText('రేటింగ్స్')).toBeInTheDocument();
+    expect(screen.getByText('క్రికెట్ స్కోర్లు')).toBeInTheDocument();
     expect(screen.getByText('రీల్స్')).toBeInTheDocument();
     expect(screen.getByText('వెబ్ వ్యాసాలు')).toBeInTheDocument();
     expect(screen.getByText('సెట్టింగులు')).toBeInTheDocument();
@@ -156,6 +164,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
     );
 
     expect(screen.getByText('అనలిటిక్స్')).toBeInTheDocument();
+    expect(screen.getByText('రేటింగ్స్')).toBeInTheDocument();
+    expect(screen.getByText('క్రికెట్ స్కోర్లు')).toBeInTheDocument();
     expect(screen.getByText('విభాగాలు')).toBeInTheDocument();
     expect(screen.getByText('వెబ్ వ్యాసాలు')).toBeInTheDocument();
     expect(screen.getByText('ఈ-పేపర్లు')).toBeInTheDocument();
@@ -181,6 +191,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('एनालिटिक्स')).toBeInTheDocument();
     expect(screen.getByText('समाचार बनाएं')).toBeInTheDocument();
+    expect(screen.getByText('रेटिंग्स')).toBeInTheDocument();
+    expect(screen.getByText('क्रिकेट स्कोर')).toBeInTheDocument();
     expect(screen.getByText('श्रेणियां')).toBeInTheDocument();
     expect(screen.getByText('वेब लेख')).toBeInTheDocument();
     expect(screen.getByText('ई-पेपर')).toBeInTheDocument();
@@ -206,6 +218,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('അനലിറ്റിക്‌സ്')).toBeInTheDocument();
     expect(screen.getByText('വാർത്ത സൃഷ്ടിക്കുക')).toBeInTheDocument();
+    expect(screen.getByText('റേറ്റിംഗുകൾ')).toBeInTheDocument();
+    expect(screen.getByText('ക്രിക്കറ്റ് സ്കോറുകൾ')).toBeInTheDocument();
     expect(screen.getByText('വിഭാഗങ്ങൾ')).toBeInTheDocument();
     expect(screen.getByText('വെബ് ലേഖനങ്ങൾ')).toBeInTheDocument();
     expect(screen.getByText('ഇ-പേപ്പറുകൾ')).toBeInTheDocument();
