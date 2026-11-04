@@ -158,14 +158,13 @@ export function useRatingsController() {
       await Promise.all([
         fetchLiveMatches(),
         fetchRecentMatches(),
-        RatingsRepository.getCricketMatches(cricketFilter).then(setCricketMatches).catch(() => {}),
       ]);
     } catch {
       showSnackbar('Failed to load cricket feeds', 'error');
     } finally {
       setIsCricketLoading(false);
     }
-  }, [cricketFilter, fetchLiveMatches, fetchRecentMatches, showSnackbar]);
+  }, [fetchLiveMatches, fetchRecentMatches, showSnackbar]);
 
   useEffect(() => {
     if (activeTab === 'movie') {
