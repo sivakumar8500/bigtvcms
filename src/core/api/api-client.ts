@@ -366,7 +366,9 @@ export const gamesApiClient = new ApiClient(
 export const cricketApiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_CRICKET_API_BASE_URL ||
-    'https://api.pravasamedia.com/api/v1'
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:1122/api/v1'
+      : 'https://api.pravasamedia.com/api/v1')
   ).replace(/\/$/, '')
 );
 
