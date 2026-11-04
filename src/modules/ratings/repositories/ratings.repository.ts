@@ -662,17 +662,28 @@ export class RatingsRepository {
   }
 
   static async publishMatch(matchId: string | number): Promise<PublishedCricketMatch> {
-    const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/publish`, {
-      isPublished: true,
-    });
-    return res?.data || res;
+    try {
+      const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/publish`, {});
+      return res?.data || res;
+    } catch {
+      const res = await cricketApiClient.post<any>('/cricket/publish', {
+        matchId: String(matchId),
+        isPublished: true,
+      });
+      return res?.data || res;
+    }
   }
 
   static async unpublishMatch(matchId: string | number): Promise<PublishedCricketMatch> {
-    const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/publish`, {
-      isPublished: false,
-    });
-    return res?.data || res;
+    try {
+      const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/unpublish`, {});
+      return res?.data || res;
+    } catch {
+      const res = await cricketApiClient.post<any>('/cricket/unpublish', {
+        matchId: String(matchId),
+      });
+      return res?.data || res;
+    }
   }
 
   static async getRecentMatches(limit = 20): Promise<PublishedCricketMatch[]> {
