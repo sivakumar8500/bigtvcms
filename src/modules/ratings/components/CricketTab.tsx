@@ -784,69 +784,109 @@ export const CricketTab: React.FC<CricketTabProps> = ({
                         </Button>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {published && onUnpublishMatch && (
-                            <Tooltip title="Unpublish from App Feed">
-                              <IconButton
+                          {published ? (
+                            <>
+                              <Button
                                 size="small"
-                                onClick={() =>
-                                  onUnpublishMatch(
-                                    matchId,
-                                    `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
-                                  )
-                                }
+                                variant="outlined"
+                                color="error"
+                                disabled={isPublishing}
+                                startIcon={isPublishing ? <CircularProgress size={14} color="inherit" /> : <VisibilityOff fontSize="small" />}
+                                onClick={() => {
+                                  if (onUnpublishMatch) {
+                                    onUnpublishMatch(
+                                      matchId,
+                                      `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
+                                    );
+                                  }
+                                }}
                                 sx={{
+                                  textTransform: 'none',
+                                  fontWeight: 700,
+                                  borderRadius: '10px',
+                                  px: 1.5,
+                                  py: 0.6,
                                   color: '#ef4444',
-                                  backgroundColor: 'rgba(239,68,68,0.1)',
-                                  '&:hover': { backgroundColor: 'rgba(239,68,68,0.2)' },
+                                  borderColor: 'rgba(239,68,68,0.5)',
+                                  backgroundColor: 'rgba(239,68,68,0.08)',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(239,68,68,0.18)',
+                                    borderColor: '#ef4444',
+                                  },
                                 }}
                               >
-                                <VisibilityOff fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
+                                {isPublishing ? 'Updating...' : 'Unpublish'}
+                              </Button>
 
-                          <Button
-                            size="small"
-                            variant={published ? 'outlined' : 'contained'}
-                            color={published ? 'success' : 'primary'}
-                            disabled={isPublishing}
-                            startIcon={
-                              isPublishing ? (
-                                <CircularProgress size={16} color="inherit" />
-                              ) : published ? (
-                                <CheckCircle fontSize="small" />
-                              ) : (
-                                <Publish fontSize="small" />
-                              )
-                            }
-                            onClick={() => {
-                              if (onPublishMatch) {
-                                onPublishMatch(
-                                  matchId,
-                                  `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
-                                );
+                              <Tooltip title="Match is active in mobile app. Click to sync latest score.">
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  color="success"
+                                  disabled={isPublishing}
+                                  startIcon={<CheckCircle fontSize="small" />}
+                                  onClick={() => {
+                                    if (onPublishMatch) {
+                                      onPublishMatch(
+                                        matchId,
+                                        `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
+                                      );
+                                    }
+                                  }}
+                                  sx={{
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    borderRadius: '10px',
+                                    px: 1.5,
+                                    py: 0.6,
+                                    backgroundColor: '#10b981',
+                                    color: '#ffffff',
+                                    '&:hover': {
+                                      backgroundColor: '#059669',
+                                    },
+                                  }}
+                                >
+                                  ✓ Published
+                                </Button>
+                              </Tooltip>
+                            </>
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              disabled={isPublishing}
+                              startIcon={
+                                isPublishing ? (
+                                  <CircularProgress size={16} color="inherit" />
+                                ) : (
+                                  <Publish fontSize="small" />
+                                )
                               }
-                            }}
-                            sx={{
-                              textTransform: 'none',
-                              fontWeight: 700,
-                              borderRadius: '10px',
-                              px: 2,
-                              py: 0.6,
-                              backgroundColor: published ? 'rgba(16,185,129,0.1)' : '#2563eb',
-                              color: published ? '#10b981' : '#ffffff',
-                              borderColor: published ? '#10b981' : undefined,
-                              '&:hover': {
-                                backgroundColor: published ? 'rgba(16,185,129,0.2)' : '#1d4ed8',
-                              },
-                            }}
-                          >
-                            {isPublishing
-                              ? 'Publishing...'
-                              : published
-                              ? '✓ Published (Sync)'
-                              : '🚀 Publish Match'}
-                          </Button>
+                              onClick={() => {
+                                if (onPublishMatch) {
+                                  onPublishMatch(
+                                    matchId,
+                                    `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
+                                  );
+                                }
+                              }}
+                              sx={{
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                borderRadius: '10px',
+                                px: 2,
+                                py: 0.6,
+                                backgroundColor: '#2563eb',
+                                color: '#ffffff',
+                                '&:hover': {
+                                  backgroundColor: '#1d4ed8',
+                                },
+                              }}
+                            >
+                              {isPublishing ? 'Publishing...' : '🚀 Publish Match'}
+                            </Button>
+                          )}
                         </Box>
                       </Box>
                     </CardContent>
