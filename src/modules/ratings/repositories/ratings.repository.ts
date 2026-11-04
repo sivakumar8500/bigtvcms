@@ -9,6 +9,11 @@ import {
   UpdatePollDto,
   PollVoteSubmission,
   CricketMatchItem,
+  CricbuzzLiveResponse,
+  CricbuzzTypeMatch,
+  CricbuzzMatchItem,
+  PublishedCricketMatch,
+  RecentMatchesApiResponse,
   UpdateCricketMatchDto,
 } from '../domain/ratings.types';
 
@@ -637,6 +642,61 @@ export class RatingsRepository {
   }
 
   // ----------------------------------------------------
+  
+  // ----------------------------------------------------
+  // CRICBUZZ LIVE & PUBLISHING SERVICE
+  // ----------------------------------------------------
+  static async getLiveMatches(cbTz = "+05:30", cbLoc = "IN"): Promise<CricbuzzLiveResponse> {
+    try {
+      const res = await cricketApiClient.get<any>("/cricket/matches/live", {
+        params: {
+          "CB-TZ": cbTz,
+          "CB-loc": cbLoc,
+        },
+      });
+      return res || { typeMatches: [] };
+    } catch (err) {
+      console.error("Failed to fetch live cricket feed:", err);
+      return { typeMatches: [] };
+    }
+  }
+
+  static async publishMatch(matchId: string | number): Promise<PublishedCricketMatch> {
+    const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/publish`, {
+      isPublished: true,
+    });
+    return res?.data || res;
+  }
+
+  static async unpublishMatch(matchId: string | number): Promise<PublishedCricketMatch> {
+    const res = await cricketApiClient.post<any>(`/cricket/matches/${matchId}/publish`, {
+      isPublished: false,
+    });
+    return res?.data || res;
+  }
+
+  static async getRecentMatches(limit = 20): Promise<PublishedCricketMatch[]> {
+    try {
+      const res = await cricketApiClient.get<any>("/cricket/matches/recent", {
+        params: { limit },
+      });
+      return res?.data?.matches || res?.matches || [];
+    } catch (err) {
+      console.error("Failed to fetch recent cricket matches:", err);
+      return [];
+    }
+  }
+
+  static async getMatchLiveScore(matchId: string | number): Promise<any> {
+    try {
+      const res = await cricketApiClient.get<any>(`/cricket/matches/${matchId}/livescore`);
+      return res?.data || res;
+    } catch (err) {
+      console.error("Failed to fetch match livescore:", err);
+      return null;
+    }
+  }
+
   // CRICKET MATCHES REPOSITORY
   // ----------------------------------------------------
   static async getCricketMatches(filter?: 'all' | 'live' | 'upcoming' | 'recent'): Promise<CricketMatchItem[]> {

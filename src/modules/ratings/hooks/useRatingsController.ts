@@ -11,6 +11,9 @@ import {
   UpdatePollDto,
   CricketMatchItem,
   UpdateCricketMatchDto,
+  CricbuzzTypeMatch,
+  CricbuzzMatchItem,
+  PublishedCricketMatch,
 } from '../domain/ratings.types';
 import { RatingsRepository } from '../repositories/ratings.repository';
 
@@ -59,13 +62,19 @@ export function useRatingsController() {
   // ----------------------------------------------------
   // CRICKET MATCHES STATE
   // ----------------------------------------------------
+  const [cricketSubTab, setCricketSubTab] = useState<'live' | 'recent'>('live');
+  const [typeMatches, setTypeMatches] = useState<CricbuzzTypeMatch[]>([]);
+  const [recentMatches, setRecentMatches] = useState<PublishedCricketMatch[]>([]);
+  const [cricketCategoryFilter, setCricketCategoryFilter] = useState<string>('all');
+  const [publishingMatchId, setPublishingMatchId] = useState<string | null>(null);
+
   const [cricketMatches, setCricketMatches] = useState<CricketMatchItem[]>([]);
   const [isCricketLoading, setIsCricketLoading] = useState<boolean>(false);
   const [cricketFilter, setCricketFilter] = useState<'all' | 'live' | 'upcoming'>('all');
   const [cricketSearch, setCricketSearch] = useState<string>('');
 
   const [scorecardModalOpen, setScorecardModalOpen] = useState<boolean>(false);
-  const [activeScorecardMatch, setActiveScorecardMatch] = useState<CricketMatchItem | null>(null);
+  const [activeScorecardMatch, setActiveScorecardMatch] = useState<any>(null);
 
   const [updateScoreModalOpen, setUpdateScoreModalOpen] = useState<boolean>(false);
   const [activeEditMatch, setActiveEditMatch] = useState<CricketMatchItem | null>(null);
@@ -125,17 +134,38 @@ export function useRatingsController() {
     }
   }, [pollLang, pollSearch, showSnackbar]);
 
+  const fetchLiveMatches = useCallback(async () => {
+    try {
+      const data = await RatingsRepository.getLiveMatches('+05:30', 'IN');
+      setTypeMatches(data.typeMatches || []);
+    } catch {
+      showSnackbar('Failed to load live cricket matches feed', 'error');
+    }
+  }, [showSnackbar]);
+
+  const fetchRecentMatches = useCallback(async () => {
+    try {
+      const data = await RatingsRepository.getRecentMatches(30);
+      setRecentMatches(data);
+    } catch {
+      showSnackbar('Failed to load recent published matches', 'error');
+    }
+  }, [showSnackbar]);
+
   const fetchCricket = useCallback(async () => {
     setIsCricketLoading(true);
     try {
-      const data = await RatingsRepository.getCricketMatches(cricketFilter);
-      setCricketMatches(data);
+      await Promise.all([
+        fetchLiveMatches(),
+        fetchRecentMatches(),
+        RatingsRepository.getCricketMatches(cricketFilter).then(setCricketMatches).catch(() => {}),
+      ]);
     } catch {
-      showSnackbar('Failed to load cricket live score feeds', 'error');
+      showSnackbar('Failed to load cricket feeds', 'error');
     } finally {
       setIsCricketLoading(false);
     }
-  }, [cricketFilter, showSnackbar]);
+  }, [cricketFilter, fetchLiveMatches, fetchRecentMatches, showSnackbar]);
 
   useEffect(() => {
     if (activeTab === 'movie') {
@@ -373,6 +403,40 @@ export function useRatingsController() {
   // ----------------------------------------------------
   // CRICKET ACTIONS
   // ----------------------------------------------------
+  const handlePublishMatch = useCallback(
+    async (matchId: string | number, matchTitle?: string) => {
+      setPublishingMatchId(String(matchId));
+      try {
+        await RatingsRepository.publishMatch(matchId);
+        showSnackbar(`✅ "${matchTitle || 'Match ' + matchId}" published successfully!`, 'success');
+        await fetchRecentMatches();
+        await fetchCricket();
+      } catch (err: any) {
+        showSnackbar(`❌ Failed to publish match: ${err.message || 'Error'}`, 'error');
+      } finally {
+        setPublishingMatchId(null);
+      }
+    },
+    [fetchRecentMatches, fetchCricket, showSnackbar]
+  );
+
+  const handleUnpublishMatch = useCallback(
+    async (matchId: string | number, matchTitle?: string) => {
+      setPublishingMatchId(String(matchId));
+      try {
+        await RatingsRepository.unpublishMatch(matchId);
+        showSnackbar(`Unpublished "${matchTitle || 'Match ' + matchId}"`, 'info');
+        await fetchRecentMatches();
+        await fetchCricket();
+      } catch (err: any) {
+        showSnackbar(`❌ Failed to unpublish match: ${err.message || 'Error'}`, 'error');
+      } finally {
+        setPublishingMatchId(null);
+      }
+    },
+    [fetchRecentMatches, fetchCricket, showSnackbar]
+  );
+
   const togglePinMatch = useCallback(
     async (id: number) => {
       try {
@@ -382,11 +446,12 @@ export function useRatingsController() {
           updated.isPinned ? 'Match published to App Feed!' : 'Match unpublished from App Feed',
           'info'
         );
+        fetchRecentMatches();
       } catch {
         showSnackbar('Failed to update match publish status', 'error');
       }
     },
-    [showSnackbar]
+    [fetchRecentMatches, showSnackbar]
   );
 
   const openScorecard = useCallback((match: CricketMatchItem) => {
@@ -510,6 +575,17 @@ export function useRatingsController() {
     submitVote,
 
     // Cricket
+    cricketSubTab,
+    setCricketSubTab,
+    typeMatches,
+    recentMatches,
+    cricketCategoryFilter,
+    setCricketCategoryFilter,
+    publishingMatchId,
+    fetchLiveMatches,
+    fetchRecentMatches,
+    handlePublishMatch,
+    handleUnpublishMatch,
     cricketMatches: filteredCricketMatches,
     allCricketMatches: cricketMatches,
     cricketFilter,

@@ -156,3 +156,117 @@ export interface UpdateCricketMatchDto {
   team1?: Partial<CricketInningScore>;
   team2?: Partial<CricketInningScore>;
 }
+
+// ----------------------------------------------------
+// CRICBUZZ LIVE FEED & PUBLISHING TYPES
+// ----------------------------------------------------
+export interface CricbuzzTeam {
+  teamId: number;
+  teamName: string;
+  teamSName?: string;
+  imageId?: number;
+}
+
+export interface CricbuzzVenue {
+  id?: number;
+  ground?: string;
+  city?: string;
+  timezone?: string;
+  latitude?: string;
+  longitude?: string;
+}
+
+export interface CricbuzzInningsScore {
+  inningsId: number;
+  runs: number;
+  wickets?: number;
+  overs?: number;
+  isDeclared?: boolean;
+  isFollowOn?: boolean;
+}
+
+export interface CricbuzzTeamScore {
+  inngs1?: CricbuzzInningsScore;
+  inngs2?: CricbuzzInningsScore;
+}
+
+export interface CricbuzzMatchScore {
+  team1Score?: CricbuzzTeamScore;
+  team2Score?: CricbuzzTeamScore;
+}
+
+export interface CricbuzzMatchInfo {
+  matchId: number;
+  seriesId: number;
+  seriesName: string;
+  matchDesc: string;
+  matchFormat: string;
+  startDate: string;
+  endDate: string;
+  state: string;
+  status?: string;
+  team1: CricbuzzTeam;
+  team2: CricbuzzTeam;
+  venueInfo?: CricbuzzVenue;
+  currBatTeamId?: number;
+  stateTitle?: string;
+}
+
+export interface CricbuzzMatchItem {
+  matchInfo: CricbuzzMatchInfo;
+  matchScore?: CricbuzzMatchScore;
+}
+
+export interface CricbuzzSeriesMatch {
+  seriesAdWrapper?: {
+    seriesId: number;
+    seriesName: string;
+    matches: CricbuzzMatchItem[];
+  };
+  ad?: any;
+}
+
+export interface CricbuzzTypeMatch {
+  matchType: 'International' | 'Domestic' | 'League' | 'Women' | string;
+  seriesMatches: CricbuzzSeriesMatch[];
+}
+
+export interface CricbuzzLiveResponse {
+  typeMatches: CricbuzzTypeMatch[];
+  filters?: {
+    matchType: string[];
+  };
+  responseLastUpdated?: string;
+}
+
+export interface PublishedCricketMatch {
+  id: string;
+  matchId: string;
+  seriesName: string;
+  matchDesc?: string;
+  matchFormat?: string;
+  state: string;
+  status?: string;
+  team1Name: string;
+  team1ShortName?: string;
+  team1Score?: string;
+  team1Overs?: string;
+  team2Name: string;
+  team2ShortName?: string;
+  team2Score?: string;
+  team2Overs?: string;
+  venue?: string;
+  city?: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  updatedAt: string;
+}
+
+export interface RecentMatchesApiResponse {
+  success: boolean;
+  message: string;
+  data: {
+    count: number;
+    matches: PublishedCricketMatch[];
+  };
+}

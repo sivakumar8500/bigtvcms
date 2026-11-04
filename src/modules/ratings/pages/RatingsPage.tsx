@@ -105,6 +105,15 @@ export const RatingsPage: React.FC = () => {
     submitVote,
 
     // Cricket
+    cricketSubTab,
+    setCricketSubTab,
+    typeMatches,
+    recentMatches,
+    cricketCategoryFilter,
+    setCricketCategoryFilter,
+    publishingMatchId,
+    handlePublishMatch,
+    handleUnpublishMatch,
     cricketMatches,
     allCricketMatches,
     cricketFilter,
@@ -321,6 +330,15 @@ export const RatingsPage: React.FC = () => {
 
           {activeTab === 'cricket' && (
             <CricketTab
+              subTab={cricketSubTab}
+              onSubTabChange={setCricketSubTab}
+              typeMatches={typeMatches}
+              recentMatches={recentMatches}
+              categoryFilter={cricketCategoryFilter}
+              onCategoryFilterChange={setCricketCategoryFilter}
+              publishingId={publishingMatchId}
+              onPublishMatch={handlePublishMatch}
+              onUnpublishMatch={handleUnpublishMatch}
               matches={cricketMatches}
               allMatches={allCricketMatches}
               filter={cricketFilter}
