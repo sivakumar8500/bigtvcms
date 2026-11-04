@@ -109,6 +109,8 @@ export class ApiClient {
               config.url?.includes('/locations') ||
               config.url?.includes('/admin') ||
               config.url?.includes('/games') ||
+              config.url?.includes('/cricket') ||
+              config.url?.includes('/matches') ||
               config.url?.includes('/sendNotification');
 
             const isCreateOrUpdateMethod =
@@ -364,9 +366,7 @@ export const gamesApiClient = new ApiClient(
 export const cricketApiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_CRICKET_API_BASE_URL ||
-    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:1122/api/v1'
-      : 'https://api.pravasamedia.com/api/v1')
+    'https://api.pravasamedia.com/api/v1'
   ).replace(/\/$/, '')
 );
 

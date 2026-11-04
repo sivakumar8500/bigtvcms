@@ -758,10 +758,48 @@ export class RatingsRepository {
     }
 
     try {
-      const endpoint = filter && filter !== 'all' ? `/matches/v1/${filter}` : '/matches/v1/live';
-      const res = await apiClient.get<any>(endpoint);
-      if (Array.isArray(res) && res.length > 0) {
-        return res;
+      const liveData = await this.getLiveMatches();
+      if (liveData?.typeMatches && liveData.typeMatches.length > 0) {
+        const liveItems: CricketMatchItem[] = [];
+        liveData.typeMatches.forEach((tm) => {
+          tm.seriesMatches?.forEach((sm) => {
+            sm.seriesAdWrapper?.matches?.forEach((item) => {
+              const { matchInfo, matchScore } = item;
+              const t1 = matchScore?.team1Score?.inngs1;
+              const t2 = matchScore?.team2Score?.inngs1;
+              liveItems.push({
+                id: matchInfo.matchId,
+                matchId: String(matchInfo.matchId),
+                title: `${matchInfo.matchDesc} - ${matchInfo.seriesName}`,
+                series: matchInfo.seriesName,
+                matchType: matchInfo.matchFormat?.toUpperCase() === 'ODI' ? 'ODI' : matchInfo.matchFormat?.toUpperCase() === 'TEST' ? 'TEST' : 'T20',
+                venue: matchInfo.venueInfo?.ground ? `${matchInfo.venueInfo.ground}, ${matchInfo.venueInfo.city || ''}` : 'Cricket Ground',
+                status: 'live',
+                statusText: matchInfo.status || matchInfo.state || 'In Progress',
+                isPinned: false,
+                startDate: matchInfo.startDate || new Date().toISOString(),
+                team1: {
+                  teamName: matchInfo.team1?.teamName || 'Team 1',
+                  shortName: matchInfo.team1?.teamSName || matchInfo.team1?.teamName?.slice(0, 3).toUpperCase() || 'T1',
+                  runs: t1?.runs || 0,
+                  wickets: t1?.wickets || 0,
+                  overs: t1?.overs || 0,
+                },
+                team2: {
+                  teamName: matchInfo.team2?.teamName || 'Team 2',
+                  shortName: matchInfo.team2?.teamSName || matchInfo.team2?.teamName?.slice(0, 3).toUpperCase() || 'T2',
+                  runs: t2?.runs || 0,
+                  wickets: t2?.wickets || 0,
+                  overs: t2?.overs || 0,
+                },
+              });
+            });
+          });
+        });
+        if (liveItems.length > 0) {
+          this.localCricket = liveItems;
+          return liveItems;
+        }
       }
     } catch {
       // Fallback
