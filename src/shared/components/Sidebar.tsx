@@ -24,7 +24,6 @@ import {
   SportsEsports,
   Analytics as AnalyticsIcon,
   StarRate,
-  SportsCricket,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -159,7 +158,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuCreate, icon: <AddCircleOutline />, href: '/dashboard' },
     { text: t.menuNotifications, icon: <NotificationsIcon />, href: '/notifications' },
     { text: t.menuRatings, icon: <StarRate />, href: '/ratings' },
-    { text: t.menuCricket, icon: <SportsCricket />, href: '/cricket' },
     { text: t.menuReels, icon: <Movie />, href: '/reels' },
     { text: t.menuTts, icon: <GraphicEqIcon />, href: '/tts' },
     { text: t.menuEvents, icon: <EventIcon />, href: '/events' },
@@ -194,7 +192,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     userRole === 'adsdynapix_creator' ||
     userRole === 'ads_dynapix_creator';
 
-  const creatorHrefs = ['/dashboard', '/reels', '/tts', '/events', '/livetvvideos', '/web-articles', '/ratings', '/cricket', '/settings'];
+  const creatorHrefs = ['/dashboard', '/reels', '/tts', '/events', '/livetvvideos', '/web-articles', '/ratings', '/settings'];
   const epaperCreatorHrefs = ['/epapers', '/settings'];
   const movieCreatorHrefs = ['/movies', '/settings'];
   const notificationCreatorHrefs = ['/dashboard', '/web-articles', '/notifications', '/settings'];
@@ -205,7 +203,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     '/dashboard',
     '/notifications',
     '/ratings',
-    '/cricket',
     '/reels',
     '/tts',
     '/events',
