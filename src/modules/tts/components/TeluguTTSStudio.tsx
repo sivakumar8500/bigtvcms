@@ -248,22 +248,24 @@ export const TeluguTTSStudio: React.FC = () => {
 
         {/* Refresh Library Button */}
         <Tooltip title={t.refresh}>
-          <IconButton
-            onClick={() => fetchFiles()}
-            disabled={loadingFiles}
-            sx={{
-              borderRadius: '12px',
-              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-              border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.15)',
-              color: isDark ? '#d0caeb' : '#5c548a',
-              p: 1,
-              '&:hover': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f8f7ff',
-              },
-            }}
-          >
-            <Refresh />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={() => fetchFiles()}
+              disabled={loadingFiles}
+              sx={{
+                borderRadius: '12px',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.15)',
+                color: isDark ? '#d0caeb' : '#5c548a',
+                p: 1,
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f8f7ff',
+                },
+              }}
+            >
+              <Refresh />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Box sx={{ flex: 1 }} />

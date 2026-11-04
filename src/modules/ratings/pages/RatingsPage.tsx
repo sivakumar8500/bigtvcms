@@ -14,7 +14,9 @@ import {
   MovieFilter,
   Poll as PollIcon,
   SportsCricket,
+  ConfirmationNumber,
 } from '@mui/icons-material';
+import { EventsTab } from '@/modules/events/components/EventsTab';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -40,6 +42,16 @@ export const RatingsPage: React.FC = () => {
   const { mode } = useAppTheme();
   const isDark = mode === 'dark';
   const t = ratingsTranslations[language] || ratingsTranslations.en;
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'events' || tabParam === 'cricket' || tabParam === 'polls' || tabParam === 'movie') {
+        setActiveTab(tabParam as any);
+      }
+    }
+  }, []);
 
   const {
     activeTab,
@@ -279,6 +291,20 @@ export const RatingsPage: React.FC = () => {
                   px: 2.5,
                 }}
               />
+              <Tab
+                label={t.tabEvents || 'Events & Booking'}
+                value="events"
+                icon={<ConfirmationNumber />}
+                iconPosition="start"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: activeTab === 'events' ? 700 : 500,
+                  fontSize: '0.95rem',
+                  color: isDark ? '#d0caeb' : '#5c548a',
+                  minHeight: 48,
+                  px: 2.5,
+                }}
+              />
             </Tabs>
           </Box>
 
@@ -351,6 +377,10 @@ export const RatingsPage: React.FC = () => {
               onViewScorecard={openScorecard}
               onEditScore={openEditMatchScore}
             />
+          )}
+
+          {activeTab === 'events' && (
+            <EventsTab />
           )}
         </Box>
       </Box>

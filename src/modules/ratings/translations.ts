@@ -1,10 +1,11 @@
 export const ratingsTranslations: Record<string, Record<string, string>> = {
   en: {
-    pageTitle: 'Ratings & Engagement Hub',
-    pageSubtitle: 'Manage Movie Reviews, Audience Polls, and Cricket Live Score Feeds',
+    pageTitle: 'BigTV Special',
+    pageSubtitle: 'Manage Movie Reviews, Audience Polls, Cricket Live Scores, and Event Bookings',
     tabMovie: 'Movie Reviews',
     tabPolls: 'Polls & Voting',
     tabCricket: 'Cricket Live Scores',
+    tabEvents: 'Events & Booking',
 
     // Common
     searchPlaceholder: 'Search by title, team, or keyword...',
@@ -158,11 +159,12 @@ export const ratingsTranslations: Record<string, Record<string, string>> = {
   },
 
   te: {
-    pageTitle: 'రేటింగ్స్ & ఎంగేజ్‌మెంట్ హబ్',
-    pageSubtitle: 'సినిమా రివ్యూలు, ప్రజాభిప్రాయ పోల్స్ మరియు క్రికెట్ లైవ్ స్కోర్ ఫీడ్‌లను నిర్వహించండి',
+    pageTitle: 'బిగ్ టీవీ స్పెషల్ (BigTV Special)',
+    pageSubtitle: 'సినిమా రివ్యూలు, ప్రజాభిప్రాయ పోల్స్, క్రికెట్ లైవ్ స్కోర్లు మరియు ఈవెంట్ బుకింగ్‌లను నిర్వహించండి',
     tabMovie: 'సినిమా రివ్యూలు (Movie Reviews)',
     tabPolls: 'పోల్స్ & ఓటింగ్ (Polls)',
     tabCricket: 'క్రికెట్ లైవ్ స్కోర్లు (Cricket)',
+    tabEvents: 'ఈవెంట్లు & బుకింగ్ (Events)',
 
     // Common
     searchPlaceholder: 'శీర్షిక, జట్టు లేదా కీవర్డ్ ద్వారా శోధించండి...',
@@ -316,11 +318,12 @@ export const ratingsTranslations: Record<string, Record<string, string>> = {
   },
 
   hi: {
-    pageTitle: 'रेटिंग्स & एंगेजमेंट हब',
-    pageSubtitle: 'मूवी समीक्षाएं, जनमत पोल और क्रिकेट लाइव स्कोर प्रबंधित करें',
+    pageTitle: 'बिग टीवी स्पेशल (BigTV Special)',
+    pageSubtitle: 'मूवी समीक्षाएं, जनमत पोल, क्रिकेट लाइव स्कोर और इवेंट बुकिंग प्रबंधित करें',
     tabMovie: 'मूवी समीक्षाएं (Movie Reviews)',
     tabPolls: 'पोल और वोटिंग (Polls)',
     tabCricket: 'क्रिकेट लाइव स्कोर (Cricket)',
+    tabEvents: 'इवेंट्स & बुकिंग (Events)',
 
     // Common
     searchPlaceholder: 'शीर्षक, टीम या कीवर्ड से खोजें...',
@@ -474,11 +477,12 @@ export const ratingsTranslations: Record<string, Record<string, string>> = {
   },
 
   ml: {
-    pageTitle: 'റേറ്റിംഗുകളും ഇടപഴകൽ ഹബ്ബും',
-    pageSubtitle: 'സിനിമ അവലോകനങ്ങൾ, അഭിപ്രായ വോട്ടെടുപ്പുകൾ, ക്രിക്കറ്റ് ലൈവ് സ്കോറുകൾ കൈകാര്യം ചെയ്യുക',
+    pageTitle: 'ബിഗ് ടിവി സ്പെഷ്യൽ (BigTV Special)',
+    pageSubtitle: 'സിനിമ അവലോകനങ്ങൾ, അഭിപ്രായ വോട്ടെടുപ്പുകൾ, ക്രിക്കറ്റ് ലൈവ് സ്കോറുകൾ, ഇവന്റ് ബുക്കിംഗുകൾ കൈകാര്യം ചെയ്യുക',
     tabMovie: 'സിനിമ അവലോകനങ്ങൾ (Movie Reviews)',
     tabPolls: 'പോളുകളും വോട്ടിംഗും (Polls)',
     tabCricket: 'ക്രിക്കറ്റ് ലൈവ് സ്കോറുകൾ (Cricket)',
+    tabEvents: 'ഇവന്റുകൾ & ബുക്കിംഗ് (Events)',
 
     // Common
     searchPlaceholder: 'തലക്കെട്ട്, ടീം അല്ലെങ്കിൽ കീവേഡ് പ്രകാരം തിരയുക...',

@@ -1,4 +1,4 @@
-export type RatingsTabType = 'movie' | 'polls' | 'cricket';
+export type RatingsTabType = 'movie' | 'polls' | 'cricket' | 'events';
 
 export interface PlatformRatingItem {
   platform_name: string;

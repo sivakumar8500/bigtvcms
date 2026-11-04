@@ -471,23 +471,25 @@ export const CricketTab: React.FC<CricketTabProps> = ({
           />
 
           <Tooltip title="Refresh feeds from provider">
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={onRefresh}
-              disabled={isLoading}
-              startIcon={<Refresh className={isLoading ? 'animate-spin' : ''} />}
-              sx={{
-                textTransform: 'none',
-                borderRadius: '10px',
-                fontWeight: 600,
-                borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-                color: isDark ? '#ffffff' : '#334155',
-                px: 2,
-              }}
-            >
-              {t.btnRefresh || 'Refresh'}
-            </Button>
+            <span>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={onRefresh}
+                disabled={isLoading}
+                startIcon={<Refresh className={isLoading ? 'animate-spin' : ''} />}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+                  color: isDark ? '#ffffff' : '#334155',
+                  px: 2,
+                }}
+              >
+                {t.btnRefresh || 'Refresh'}
+              </Button>
+            </span>
           </Tooltip>
         </Box>
       </Box>
@@ -819,35 +821,37 @@ export const CricketTab: React.FC<CricketTabProps> = ({
                               </Button>
 
                               <Tooltip title="Match is active in mobile app. Click to sync latest score.">
-                                <Button
-                                  size="small"
-                                  variant="contained"
-                                  color="success"
-                                  disabled={isPublishing}
-                                  startIcon={<CheckCircle fontSize="small" />}
-                                  onClick={() => {
-                                    if (onPublishMatch) {
-                                      onPublishMatch(
-                                        matchId,
-                                        `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
-                                      );
-                                    }
-                                  }}
-                                  sx={{
-                                    textTransform: 'none',
-                                    fontWeight: 700,
-                                    borderRadius: '10px',
-                                    px: 1.5,
-                                    py: 0.6,
-                                    backgroundColor: '#10b981',
-                                    color: '#ffffff',
-                                    '&:hover': {
-                                      backgroundColor: '#059669',
-                                    },
-                                  }}
-                                >
-                                  ✓ Published
-                                </Button>
+                                <span>
+                                  <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="success"
+                                    disabled={isPublishing}
+                                    startIcon={<CheckCircle fontSize="small" />}
+                                    onClick={() => {
+                                      if (onPublishMatch) {
+                                        onPublishMatch(
+                                          matchId,
+                                          `${info.team1?.teamSName || info.team1?.teamName} vs ${info.team2?.teamSName || info.team2?.teamName}`
+                                        );
+                                      }
+                                    }}
+                                    sx={{
+                                      textTransform: 'none',
+                                      fontWeight: 700,
+                                      borderRadius: '10px',
+                                      px: 1.5,
+                                      py: 0.6,
+                                      backgroundColor: '#10b981',
+                                      color: '#ffffff',
+                                      '&:hover': {
+                                        backgroundColor: '#059669',
+                                      },
+                                    }}
+                                  >
+                                    ✓ Published
+                                  </Button>
+                                </span>
                               </Tooltip>
                             </>
                           ) : (

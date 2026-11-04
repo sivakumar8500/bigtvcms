@@ -304,18 +304,20 @@ export const AdsDynapixTable: React.FC<AdsDynapixTableProps> = ({
                         </IconButton>
                       </Tooltip>
                       <Tooltip title={t.delete || 'Delete Banner'}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteClick(row.id)}
-                          disabled={deletingId === row.id}
-                          sx={{ color: '#f44336' }}
-                        >
-                          {deletingId === row.id ? (
-                            <CircularProgress size={18} color="error" />
-                          ) : (
-                            <Delete fontSize="small" />
-                          )}
-                        </IconButton>
+                        <span>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteClick(row.id)}
+                            disabled={deletingId === row.id}
+                            sx={{ color: '#f44336' }}
+                          >
+                            {deletingId === row.id ? (
+                              <CircularProgress size={18} color="error" />
+                            ) : (
+                              <Delete fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
                       </Tooltip>
                     </Box>
                   </TableCell>
