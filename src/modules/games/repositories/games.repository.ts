@@ -88,6 +88,17 @@ export class GamesRepository {
     return gamesApiClient.post<unknown>(`/admin/games/${gameId}/levels/${levelId}/archive`, {});
   }
 
+  static async listDailyLevels(
+    gameId: string,
+    page = 1,
+    pageSize = 100
+  ): Promise<{ items: Array<{ id?: string; puzzleDate: string; levelId: string; isToday?: boolean }> }> {
+    return gamesApiClient.get<{ items: Array<{ id?: string; puzzleDate: string; levelId: string; isToday?: boolean }> }>(
+      `/admin/games/${gameId}/daily-levels`,
+      { page, pageSize }
+    );
+  }
+
   static async assignDailyLevel(gameId: string, date: string, levelIds: string[]): Promise<AssignDailyLevelResponse> {
     return gamesApiClient.put<AssignDailyLevelResponse>(`/admin/games/${gameId}/daily-levels/${date}`, {
       levelIds,

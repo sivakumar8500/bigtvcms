@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { GamesRepository } from '../repositories/games.repository';
-import { GameItem, LevelItem, StreakRecoveryItem } from '../dto/games.dto';
+import { GameItem, LevelItem, StreakRecoveryItem, formatLevelDate } from '../dto/games.dto';
 
 export const useGamesController = () => {
   // Navigation Tabs: 0: Games, 1: Levels, 2: Streak Recovery
@@ -159,17 +159,59 @@ export const useGamesController = () => {
     setLevelsLoading(true);
     setLevelsError(null);
     try {
-      const res = await GamesRepository.listLevels(selectedGameId, 1, 100);
+      const [levelsResult, dailyResult] = await Promise.allSettled([
+        GamesRepository.listLevels(selectedGameId, 1, 100),
+        GamesRepository.listDailyLevels(selectedGameId, 1, 100),
+      ]);
+
       let items: LevelItem[] = [];
-      if (Array.isArray(res)) {
-        items = res;
-      } else if (res && Array.isArray(res.items)) {
-        items = res.items;
-      } else if (res && (res as any).data && Array.isArray((res as any).data.items)) {
-        items = (res as any).data.items;
-      } else if (res && (res as any).data && Array.isArray((res as any).data)) {
-        items = (res as any).data;
+      if (levelsResult.status === 'fulfilled') {
+        const res = levelsResult.value;
+        if (Array.isArray(res)) {
+          items = res;
+        } else if (res && Array.isArray(res.items)) {
+          items = res.items;
+        } else if (res && (res as any).data && Array.isArray((res as any).data.items)) {
+          items = (res as any).data.items;
+        } else if (res && (res as any).data && Array.isArray((res as any).data)) {
+          items = (res as any).data;
+        }
+      } else {
+        throw levelsResult.reason;
       }
+
+      // Merge daily assignments if available
+      if (dailyResult.status === 'fulfilled' && dailyResult.value) {
+        const dRes = dailyResult.value as any;
+        const dailyItems: any[] = dRes.items || dRes.data?.items || (Array.isArray(dRes) ? dRes : []);
+        const dailyMap = new Map<string, { puzzleDate: string; isToday?: boolean }>();
+        dailyItems.forEach((d) => {
+          if (d.levelId && d.puzzleDate && !dailyMap.has(d.levelId)) {
+            dailyMap.set(d.levelId, {
+              puzzleDate: formatLevelDate(d.puzzleDate),
+              isToday: d.isToday,
+            });
+          }
+        });
+
+        items = items.map((lvl) => {
+          const daily = dailyMap.get(lvl.levelId);
+          if (daily) {
+            return {
+              ...lvl,
+              puzzleDate: lvl.puzzleDate ? formatLevelDate(lvl.puzzleDate) : daily.puzzleDate,
+              assignedDate: lvl.assignedDate ? formatLevelDate(lvl.assignedDate) : daily.puzzleDate,
+              isToday: lvl.isToday !== undefined ? lvl.isToday : daily.isToday,
+            };
+          }
+          return {
+            ...lvl,
+            puzzleDate: lvl.puzzleDate ? formatLevelDate(lvl.puzzleDate) : lvl.puzzleDate,
+            assignedDate: lvl.assignedDate ? formatLevelDate(lvl.assignedDate) : lvl.assignedDate,
+          };
+        });
+      }
+
       setLevels(items);
     } catch (err: any) {
       console.error('Failed to load levels:', err);

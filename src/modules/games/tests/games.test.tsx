@@ -16,7 +16,7 @@ import { StreakActionDialog } from '../components/StreakActionDialog';
 import { LevelPlayModal } from '../components/LevelPlayModal';
 import { gamesTranslations } from '../pages/GamesPage';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
-import { DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
+import { DEFAULT_LEVEL_ICON_URL, getLevelImageUrl, formatLevelDate } from '../dto/games.dto';
 import { UploadService } from '@/modules/media/services/upload.service';
 
 jest.mock('@/modules/media/services/upload.service', () => ({
@@ -138,6 +138,9 @@ describe('Games Module - Comprehensive Test Suite', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (gamesApiClient.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/admin/games') && url.includes('/daily-levels')) {
+        return Promise.resolve({ items: [{ puzzleDate: '2026-10-22', levelId: 'sudoku_001', isToday: false }] });
+      }
       if (url.includes('/admin/games') && url.includes('/levels')) {
         return Promise.resolve({ items: mockLevelsData, total: 2 });
       }
@@ -226,6 +229,12 @@ describe('Games Module - Comprehensive Test Suite', () => {
       await GamesRepository.assignDailyLevel('sudoku', '2026-10-23', ['sudoku_001']);
       expect(gamesApiClient.put).toHaveBeenCalledWith('/admin/games/sudoku/daily-levels/2026-10-23', {
         levelIds: ['sudoku_001'],
+      });
+
+      await GamesRepository.listDailyLevels('sudoku', 1, 50);
+      expect(gamesApiClient.get).toHaveBeenCalledWith('/admin/games/sudoku/daily-levels', {
+        page: 1,
+        pageSize: 50,
       });
 
       await GamesRepository.importLevels('sudoku', { dryRun: false, levels: [] });
@@ -757,6 +766,19 @@ describe('Games Module - Comprehensive Test Suite', () => {
       expect(getLevelImageUrl({ iconUrl: 'https://img.com/icon.png' })).toBe('https://img.com/icon.png');
       expect(getLevelImageUrl({ content: { backgroundImage: 'https://img.com/bg.png' } })).toBe('https://img.com/bg.png');
       expect(getLevelImageUrl({ content: { backgroundImageUrl: 'https://img.com/bg2.png' } })).toBe('https://img.com/bg2.png');
+    });
+  });
+
+  describe('formatLevelDate utility', () => {
+    it('normalizes various date inputs into standard YYYY-MM-DD format', () => {
+      expect(formatLevelDate(null)).toBe('');
+      expect(formatLevelDate(undefined)).toBe('');
+      expect(formatLevelDate('')).toBe('');
+      expect(formatLevelDate('2026-10-26')).toBe('2026-10-26');
+      expect(formatLevelDate('2026-10-26T00:00:00.000Z')).toBe('2026-10-26');
+      expect(formatLevelDate('2026-10-26 14:30:00')).toBe('2026-10-26');
+      expect(formatLevelDate(new Date('2026-10-26T12:00:00Z'))).toBe('2026-10-26');
+      expect(formatLevelDate('invalid-date')).toBe('');
     });
   });
 

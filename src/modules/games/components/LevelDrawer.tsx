@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Close, CheckCircleOutline, CloudUpload, Refresh, Image as ImageIcon } from '@mui/icons-material';
-import { LevelItem, DEFAULT_LEVEL_ICON_URL, getLevelImageUrl } from '../dto/games.dto';
+import { LevelItem, DEFAULT_LEVEL_ICON_URL, getLevelImageUrl, formatLevelDate } from '../dto/games.dto';
 import { GamesRepository } from '../repositories/games.repository';
 import { PatchLevelValidator } from '../validators/patch-level.validator';
 import { UploadService } from '@/modules/media/services/upload.service';
@@ -72,10 +72,10 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
       const todayStr = new Date().toISOString().slice(0, 10);
       if (isEditMode && selectedLevel) {
         const autoFetchedDate =
-          selectedLevel.puzzleDate ||
-          selectedLevel.assignedDate ||
-          (selectedLevel.publishedAt ? selectedLevel.publishedAt.slice(0, 10) : '') ||
-          (selectedLevel.createdAt ? selectedLevel.createdAt.slice(0, 10) : '') ||
+          formatLevelDate(selectedLevel.puzzleDate) ||
+          formatLevelDate(selectedLevel.assignedDate) ||
+          formatLevelDate(selectedLevel.publishedAt) ||
+          formatLevelDate(selectedLevel.createdAt) ||
           todayStr;
 
         setFormData({
@@ -88,6 +88,28 @@ export const LevelDrawer: React.FC<LevelDrawerProps> = ({
           iconUrl: getLevelImageUrl(selectedLevel),
           contentStr: selectedLevel.content ? JSON.stringify(selectedLevel.content, null, 2) : '{}',
         });
+
+        // Auto-fetch fresh daily challenge schedule from server if available
+        const targetId = selectedLevel.levelId || selectedLevel.id;
+        if (targetId && gameId) {
+          GamesRepository.listDailyLevels(gameId, 1, 100)
+            .then((res: any) => {
+              const dailyItems: any[] = res?.items || res?.data?.items || (Array.isArray(res) ? res : []);
+              const match = dailyItems.find((d: any) => d.levelId === targetId);
+              if (match && match.puzzleDate) {
+                const freshDate = formatLevelDate(match.puzzleDate);
+                if (freshDate) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    publishDate: freshDate,
+                  }));
+                }
+              }
+            })
+            .catch(() => {
+              // Silently retain autoFetchedDate
+            });
+        }
       } else {
         setFormData({
           levelId: `${gameId}_${Date.now().toString().slice(-4)}`,

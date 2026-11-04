@@ -94,6 +94,24 @@ export const getLevelImageUrl = (level?: Partial<LevelItem> | null): string => {
   );
 };
 
+export const formatLevelDate = (dateVal?: unknown): string => {
+  if (!dateVal) return '';
+  if (typeof dateVal === 'string') {
+    const trimmed = dateVal.trim();
+    if (trimmed.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+      return trimmed.slice(0, 10);
+    }
+    const parsed = new Date(trimmed);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().slice(0, 10);
+    }
+  }
+  if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+    return dateVal.toISOString().slice(0, 10);
+  }
+  return '';
+};
+
 export interface LevelListResponse {
   gameId: string;
   gameType?: string;
