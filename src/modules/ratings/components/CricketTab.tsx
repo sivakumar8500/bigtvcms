@@ -36,8 +36,8 @@ import { Loader } from '@/shared/components/Loader';
 interface CricketTabProps {
   matches: CricketMatchItem[];
   allMatches: CricketMatchItem[];
-  filter: 'all' | 'live' | 'upcoming' | 'recent';
-  onFilterChange: (newFilter: 'all' | 'live' | 'upcoming' | 'recent') => void;
+  filter: 'all' | 'live' | 'upcoming';
+  onFilterChange: (newFilter: 'all' | 'live' | 'upcoming') => void;
   search: string;
   onSearchChange: (val: string) => void;
   isLoading: boolean;
@@ -76,7 +76,7 @@ export const CricketTab: React.FC<CricketTabProps> = ({
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' },
           gap: 2,
         }}
       >
@@ -150,40 +150,7 @@ export const CricketTab: React.FC<CricketTabProps> = ({
           </CardContent>
         </Card>
 
-        {/* Recent */}
-        <Card
-          sx={{
-            borderRadius: '16px',
-            backgroundColor: isDark ? 'rgba(38,28,86,0.5)' : '#ffffff',
-            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-            boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.2)' : '0 4px 16px rgba(0,0,0,0.04)',
-          }}
-        >
-          <CardContent sx={{ p: 2.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" sx={{ color: isDark ? '#d0caeb' : '#5c548a', fontWeight: 600 }}>
-                {t.cricketStatRecent}
-              </Typography>
-              <Box
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '10px',
-                  backgroundColor: 'rgba(16,185,129,0.15)',
-                  color: '#10b981',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Scoreboard fontSize="small" />
-              </Box>
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981' }}>
-              {recentCount}
-            </Typography>
-          </CardContent>
-        </Card>
+
 
         {/* Pinned */}
         <Card
@@ -258,15 +225,7 @@ export const CricketTab: React.FC<CricketTabProps> = ({
           >
             {t.filterUpcomingMatches}
           </Button>
-          <Button
-            variant={filter === 'recent' ? 'contained' : 'outlined'}
-            color="success"
-            size="small"
-            onClick={() => onFilterChange('recent')}
-            sx={{ textTransform: 'none', fontWeight: 600 }}
-          >
-            {t.filterRecentMatches}
-          </Button>
+
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -316,7 +275,7 @@ export const CricketTab: React.FC<CricketTabProps> = ({
         </Box>
       ) : (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2.5 }}>
-          {matches.map((match) => {
+          {matches.filter((m) => m.status !== 'recent').map((match) => {
             const isLive = match.status === 'live';
             return (
               <Card

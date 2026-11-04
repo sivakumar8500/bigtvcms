@@ -61,7 +61,7 @@ export function useRatingsController() {
   // ----------------------------------------------------
   const [cricketMatches, setCricketMatches] = useState<CricketMatchItem[]>([]);
   const [isCricketLoading, setIsCricketLoading] = useState<boolean>(false);
-  const [cricketFilter, setCricketFilter] = useState<'all' | 'live' | 'upcoming' | 'recent'>('all');
+  const [cricketFilter, setCricketFilter] = useState<'all' | 'live' | 'upcoming'>('all');
   const [cricketSearch, setCricketSearch] = useState<string>('');
 
   const [scorecardModalOpen, setScorecardModalOpen] = useState<boolean>(false);

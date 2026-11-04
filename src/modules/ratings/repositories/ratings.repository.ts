@@ -685,8 +685,9 @@ export class RatingsRepository {
           };
         });
 
-        this.localCricket = mapped;
-        let items = mapped;
+        const activeMatches = mapped.filter((m) => m.status !== 'recent');
+        this.localCricket = activeMatches;
+        let items = activeMatches;
         if (filter && filter !== 'all') {
           items = items.filter((m) => m.status === filter);
         }
@@ -706,7 +707,7 @@ export class RatingsRepository {
       // Fallback
     }
 
-    let items = [...this.localCricket];
+    let items = this.localCricket.filter((m) => m.status !== 'recent');
     if (filter && filter !== 'all') {
       items = items.filter((m) => m.status === filter);
     }

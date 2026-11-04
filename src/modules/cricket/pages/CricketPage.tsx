@@ -268,18 +268,7 @@ export const CricketPage: React.FC = () => {
               '&.Mui-selected': { color: '#3b82f6' },
             }}
           />
-          <Tab
-            value="recent"
-            label={t.filterRecent}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              minHeight: 40,
-              color: isDark ? '#94a3b8' : '#64748b',
-              '&.Mui-selected': { color: isDark ? '#ffffff' : '#0f172a' },
-            }}
-          />
+
         </Tabs>
 
         {/* Right side: Search & Visibility Dropdown */}
