@@ -3135,7 +3135,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({
                       onClick={async () => {
                         setIsSummarizing(true);
                         try {
-                          const res = await fetch('https://api.chotanews.com/summarize', {
+                          const res = await fetch('https://devapi.chotanews.com/summarize', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ content: stripHtml(body) })

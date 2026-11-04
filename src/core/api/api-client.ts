@@ -328,7 +328,7 @@ export const apiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'https://api.chotanews.com'
+    'https://devapi.chotanews.com'
   ).replace(/\/$/, '')
 );
 
