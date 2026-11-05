@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -19,6 +19,7 @@ import {
   TableRow,
   TableCell,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   Close,
@@ -27,6 +28,10 @@ import {
   AccessTime,
   Sync,
   SportsCricket,
+  ContentCopy,
+  Check,
+  OpenInNew,
+  Key,
 } from '@mui/icons-material';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { CricketMatch } from '../domain/cricket.types';
@@ -38,6 +43,8 @@ interface CricketScorecardModalProps {
   onClose: () => void;
   onTogglePublish: (matchId: string, currentStatus: boolean) => void;
   isToggling: boolean;
+  onRefreshScorecard?: (matchId: string) => void;
+  isLoadingScorecard?: boolean;
   t: CricketTranslations;
 }
 
@@ -47,16 +54,54 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
   onClose,
   onTogglePublish,
   isToggling,
+  onRefreshScorecard,
+  isLoadingScorecard = false,
   t,
 }) => {
   const { mode } = useAppTheme();
   const isDark = mode === 'dark';
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   if (!match) return null;
+
+  const handleCopy = (text: string, key: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 2000);
+    }
+  };
 
   const isLive = match.state?.toLowerCase() === 'live';
   const isUpcoming = match.state?.toLowerCase() === 'upcoming';
   const miniscore = match.liveScorePayload?.miniscore;
+
+  // Normalization for RapidAPI Cricbuzz casing variations
+  const currentRunRate = miniscore?.crr ?? miniscore?.currentRunRate;
+  const reqRunRate = miniscore?.rrr ?? miniscore?.requiredRunRate;
+  const target = miniscore?.target;
+
+  // Partnership string or object
+  let partnershipDisplay: string | null = null;
+  if (typeof miniscore?.partnership === 'string') {
+    partnershipDisplay = miniscore.partnership;
+  } else if (miniscore?.partnerShip) {
+    partnershipDisplay = `${miniscore.partnerShip.runs} runs (${miniscore.partnerShip.balls}b)`;
+  } else if (typeof miniscore?.partnership === 'object' && miniscore.partnership !== null) {
+    const p = miniscore.partnership as { runs: number; balls: number };
+    partnershipDisplay = `${p.runs} runs (${p.balls}b)`;
+  }
+
+  // Striker & Non-Striker Batsmen
+  const bStriker = miniscore?.batsmanstriker || miniscore?.batsmanStriker;
+  const bNonStriker = miniscore?.batsmannonstriker || miniscore?.batsmanNonStriker;
+
+  // Bowlers
+  const bowStriker = miniscore?.bowlerstriker || miniscore?.bowlerStriker;
+  const bowNonStriker = miniscore?.bowlernonstriker || miniscore?.bowlerNonStriker;
+
+  // Recent overs
+  const recentBallsString = miniscore?.recentOversStats || miniscore?.curovsstats;
 
   const renderRecentBalls = (recentOversStats?: string) => {
     if (!recentOversStats) return null;
@@ -148,7 +193,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
         }}
       >
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5, flexWrap: 'wrap' }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: isDark ? '#ffffff' : '#0f172a' }}>
               {match.seriesName || t.modalTitle}
             </Typography>
@@ -196,21 +241,60 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                 color: isLive ? '#ef4444' : isUpcoming ? '#3b82f6' : isDark ? '#94a3b8' : '#64748b',
               }}
             />
+            <Chip
+              label={match.isPublished ? t.published : t.unpublished}
+              size="small"
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                backgroundColor: match.isPublished
+                  ? 'rgba(16, 185, 129, 0.15)'
+                  : 'rgba(245, 158, 11, 0.15)',
+                color: match.isPublished ? '#10b981' : '#f59e0b',
+              }}
+            />
           </Box>
           <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#64748b' }}>
             {match.matchDesc || t.modalSubtitle}
           </Typography>
         </Box>
 
-        <IconButton
-          onClick={onClose}
-          sx={{
-            color: isDark ? '#94a3b8' : '#64748b',
-            '&:hover': { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
-          }}
-        >
-          <Close />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {onRefreshScorecard && (
+            <Tooltip title={t.refreshScorecard}>
+              <IconButton
+                onClick={() => onRefreshScorecard(match.matchId)}
+                disabled={isLoadingScorecard}
+                sx={{
+                  color: '#6366f1',
+                  backgroundColor: isDark ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.06)',
+                  '&:hover': { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.12)' },
+                }}
+              >
+                <Sync
+                  sx={{
+                    fontSize: 20,
+                    animation: isLoadingScorecard ? 'spin 1s linear infinite' : 'none',
+                    '@keyframes spin': {
+                      '0%': { transform: 'rotate(0deg)' },
+                      '100%': { transform: 'rotate(360deg)' },
+                    },
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          <IconButton
+            onClick={onClose}
+            sx={{
+              color: isDark ? '#94a3b8' : '#64748b',
+              '&:hover': { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ p: 3 }}>
@@ -335,7 +419,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
           </Box>
 
           {/* Commentary / Status */}
-          {match.status && (
+          {(match.status || miniscore?.custstatus) && (
             <Box
               sx={{
                 mt: 2.5,
@@ -354,7 +438,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                   color: isLive ? '#ef4444' : isDark ? '#cbd5e1' : '#334155',
                 }}
               >
-                {match.status}
+                {miniscore?.custstatus || match.status}
               </Typography>
             </Box>
           )}
@@ -362,12 +446,12 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
 
         {/* Detailed Live Miniscore Section */}
         {miniscore && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 3 }}>
             {/* Rates & Target Bar */}
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center' }}>
-              {miniscore.target !== undefined && miniscore.target !== null && (
+              {target !== undefined && target !== null && (
                 <Chip
-                  label={`${t.target}: ${miniscore.target}`}
+                  label={`${t.target}: ${target}`}
                   sx={{
                     fontWeight: 700,
                     backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : '#e0e7ff',
@@ -375,9 +459,9 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                   }}
                 />
               )}
-              {miniscore.currentRunRate !== undefined && (
+              {currentRunRate !== undefined && (
                 <Chip
-                  label={`${t.crr}: ${miniscore.currentRunRate}`}
+                  label={`${t.crr}: ${currentRunRate}`}
                   sx={{
                     fontWeight: 700,
                     backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#dcfce7',
@@ -385,9 +469,9 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                   }}
                 />
               )}
-              {miniscore.requiredRunRate !== undefined && (
+              {reqRunRate !== undefined && (
                 <Chip
-                  label={`${t.rrr}: ${miniscore.requiredRunRate}`}
+                  label={`${t.rrr}: ${reqRunRate}`}
                   sx={{
                     fontWeight: 700,
                     backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
@@ -395,9 +479,9 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                   }}
                 />
               )}
-              {miniscore.partnerShip && (
+              {partnershipDisplay && (
                 <Chip
-                  label={`${t.partnership}: ${miniscore.partnerShip.runs} runs (${miniscore.partnerShip.balls}b)`}
+                  label={`${t.partnership}: ${partnershipDisplay}`}
                   sx={{
                     fontWeight: 600,
                     backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9',
@@ -408,7 +492,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
             </Box>
 
             {/* Batting Striker & Non-Striker Table */}
-            {(miniscore.batsmanStriker || miniscore.batsmanNonStriker) && (
+            {(bStriker || bNonStriker) && (
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: isDark ? '#ffffff' : '#0f172a' }}>
                   {t.batting}
@@ -435,7 +519,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {[miniscore.batsmanStriker, miniscore.batsmanNonStriker].filter(Boolean).map((b, idx) => (
+                    {[bStriker, bNonStriker].filter(Boolean).map((b, idx) => (
                       <TableRow key={idx}>
                         <TableCell sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>
                           {b?.name} {idx === 0 ? '*' : ''}
@@ -453,7 +537,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                           {b?.sixes}
                         </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 600, color: isDark ? '#cbd5e1' : '#475569' }}>
-                          {b?.strikeRate}
+                          {b?.strkrate || b?.strikeRate}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -463,7 +547,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
             )}
 
             {/* Bowling Striker & Non-Striker Table */}
-            {(miniscore.bowlerStriker || miniscore.bowlerNonStriker) && (
+            {(bowStriker || bowNonStriker) && (
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: isDark ? '#ffffff' : '#0f172a' }}>
                   {t.bowling}
@@ -490,7 +574,7 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {[miniscore.bowlerStriker, miniscore.bowlerNonStriker].filter(Boolean).map((bow, idx) => (
+                    {[bowStriker, bowNonStriker].filter(Boolean).map((bow, idx) => (
                       <TableRow key={idx}>
                         <TableCell sx={{ fontWeight: 600, color: isDark ? '#ffffff' : '#0f172a' }}>
                           {bow?.name} {idx === 0 ? '*' : ''}
@@ -518,12 +602,111 @@ export const CricketScorecardModal: React.FC<CricketScorecardModalProps> = ({
             )}
 
             {/* Recent Overs Balls */}
-            {miniscore.recentOversStats && (
+            {recentBallsString && (
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: isDark ? '#ffffff' : '#0f172a' }}>
                   {t.recentOvers}
                 </Typography>
-                {renderRecentBalls(miniscore.recentOversStats)}
+                {renderRecentBalls(recentBallsString)}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* API Delivery Section (Section 4.4 in .md API) */}
+        {(match.liveUrl || match.liveCrickBuzzUrl || match.accessKey) && (
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: '14px',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.02)' : '#f8fafc',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5,
+            }}
+          >
+            {match.liveUrl && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#6366f1', display: 'block' }}>
+                    {t.liveUrlLabel}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                      color: isDark ? '#94a3b8' : '#475569',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {match.liveUrl}
+                  </Typography>
+                </Box>
+                <Tooltip title={copiedKey === 'liveUrl' ? t.copied : t.copy}>
+                  <IconButton size="small" onClick={() => handleCopy(match.liveUrl!, 'liveUrl')}>
+                    {copiedKey === 'liveUrl' ? <Check sx={{ fontSize: 16, color: '#10b981' }} /> : <ContentCopy sx={{ fontSize: 16 }} />}
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+
+            {match.liveCrickBuzzUrl && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#10b981', display: 'block' }}>
+                    {t.cricbuzzUrlLabel}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                      color: isDark ? '#94a3b8' : '#475569',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {match.liveCrickBuzzUrl}
+                  </Typography>
+                </Box>
+                <Tooltip title={copiedKey === 'cricbuzz' ? t.copied : t.copy}>
+                  <IconButton size="small" onClick={() => handleCopy(match.liveCrickBuzzUrl!, 'cricbuzz')}>
+                    {copiedKey === 'cricbuzz' ? <Check sx={{ fontSize: 16, color: '#10b981' }} /> : <ContentCopy sx={{ fontSize: 16 }} />}
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+
+            {match.accessKey && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Key sx={{ fontSize: 16, color: '#f59e0b' }} />
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#f59e0b', display: 'block' }}>
+                      {t.accessKeyLabel}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: 'monospace',
+                        fontSize: '0.8rem',
+                        color: isDark ? '#94a3b8' : '#475569',
+                      }}
+                    >
+                      {match.accessKey.substring(0, 12)}••••••••••••
+                    </Typography>
+                  </Box>
+                </Box>
+                <Tooltip title={copiedKey === 'key' ? t.copied : t.copy}>
+                  <IconButton size="small" onClick={() => handleCopy(match.accessKey!, 'key')}>
+                    {copiedKey === 'key' ? <Check sx={{ fontSize: 16, color: '#10b981' }} /> : <ContentCopy sx={{ fontSize: 16 }} />}
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
           </Box>

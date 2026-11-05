@@ -1,18 +1,20 @@
 export type CricketMatchState = 'live' | 'recent' | 'upcoming';
 export type CricketMatchFormat = 'T20' | 'ODI' | 'TEST';
+export type PravasaMatchStatus = 'published' | 'unpublished';
 
 export interface CricketMiniscorePlayer {
-  id: number;
-  name: string;
-  runs: number;
+  id?: number | string;
+  name?: string;
+  runs?: number;
   balls?: number;
   fours?: number;
   sixes?: number;
-  strikeRate?: number;
+  strikeRate?: number | string;
+  strkrate?: number | string;
   overs?: number | string;
   maidens?: number;
   wickets?: number;
-  economy?: number;
+  economy?: number | string;
 }
 
 export interface CricketMiniscore {
@@ -21,9 +23,15 @@ export interface CricketMiniscore {
   target?: number;
   wickets?: number;
   inningsId?: number;
+  inningsid?: number;
   currentRunRate?: number;
   requiredRunRate?: number;
+  crr?: number;
+  rrr?: number;
   lastUpdated?: string;
+  responselastupdated?: number;
+  inningsnbr?: string;
+  custstatus?: string;
   batTeam?: {
     teamId: number | string;
     teamName: string;
@@ -33,23 +41,39 @@ export interface CricketMiniscore {
     runs: number;
     balls: number;
   };
+  partnership?: string | { runs: number; balls: number };
   batsmanStriker?: CricketMiniscorePlayer;
   batsmanNonStriker?: CricketMiniscorePlayer;
+  batsmanstriker?: CricketMiniscorePlayer;
+  batsmannonstriker?: CricketMiniscorePlayer;
   bowlerStriker?: CricketMiniscorePlayer;
   bowlerNonStriker?: CricketMiniscorePlayer;
+  bowlerstriker?: CricketMiniscorePlayer;
+  bowlernonstriker?: CricketMiniscorePlayer;
   recentOversStats?: string;
+  curovsstats?: string;
+  inningsscores?: {
+    inningsscore?: Array<{
+      inningsid?: number;
+      batteamshortname?: string;
+      runs?: number;
+      wickets?: number;
+      overs?: number | string;
+    }>;
+  };
 }
 
 export interface CricketLiveScorePayload {
   state?: string;
   status?: string;
-  matchId?: string;
+  matchId?: string | number;
   miniscore?: CricketMiniscore;
+  [key: string]: unknown;
 }
 
 export interface CricketMatch {
-  id: string; // UUID
-  matchId: string; // Cricbuzz matchId e.g. "1001"
+  id: string; // UUID or matchId
+  matchId: string; // Cricbuzz matchId e.g. "161245"
   seriesId?: string | null;
   seriesName?: string | null;
   matchDesc?: string | null;
@@ -72,8 +96,12 @@ export interface CricketMatch {
   city?: string | null;
   startTime?: string | null;
   endTime?: string | null;
+  pravasaStatus?: PravasaMatchStatus;
   isPublished: boolean;
   publishedAt?: string | null;
+  liveUrl?: string | null;
+  liveCrickBuzzUrl?: string | null;
+  accessKey?: string | null;
   liveScorePayload?: CricketLiveScorePayload | null;
   miniScorecardPayload?: unknown | null;
   lastSyncedAt?: string | null;
@@ -95,7 +123,30 @@ export interface CricketAdminMatchesData {
 export interface CricketAdminMatchesResponse {
   success: boolean;
   data: CricketAdminMatchesData;
-  timestamp: string;
+  timestamp?: string;
+}
+
+export interface CricketStatusDto {
+  matchId: string;
+  pravasaStatus?: PravasaMatchStatus;
+  status?: string;
+  isPublished?: boolean;
+}
+
+export interface CricketStatusResponse {
+  success: boolean;
+  matchId: string;
+  pravasaStatus: PravasaMatchStatus;
+  isPublished: boolean;
+  message: string;
+}
+
+export interface CricketPublishedMatchesResponse {
+  count: number;
+  liveUrl: string | null;
+  liveCrickBuzzUrl: string | null;
+  accessKey: string | null;
+  matches: CricketMatch[];
 }
 
 export interface CricketPublishResponse {
@@ -133,6 +184,22 @@ export interface CricketSyncResponse {
   timestamp?: string;
 }
 
+export interface CricbuzzLiveFeedResponse {
+  typeMatches?: Array<{
+    matchType?: string;
+    seriesMatches?: Array<{
+      seriesAdWrapper?: {
+        seriesId?: number | string;
+        seriesName?: string;
+        matches?: any[];
+      };
+      matches?: any[];
+    }>;
+  }>;
+  matches?: any[];
+  [key: string]: unknown;
+}
+
 export interface CricketFilterParams {
   page?: number;
   limit?: number;
@@ -140,3 +207,4 @@ export interface CricketFilterParams {
   state?: 'live' | 'recent' | 'upcoming';
   search?: string;
 }
+

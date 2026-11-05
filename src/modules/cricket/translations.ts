@@ -70,6 +70,13 @@ export interface CricketTranslations {
   noMatchesFound: string;
   refresh: string;
   close: string;
+  liveUrlLabel: string;
+  cricbuzzUrlLabel: string;
+  accessKeyLabel: string;
+  copy: string;
+  copied: string;
+  refreshScorecard: string;
+  liveIndicator: string;
 }
 
 export const cricketTranslations: Record<string, CricketTranslations> = {
@@ -109,7 +116,7 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     unpublished: 'Unpublished',
     neverPublished: 'Not Published',
     modalTitle: 'Match Details & Live Scorecard',
-    modalSubtitle: 'Real-time score data synced from Cricbuzz poller',
+    modalSubtitle: 'Real-time score data synced from Cricbuzz RapidAPI',
     liveBadge: 'LIVE',
     recentBadge: 'CONCLUDED',
     upcomingBadge: 'UPCOMING',
@@ -145,6 +152,13 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     noMatchesFound: 'No cricket matches found matching your filters.',
     refresh: 'Refresh',
     close: 'Close',
+    liveUrlLabel: 'Live Score API URL',
+    cricbuzzUrlLabel: 'Cricbuzz RapidAPI URL',
+    accessKeyLabel: 'Access Key',
+    copy: 'Copy',
+    copied: 'Copied!',
+    refreshScorecard: 'Refresh Scorecard',
+    liveIndicator: 'Live ball-by-ball updates',
   },
   te: {
     pageTitle: 'క్రికెట్ మ్యాచ్‌లు & లైవ్ స్కోర్ల నిర్వహణ (Cricket Management)',
@@ -182,7 +196,7 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     unpublished: 'ప్రచురించబడలేదు',
     neverPublished: 'ప్రచురించబడలేదు',
     modalTitle: 'మ్యాచ్ వివరాలు & లైవ్ స్కోర్‌కార్డ్',
-    modalSubtitle: 'క్రిక్‌బజ్ పోలర్ నుండి రియల్ టైమ్ డేటా సమకాలీకరించబడింది',
+    modalSubtitle: 'క్రిక్‌బజ్ RapidAPI నుండి రియల్ టైమ్ డేటా సమకాలీకరించబడింది',
     liveBadge: 'లైవ్',
     recentBadge: 'ముగిసింది',
     upcomingBadge: 'రాబోయేది',
@@ -218,6 +232,13 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     noMatchesFound: 'మీ శోధనకు తగిన క్రికెట్ మ్యాచ్‌లు కనుగొనబడలేదు.',
     refresh: 'రిఫ్రెష్',
     close: 'మూసివేయి',
+    liveUrlLabel: 'లైవ్ స్కోర్ API URL',
+    cricbuzzUrlLabel: 'క్రిక్‌బజ్ RapidAPI URL',
+    accessKeyLabel: 'యాక్సెస్ కీ',
+    copy: 'కాపీ చేయండి',
+    copied: 'కాపీ చేయబడింది!',
+    refreshScorecard: 'స్కోర్‌కార్డ్ రిఫ్రెష్ చేయండి',
+    liveIndicator: 'లైవ్ బంతి-బంతికి అప్‌డేట్లు',
   },
   hi: {
     pageTitle: 'क्रिकेट मैच और लाइव स्कोर प्रबंधन (Cricket Management)',
@@ -255,7 +276,7 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     unpublished: 'अप्रकाशित',
     neverPublished: 'प्रकाशित नहीं',
     modalTitle: 'मैच विवरण और लाइव स्कोरकार्ड',
-    modalSubtitle: 'क्रिकबज पोलर से रीयल-टाइम डेटा सिंक किया गया',
+    modalSubtitle: 'क्रिकबज RapidAPI से रीयल-टाइम डेटा सिंक किया गया',
     liveBadge: 'लाइव',
     recentBadge: 'समाप्त',
     upcomingBadge: 'आगामी',
@@ -291,6 +312,13 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     noMatchesFound: 'कोई मैच नहीं मिला।',
     refresh: 'रिफ्रेश',
     close: 'बंद करें',
+    liveUrlLabel: 'लाइव स्कोर API URL',
+    cricbuzzUrlLabel: 'क्रिकबज RapidAPI URL',
+    accessKeyLabel: 'एक्सेस कुंजी',
+    copy: 'कॉपी करें',
+    copied: 'कॉपी हो गया!',
+    refreshScorecard: 'स्कोरकार्ड रीफ्रेश करें',
+    liveIndicator: 'लाइव गेंद-दर-गेंद अपडेट',
   },
   ml: {
     pageTitle: 'ക്രിക്കറ്റ് മത്സരങ്ങളും ലൈവ് സ്കോറുകളും (Cricket Management)',
@@ -328,7 +356,7 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     unpublished: 'പ്രസിദ്ധീകരിച്ചിട്ടില്ല',
     neverPublished: 'പ്രസിദ്ധീകരിച്ചിട്ടില്ല',
     modalTitle: 'മത്സര വിവരങ്ങളും തത്സമയ സ്കോർകാർഡും',
-    modalSubtitle: 'തത്സമയ സ്കോറുകൾ ക്രിക്ക്ബസ് പോളർ വഴി ലഭ്യമാക്കുന്നു',
+    modalSubtitle: 'തത്സമയ സ്കോറുകൾ ക്രിക്ക്ബസ് RapidAPI വഴി ലഭ്യമാക്കുന്നു',
     liveBadge: 'ലൈവ്',
     recentBadge: 'പൂർത്തിയായി',
     upcomingBadge: 'വരാനിരിക്കുന്നത്',
@@ -364,5 +392,12 @@ export const cricketTranslations: Record<string, CricketTranslations> = {
     noMatchesFound: 'മത്സരങ്ങൾ ഒന്നും കണ്ടെത്താനായില്ല.',
     refresh: 'പുതുക്കുക',
     close: 'അടയ്ക്കുക',
+    liveUrlLabel: 'ലൈവ് സ്കോർ API URL',
+    cricbuzzUrlLabel: 'ക്രിക്ക്ബസ് RapidAPI URL',
+    accessKeyLabel: 'ആക്സസ് കീ',
+    copy: 'പകർത്തുക',
+    copied: 'പകർത്തി!',
+    refreshScorecard: 'സ്കോർകാർഡ് പുതുക്കുക',
+    liveIndicator: 'തത്സമയ ബോൾ-ബൈ-ബോൾ അപ്‌ഡേറ്റുകൾ',
   },
 };

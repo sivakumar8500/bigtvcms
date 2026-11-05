@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { CricketMatch, CricketMatchState } from '../domain/cricket.types';
+import { CricketMatch, CricketMatchState, PravasaMatchStatus } from '../domain/cricket.types';
 import { CricketRepository } from '../repositories/cricket.repository';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { cricketTranslations } from '../translations';
@@ -32,6 +32,7 @@ export function useCricketController() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [togglingMatchId, setTogglingMatchId] = useState<string | null>(null);
+  const [isLoadingScorecard, setIsLoadingScorecard] = useState<boolean>(false);
 
   // Filters & Search
   const [search, setSearch] = useState<string>('');
@@ -65,7 +66,7 @@ export function useCricketController() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   }, []);
 
-  // Fetch matches from API
+  // Fetch matches from API (GET /live & GET /published)
   const fetchMatches = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -107,12 +108,18 @@ export function useCricketController() {
     async (matchId: string, currentStatus: boolean) => {
       setTogglingMatchId(matchId);
       const newStatus = !currentStatus;
+      const targetPravasaStatus: PravasaMatchStatus = newStatus ? 'published' : 'unpublished';
 
       // Optimistic UI update
       setMatches((prev) =>
         prev.map((m) =>
           m.matchId === matchId || m.id === matchId
-            ? { ...m, isPublished: newStatus, publishedAt: newStatus ? new Date().toISOString() : null }
+            ? {
+                ...m,
+                isPublished: newStatus,
+                pravasaStatus: targetPravasaStatus,
+                publishedAt: newStatus ? new Date().toISOString() : null,
+              }
             : m
         )
       );
@@ -120,7 +127,12 @@ export function useCricketController() {
       if (scorecardModalMatch && (scorecardModalMatch.matchId === matchId || scorecardModalMatch.id === matchId)) {
         setScorecardModalMatch((prev) =>
           prev
-            ? { ...prev, isPublished: newStatus, publishedAt: newStatus ? new Date().toISOString() : null }
+            ? {
+                ...prev,
+                isPublished: newStatus,
+                pravasaStatus: targetPravasaStatus,
+                publishedAt: newStatus ? new Date().toISOString() : null,
+              }
             : null
         );
       }
@@ -137,10 +149,11 @@ export function useCricketController() {
         await fetchMatches();
       } catch {
         // Revert on error
+        const revertStatus: PravasaMatchStatus = currentStatus ? 'published' : 'unpublished';
         setMatches((prev) =>
           prev.map((m) =>
             m.matchId === matchId || m.id === matchId
-              ? { ...m, isPublished: currentStatus }
+              ? { ...m, isPublished: currentStatus, pravasaStatus: revertStatus }
               : m
           )
         );
@@ -171,7 +184,7 @@ export function useCricketController() {
     [selectedMatchIds, fetchMatches, showSnackbar, t.toastBulkError, t.toastBulkSuccess]
   );
 
-  // Handle manual trigger sync
+  // Handle manual trigger sync (fetches fresh live matches from RapidAPI into DB)
   const handleSync = useCallback(async () => {
     setIsSyncing(true);
     try {
@@ -214,9 +227,52 @@ export function useCricketController() {
     [matches.length, selectedMatchIds.length]
   );
 
-  // Modal Handlers
-  const openScorecardModal = useCallback((match: CricketMatch) => {
+  // Modal Handlers & Real-time Live Score fetch
+  const openScorecardModal = useCallback(async (match: CricketMatch) => {
     setScorecardModalMatch(match);
+    if (match.matchId) {
+      setIsLoadingScorecard(true);
+      try {
+        const liveDetails = await CricketRepository.getLiveScore(match.matchId);
+        if (liveDetails) {
+          setScorecardModalMatch((prev) =>
+            prev && (prev.matchId === match.matchId || prev.id === match.id)
+              ? {
+                  ...prev,
+                  status: liveDetails.status || liveDetails.miniscore?.custstatus || prev.status,
+                  liveScorePayload: liveDetails,
+                }
+              : prev
+          );
+        }
+      } catch {
+        // retain previous state
+      } finally {
+        setIsLoadingScorecard(false);
+      }
+    }
+  }, []);
+
+  const refreshScorecard = useCallback(async (matchId: string) => {
+    setIsLoadingScorecard(true);
+    try {
+      const liveDetails = await CricketRepository.getLiveScore(matchId);
+      if (liveDetails) {
+        setScorecardModalMatch((prev) =>
+          prev && (prev.matchId === matchId || prev.id === matchId)
+            ? {
+                ...prev,
+                status: liveDetails.status || liveDetails.miniscore?.custstatus || prev.status,
+                liveScorePayload: liveDetails,
+              }
+            : prev
+        );
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsLoadingScorecard(false);
+    }
   }, []);
 
   const closeScorecardModal = useCallback(() => {
@@ -229,6 +285,7 @@ export function useCricketController() {
     isLoading,
     isSyncing,
     togglingMatchId,
+    isLoadingScorecard,
     search,
     setSearch,
     stateFilter,
@@ -251,6 +308,7 @@ export function useCricketController() {
     fetchMatches,
     scorecardModalMatch,
     openScorecardModal,
+    refreshScorecard,
     closeScorecardModal,
     snackbar,
     closeSnackbar,

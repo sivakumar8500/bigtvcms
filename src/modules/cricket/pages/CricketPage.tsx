@@ -40,6 +40,7 @@ export const CricketPage: React.FC = () => {
     isLoading,
     isSyncing,
     togglingMatchId,
+    isLoadingScorecard,
     search,
     setSearch,
     stateFilter,
@@ -62,6 +63,7 @@ export const CricketPage: React.FC = () => {
     fetchMatches,
     scorecardModalMatch,
     openScorecardModal,
+    refreshScorecard,
     closeScorecardModal,
     snackbar,
     closeSnackbar,
@@ -268,7 +270,18 @@ export const CricketPage: React.FC = () => {
               '&.Mui-selected': { color: '#3b82f6' },
             }}
           />
-
+          <Tab
+            value="recent"
+            label={t.filterRecent}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              minHeight: 40,
+              color: isDark ? '#94a3b8' : '#64748b',
+              '&.Mui-selected': { color: isDark ? '#cbd5e1' : '#475569' },
+            }}
+          />
         </Tabs>
 
         {/* Right side: Search & Visibility Dropdown */}
@@ -358,6 +371,8 @@ export const CricketPage: React.FC = () => {
         onClose={closeScorecardModal}
         onTogglePublish={handleTogglePublish}
         isToggling={Boolean(togglingMatchId && scorecardModalMatch && togglingMatchId === scorecardModalMatch.matchId)}
+        onRefreshScorecard={refreshScorecard}
+        isLoadingScorecard={isLoadingScorecard}
         t={t}
       />
 
