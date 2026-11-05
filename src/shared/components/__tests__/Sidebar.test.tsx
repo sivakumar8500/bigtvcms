@@ -14,7 +14,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
     useLanguageStore.setState({ language: 'en' });
   });
 
-  it('renders menu items for creators role (Create News, Notifications for notification_creator, Reels, Web Articles, Settings)', () => {
+  it('renders menu items for creators role (Create News, BigTV Special, Reels, Web Articles, Settings)', () => {
     useUserStore.setState({
       user: {
         username: 'creator_user',
@@ -32,14 +32,14 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
-    expect(screen.getByText('Ratings')).toBeInTheDocument();
-    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
+    expect(screen.getByText('BigTV Special')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
 
+    expect(screen.queryByText('Games')).not.toBeInTheDocument();
     expect(screen.queryByText('Categories')).not.toBeInTheDocument();
-    expect(screen.queryByText('Epapers')).not.toBeInTheDocument();
+    expect(screen.queryByText('E-Papers')).not.toBeInTheDocument();
     expect(screen.queryByText('Locations')).not.toBeInTheDocument();
     expect(screen.queryByText('Creators')).not.toBeInTheDocument();
     expect(screen.queryByText('Post Types')).not.toBeInTheDocument();
@@ -66,23 +66,17 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
-    expect(screen.getByText('Ratings')).toBeInTheDocument();
-    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
+    expect(screen.getByText('BigTV Special')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
     expect(screen.queryByText('Movies')).not.toBeInTheDocument();
-    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.queryByText('Games')).not.toBeInTheDocument();
     expect(screen.getByText('Live TV Videos')).toBeInTheDocument();
-    expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
-    expect(screen.getByText('Epapers')).toBeInTheDocument();
-    expect(screen.getByText('Locations')).toBeInTheDocument();
-    expect(screen.getByText('Creators')).toBeInTheDocument();
-    expect(screen.getByText('Post Types')).toBeInTheDocument();
-    expect(screen.getByText('Languages')).toBeInTheDocument();
-    expect(screen.getByText('AiTags')).toBeInTheDocument();
+    expect(screen.getByText('E-Papers')).toBeInTheDocument();
     expect(screen.getByText('Ads Dynapix')).toBeInTheDocument();
     expect(screen.getByText('More Follow Menu')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByText('App Config')).toBeInTheDocument();
   });
 
   it('renders all menu items for superadmin role including Ads Dynapix and More Follow Menu', () => {
@@ -103,17 +97,11 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('Analytics')).toBeInTheDocument();
     expect(screen.getByText('Create News')).toBeInTheDocument();
-    expect(screen.getByText('Ratings')).toBeInTheDocument();
-    expect(screen.getByText('Cricket Scores')).toBeInTheDocument();
+    expect(screen.getByText('BigTV Special')).toBeInTheDocument();
     expect(screen.getByText('Reels')).toBeInTheDocument();
-    expect(screen.getByText('Categories')).toBeInTheDocument();
+    expect(screen.queryByText('Games')).not.toBeInTheDocument();
     expect(screen.getByText('Web Articles')).toBeInTheDocument();
-    expect(screen.getByText('Epapers')).toBeInTheDocument();
-    expect(screen.getByText('Locations')).toBeInTheDocument();
-    expect(screen.getByText('Creators')).toBeInTheDocument();
-    expect(screen.getByText('Post Types')).toBeInTheDocument();
-    expect(screen.getByText('Languages')).toBeInTheDocument();
-    expect(screen.getByText('AiTags')).toBeInTheDocument();
+    expect(screen.getByText('E-Papers')).toBeInTheDocument();
     expect(screen.getByText('Ads Dynapix')).toBeInTheDocument();
     expect(screen.getByText('More Follow Menu')).toBeInTheDocument();
     expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -137,14 +125,12 @@ describe('Sidebar Component - Role Based Navigation', () => {
     );
 
     expect(screen.getByText('వార్తలను సృష్టించండి')).toBeInTheDocument();
-    expect(screen.getByText('రేటింగ్స్')).toBeInTheDocument();
-    expect(screen.getByText('క్రికెట్ స్కోర్లు')).toBeInTheDocument();
+    expect(screen.getByText('బిగ్ టీవీ స్పెషల్')).toBeInTheDocument();
     expect(screen.getByText('రీల్స్')).toBeInTheDocument();
-    expect(screen.getByText('వెబ్ వ్యాసాలు')).toBeInTheDocument();
-    expect(screen.getByText('సెట్టింగులు')).toBeInTheDocument();
-    expect(screen.queryByText('విభాగాలు')).not.toBeInTheDocument();
+    expect(screen.getByText('వెబ్ కథనాలు')).toBeInTheDocument();
+    expect(screen.getByText('సెట్టింగ్‌లు')).toBeInTheDocument();
     expect(screen.queryByText('ఈ-పేపర్లు')).not.toBeInTheDocument();
-    expect(screen.queryByText('యాడ్స్ డైనాపిక్స్')).not.toBeInTheDocument();
+    expect(screen.queryByText('యాడ్స్ డైనపిక్స్')).not.toBeInTheDocument();
 
     act(() => {
       useUserStore.setState({
@@ -164,12 +150,10 @@ describe('Sidebar Component - Role Based Navigation', () => {
     );
 
     expect(screen.getByText('అనలిటిక్స్')).toBeInTheDocument();
-    expect(screen.getByText('రేటింగ్స్')).toBeInTheDocument();
-    expect(screen.getByText('క్రికెట్ స్కోర్లు')).toBeInTheDocument();
-    expect(screen.getByText('విభాగాలు')).toBeInTheDocument();
-    expect(screen.getByText('వెబ్ వ్యాసాలు')).toBeInTheDocument();
+    expect(screen.getByText('బిగ్ టీవీ స్పెషల్')).toBeInTheDocument();
+    expect(screen.getByText('వెబ్ కథనాలు')).toBeInTheDocument();
     expect(screen.getByText('ఈ-పేపర్లు')).toBeInTheDocument();
-    expect(screen.getByText('యాడ్స్ డైనాపిక్స్')).toBeInTheDocument();
+    expect(screen.getByText('యాడ్స్ డైనపిక్స్')).toBeInTheDocument();
   });
 
   it('supports Hindi (hi) language for creators and admin including Ads Dynapix', () => {
@@ -191,12 +175,10 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('एनालिटिक्स')).toBeInTheDocument();
     expect(screen.getByText('समाचार बनाएं')).toBeInTheDocument();
-    expect(screen.getByText('रेटिंग्स')).toBeInTheDocument();
-    expect(screen.getByText('क्रिकेट स्कोर')).toBeInTheDocument();
-    expect(screen.getByText('श्रेणियां')).toBeInTheDocument();
+    expect(screen.getByText('बिग टीवी स्पेशल')).toBeInTheDocument();
     expect(screen.getByText('वेब लेख')).toBeInTheDocument();
-    expect(screen.getByText('ई-पेपर')).toBeInTheDocument();
-    expect(screen.getByText('ऐड्स डायनापिक्स')).toBeInTheDocument();
+    expect(screen.getByText('ई-पेपर्स')).toBeInTheDocument();
+    expect(screen.getByText('विज्ञापन डायनापिक्स')).toBeInTheDocument();
   });
 
   it('supports Malayalam (ml) language for creators and admin including Ads Dynapix', () => {
@@ -218,9 +200,7 @@ describe('Sidebar Component - Role Based Navigation', () => {
 
     expect(screen.getByText('അനലിറ്റിക്‌സ്')).toBeInTheDocument();
     expect(screen.getByText('വാർത്ത സൃഷ്ടിക്കുക')).toBeInTheDocument();
-    expect(screen.getByText('റേറ്റിംഗുകൾ')).toBeInTheDocument();
-    expect(screen.getByText('ക്രിക്കറ്റ് സ്കോറുകൾ')).toBeInTheDocument();
-    expect(screen.getByText('വിഭാഗങ്ങൾ')).toBeInTheDocument();
+    expect(screen.getByText('ബിഗ് ടിവി സ്പെഷ്യൽ')).toBeInTheDocument();
     expect(screen.getByText('വെബ് ലേഖനങ്ങൾ')).toBeInTheDocument();
     expect(screen.getByText('ഇ-പേപ്പറുകൾ')).toBeInTheDocument();
     expect(screen.getByText('ആഡ്സ് ഡൈനാപിക്സ്')).toBeInTheDocument();
@@ -251,12 +231,8 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.queryByText('Reels')).not.toBeInTheDocument();
     expect(screen.queryByText('Movies')).not.toBeInTheDocument();
     expect(screen.queryByText('Web Articles')).not.toBeInTheDocument();
-    expect(screen.queryByText('Epapers')).not.toBeInTheDocument();
-    expect(screen.queryByText('Categories')).not.toBeInTheDocument();
-    expect(screen.queryByText('Locations')).not.toBeInTheDocument();
-    expect(screen.queryByText('Creators')).not.toBeInTheDocument();
-    expect(screen.queryByText('Post Types')).not.toBeInTheDocument();
-    expect(screen.queryByText('Languages')).not.toBeInTheDocument();
+    expect(screen.queryByText('E-Papers')).not.toBeInTheDocument();
+    expect(screen.queryByText('Games')).not.toBeInTheDocument();
     expect(screen.queryByText('Settings')).not.toBeInTheDocument();
   });
 
@@ -299,4 +275,3 @@ describe('Sidebar Component - Role Based Navigation', () => {
     expect(screen.queryByText('Movies')).not.toBeInTheDocument();
   });
 });
-

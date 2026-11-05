@@ -170,7 +170,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
     { text: t.menuWebArticles, icon: <WebIcon />, href: '/web-articles' },
     { text: t.menuEpapers, icon: <NewspaperIcon />, href: '/epapers' },
     { text: t.menuReporters, icon: <AssignmentInd />, href: '/reporters' },
-    { text: t.menuGames, icon: <SportsEsports />, href: '/games' },
     { text: t.menuAdsDynapix, icon: <CampaignIcon />, href: '/ads-dynapix' },
     { text: t.menuMoreFollow, icon: <RssFeed />, href: '/more-follow' },
   ];
@@ -325,7 +324,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeHref }) => {
           const isActive =
             normalizedPath === item.href ||
             (item.href !== '/dashboard' && normalizedPath.startsWith(item.href)) ||
-            (item.href === '/dashboard' && (normalizedPath === '/' || normalizedPath === '/dashboard'));
+            (item.href === '/dashboard' && (normalizedPath === '/' || normalizedPath === '/dashboard')) ||
+            (item.href === '/ratings' && normalizedPath.startsWith('/games'));
 
           return (
             <Link

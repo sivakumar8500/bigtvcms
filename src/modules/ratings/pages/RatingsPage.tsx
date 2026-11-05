@@ -15,8 +15,10 @@ import {
   Poll as PollIcon,
   SportsCricket,
   ConfirmationNumber,
+  SportsEsports,
 } from '@mui/icons-material';
 import { EventsTab } from '@/modules/events/components/EventsTab';
+import { GamesTab } from '@/modules/games/components/GamesTab';
 import { Header } from '@/shared/components/Header';
 import { Sidebar } from '@/shared/components/Sidebar';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -47,7 +49,7 @@ export const RatingsPage: React.FC = () => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
-      if (tabParam === 'events' || tabParam === 'cricket' || tabParam === 'polls' || tabParam === 'movie') {
+      if (tabParam === 'events' || tabParam === 'cricket' || tabParam === 'polls' || tabParam === 'movie' || tabParam === 'games') {
         setActiveTab(tabParam as any);
       }
     }
@@ -305,6 +307,20 @@ export const RatingsPage: React.FC = () => {
                   px: 2.5,
                 }}
               />
+              <Tab
+                label={t.tabGames || 'Games'}
+                value="games"
+                icon={<SportsEsports />}
+                iconPosition="start"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: activeTab === 'games' ? 700 : 500,
+                  fontSize: '0.95rem',
+                  color: isDark ? '#d0caeb' : '#5c548a',
+                  minHeight: 48,
+                  px: 2.5,
+                }}
+              />
             </Tabs>
           </Box>
 
@@ -381,6 +397,10 @@ export const RatingsPage: React.FC = () => {
 
           {activeTab === 'events' && (
             <EventsTab />
+          )}
+
+          {activeTab === 'games' && (
+            <GamesTab />
           )}
         </Box>
       </Box>

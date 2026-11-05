@@ -155,10 +155,12 @@ export function useRatingsController() {
   const fetchCricket = useCallback(async () => {
     setIsCricketLoading(true);
     try {
-      await Promise.all([
+      const [legacyMatches] = await Promise.all([
+        RatingsRepository.getCricketMatches(),
         fetchLiveMatches(),
         fetchRecentMatches(),
       ]);
+      setCricketMatches(legacyMatches || []);
     } catch {
       showSnackbar('Failed to load cricket feeds', 'error');
     } finally {

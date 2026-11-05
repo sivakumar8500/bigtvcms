@@ -1,7 +1,15 @@
 'use client';
 
-import { GamesPage } from '@/modules/games/pages/GamesPage';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader } from '@/shared/components/Loader';
 
 export default function AppGamesPage() {
-  return <GamesPage />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/ratings?tab=games');
+  }, [router]);
+
+  return <Loader />;
 }

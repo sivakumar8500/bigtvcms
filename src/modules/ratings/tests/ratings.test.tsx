@@ -12,6 +12,64 @@ jest.mock('@/core/api/api-client', () => ({
     put: jest.fn(),
     delete: jest.fn(),
   },
+  cricketApiClient: {
+    get: jest.fn().mockImplementation((url: string) => {
+      if (url.includes('/matches/live')) {
+        return Promise.resolve({
+          typeMatches: [
+            {
+              matchType: 'International',
+              seriesMatches: [
+                {
+                  seriesAdWrapper: {
+                    seriesId: 101,
+                    seriesName: 'Tour of India',
+                    matches: [
+                      {
+                        matchInfo: {
+                          matchId: 991,
+                          seriesId: 101,
+                          seriesName: 'Tour of India',
+                          matchDesc: '1st ODI',
+                          matchFormat: 'ODI',
+                          startDate: '1700000000000',
+                          endDate: '1700030000000',
+                          state: 'In Progress',
+                          status: 'IND 240/3',
+                          team1: { teamId: 1, teamName: 'India', teamSName: 'IND' },
+                          team2: { teamId: 2, teamName: 'Australia', teamSName: 'AUS' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      }
+      if (url.includes('/matches/recent')) {
+        return Promise.resolve({
+          matches: [
+            {
+              id: 'rec-1',
+              matchId: 991,
+              title: 'IND vs AUS',
+              status: 'live',
+              isPinned: false,
+              seriesName: 'Tour of India',
+              matchDesc: '1st ODI',
+              pravasaStatus: 'published',
+            },
+          ],
+        });
+      }
+      return Promise.resolve({});
+    }),
+    post: jest.fn().mockResolvedValue({ success: true, isPinned: true }),
+    put: jest.fn().mockResolvedValue({ success: true }),
+    delete: jest.fn().mockResolvedValue({ success: true }),
+  },
 }));
 
 describe('Ratings Module - Repository & Controller Tests', () => {
@@ -28,6 +86,8 @@ describe('Ratings Module - Repository & Controller Tests', () => {
         expect(ratingsTranslations[lang].tabMovie).toBeDefined();
         expect(ratingsTranslations[lang].tabPolls).toBeDefined();
         expect(ratingsTranslations[lang].tabCricket).toBeDefined();
+        expect(ratingsTranslations[lang].tabEvents).toBeDefined();
+        expect(ratingsTranslations[lang].tabGames).toBeDefined();
       });
     });
 
@@ -317,7 +377,7 @@ describe('Ratings Module - Repository & Controller Tests', () => {
       expect(result.current.movies.length).toBeGreaterThan(0);
     });
 
-    it('switches between movie, polls, and cricket tabs', async () => {
+    it('switches between movie, polls, cricket, events, and games tabs', async () => {
       const { result } = renderHook(() => useRatingsController());
 
       act(() => {
@@ -329,6 +389,16 @@ describe('Ratings Module - Repository & Controller Tests', () => {
         result.current.setActiveTab('cricket');
       });
       expect(result.current.activeTab).toBe('cricket');
+
+      act(() => {
+        result.current.setActiveTab('events');
+      });
+      expect(result.current.activeTab).toBe('events');
+
+      act(() => {
+        result.current.setActiveTab('games');
+      });
+      expect(result.current.activeTab).toBe('games');
     });
 
     it('handles movie review modal and save workflow', async () => {
