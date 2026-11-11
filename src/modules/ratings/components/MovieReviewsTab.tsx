@@ -28,6 +28,8 @@ import {
   MovieFilter,
   CheckCircle,
   Drafts,
+  SmartDisplay,
+  VideoLibrary,
 } from '@mui/icons-material';
 import { MovieReviewItem } from '../domain/ratings.types';
 import { useLanguageStore } from '@/core/storage/language-store';
@@ -389,7 +391,7 @@ export const MovieReviewsTab: React.FC<MovieReviewsTabProps> = ({
 
                   {/* Title & Content */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 0.5 }}>
                       <Chip
                         label={movie.language_code.toUpperCase()}
                         size="small"
@@ -406,6 +408,40 @@ export const MovieReviewsTab: React.FC<MovieReviewsTabProps> = ({
                         color={movie.draft ? 'warning' : 'success'}
                         sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }}
                       />
+                      {movie.video_url && (
+                        <Chip
+                          icon={<SmartDisplay sx={{ color: '#ef4444 !important', fontSize: '0.85rem' }} />}
+                          label={t.btnWatchTrailer}
+                          size="small"
+                          component="a"
+                          href={movie.video_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          clickable
+                          variant="outlined"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            borderColor: 'rgba(239, 68, 68, 0.4)',
+                            color: isDark ? '#fca5a5' : '#dc2626',
+                          }}
+                        />
+                      )}
+                      {movie.gallery && movie.gallery.length > 0 && (
+                        <Chip
+                          icon={<VideoLibrary sx={{ fontSize: '0.8rem !important' }} />}
+                          label={`${movie.gallery.length} ${t.galleryCountBadge}`}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            backgroundColor: isDark ? 'rgba(37,99,235,0.2)' : 'rgba(37,99,235,0.1)',
+                            color: '#3b82f6',
+                          }}
+                        />
+                      )}
                     </Box>
 
                     <Typography

@@ -136,7 +136,7 @@ describe('Ratings Module - Repository & Controller Tests', () => {
       expect(result[0].title).toContain('Devara');
     });
 
-    it('creates movie review via API and updates list', async () => {
+    it('creates movie review via API with video_url and gallery and updates list', async () => {
       (apiClient.post as jest.Mock).mockResolvedValueOnce({ id: 3001 });
 
       const newReview = await RatingsRepository.createMovieReview({
@@ -147,6 +147,11 @@ describe('Ratings Module - Repository & Controller Tests', () => {
         language_code: 'te',
         category_ids: [5],
         image_url: 'https://example.com/poster.jpg',
+        video_url: 'https://www.youtube.com/watch?v=sample123',
+        gallery: [
+          { Url: 'https://example.com/still1.jpg' },
+          { Url: 'https://example.com/still2.jpg' },
+        ],
         chotarating: '4.5/5',
         externalRatings: [{ platform_name: 'IMDb', platform_rating: '8.5/10' }],
         draft: false,
@@ -154,6 +159,21 @@ describe('Ratings Module - Repository & Controller Tests', () => {
 
       expect(newReview.id).toBe(3001);
       expect(newReview.title).toBe('New Sci-Fi Movie');
+      expect(newReview.video_url).toBe('https://www.youtube.com/watch?v=sample123');
+      expect(newReview.gallery).toEqual([
+        { Url: 'https://example.com/still1.jpg' },
+        { Url: 'https://example.com/still2.jpg' },
+      ]);
+      expect(apiClient.post).toHaveBeenCalledWith(
+        '/news-posts',
+        expect.objectContaining({
+          video_url: 'https://www.youtube.com/watch?v=sample123',
+          gallery: [
+            { Url: 'https://example.com/still1.jpg' },
+            { Url: 'https://example.com/still2.jpg' },
+          ],
+        })
+      );
     });
 
     it('creates movie review with fallback ID when API fails', async () => {
@@ -176,16 +196,27 @@ describe('Ratings Module - Repository & Controller Tests', () => {
       expect(newReview.title).toBe('Fallback Movie Review');
     });
 
-    it('updates movie review', async () => {
+    it('updates movie review with video_url and gallery', async () => {
       (apiClient.put as jest.Mock).mockResolvedValueOnce({ success: true });
 
       const updated = await RatingsRepository.updateMovieReview(1051, {
         title: 'Devara Part 1 - Updated Title',
         chotarating: '4.0/5',
+        video_url: 'https://www.youtube.com/watch?v=updated_trailer',
+        gallery: [{ Url: 'https://example.com/updated_still.jpg' }],
       });
 
       expect(updated.title).toBe('Devara Part 1 - Updated Title');
       expect(updated.chotarating).toBe('4.0/5');
+      expect(updated.video_url).toBe('https://www.youtube.com/watch?v=updated_trailer');
+      expect(updated.gallery).toEqual([{ Url: 'https://example.com/updated_still.jpg' }]);
+      expect(apiClient.put).toHaveBeenCalledWith(
+        '/news-posts/1051',
+        expect.objectContaining({
+          video_url: 'https://www.youtube.com/watch?v=updated_trailer',
+          gallery: [{ Url: 'https://example.com/updated_still.jpg' }],
+        })
+      );
     });
 
     it('deletes movie review', async () => {
@@ -208,6 +239,14 @@ describe('Ratings Module - Repository & Controller Tests', () => {
       const details = await RatingsRepository.getMovieReviewDetails(1052);
       expect(details.overall_rating).toBe(4.5);
       expect(details.total_reviews).toBe(60);
+    });
+
+    it('uploads media file via uploadMediaFile', async () => {
+      const mockFile = new File(['content'], 'trailer.mp4', { type: 'video/mp4' });
+      jest.spyOn(RatingsRepository, 'uploadImage').mockResolvedValueOnce('https://example.com/trailer.mp4');
+
+      const url = await RatingsRepository.uploadMediaFile(mockFile);
+      expect(url).toBe('https://example.com/trailer.mp4');
     });
   });
 
@@ -362,6 +401,21 @@ describe('Ratings Module - Repository & Controller Tests', () => {
 
       const toggledBack = await RatingsRepository.togglePinMatch(2);
       expect(toggledBack.isPinned).toBe(false);
+    });
+
+    it('handles togglePinMatch and updateCricketMatch with non-existent id', async () => {
+      await expect(RatingsRepository.togglePinMatch(99999)).rejects.toThrow('Match not found');
+
+      const updated = await RatingsRepository.updateCricketMatch(99999, { title: 'Unknown' });
+      expect(updated.id).toBe(99999);
+    });
+
+    it('handles getMatchLiveScore error gracefully', async () => {
+      const { cricketApiClient } = jest.requireMock('@/core/api/api-client');
+      cricketApiClient.get.mockRejectedValueOnce(new Error('Network error'));
+
+      const res = await RatingsRepository.getMatchLiveScore('err-id');
+      expect(res).toBeNull();
     });
   });
 

@@ -19,17 +19,19 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
-import { Close, AddCircleOutline, DeleteOutline, StarRate } from '@mui/icons-material';
+import { Close, AddCircleOutline, DeleteOutline, StarRate, SmartDisplay } from '@mui/icons-material';
 import {
   MovieReviewItem,
   CreateMovieReviewDto,
   UpdateMovieReviewDto,
   PlatformRatingItem,
+  MovieReviewGalleryItem,
 } from '../domain/ratings.types';
 import { useLanguageStore } from '@/core/storage/language-store';
 import { ratingsTranslations } from '../translations';
 import { useAppTheme } from '@/shared/providers/ThemeProvider';
 import { RatingsImageUploader } from './RatingsImageUploader';
+import { MovieReviewGalleryUploader } from './MovieReviewGalleryUploader';
 
 interface MovieReviewModalProps {
   open: boolean;
@@ -55,6 +57,8 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
   const [content, setContent] = useState('');
   const [languageCode, setLanguageCode] = useState('te');
   const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [gallery, setGallery] = useState<MovieReviewGalleryItem[]>([]);
   const [chotarating, setChotarating] = useState('3.5/5');
   const [externalRatings, setExternalRatings] = useState<PlatformRatingItem[]>([
     { platform_name: 'IMDb', platform_rating: '7.8/10' },
@@ -69,6 +73,18 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
       setContent(movie.content || '');
       setLanguageCode(movie.language_code || 'te');
       setImageUrl(movie.image_url || '');
+      setVideoUrl(movie.video_url || '');
+      setGallery(
+        movie.gallery && Array.isArray(movie.gallery)
+          ? movie.gallery
+              .map((g: any) =>
+                typeof g === 'string'
+                  ? { Url: g }
+                  : { Url: g?.Url || g?.url || '' }
+              )
+              .filter((g: any) => Boolean(g.Url))
+          : []
+      );
       setChotarating(movie.chotarating || '3.5/5');
       setExternalRatings(
         movie.externalRatings && movie.externalRatings.length > 0
@@ -81,6 +97,8 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
       setContent('');
       setLanguageCode('te');
       setImageUrl('');
+      setVideoUrl('');
+      setGallery([]);
       setChotarating('3.5/5');
       setExternalRatings([
         { platform_name: 'IMDb', platform_rating: '7.8/10' },
@@ -122,6 +140,8 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
       (r) => r.platform_name.trim() && r.platform_rating.trim()
     );
 
+    const cleanedGallery = gallery.filter((item) => item.Url && item.Url.trim());
+
     if (movie) {
       onSave({
         id: movie.id,
@@ -132,6 +152,8 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
         language_code: languageCode,
         category_ids: [5],
         image_url: imageUrl.trim(),
+        video_url: videoUrl.trim(),
+        gallery: cleanedGallery,
         chotarating: chotarating.trim(),
         externalRatings: cleanedExternal,
         draft,
@@ -145,6 +167,8 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
         language_code: languageCode,
         category_ids: [5],
         image_url: imageUrl.trim(),
+        video_url: videoUrl.trim(),
+        gallery: cleanedGallery,
         chotarating: chotarating.trim(),
         externalRatings: cleanedExternal,
         draft,
@@ -274,6 +298,37 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
             value={imageUrl}
             onChange={setImageUrl}
             placeholder={t.placeholderPosterUrl}
+          />
+
+          {/* Trailer Video URL */}
+          <TextField
+            label={t.labelTrailerVideoUrl}
+            placeholder={t.placeholderTrailerVideoUrl}
+            helperText={t.helperTrailerVideoUrl}
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              startAdornment: (
+                <SmartDisplay
+                  sx={{
+                    mr: 1,
+                    color: '#ef4444',
+                    fontSize: '1.3rem',
+                  }}
+                />
+              ),
+            }}
+          />
+
+          <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />
+
+          {/* Gallery Videos & Clips Uploader */}
+          <MovieReviewGalleryUploader
+            gallery={gallery}
+            onChange={setGallery}
+            disabled={isSaving}
           />
 
           <Divider sx={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)' }} />

@@ -4,6 +4,7 @@ import {
   MovieReviewItem,
   CreateMovieReviewDto,
   UpdateMovieReviewDto,
+  MovieReviewGalleryItem,
   PollItem,
   CreatePollDto,
   UpdatePollDto,
@@ -27,6 +28,11 @@ const INITIAL_MOCK_MOVIES: MovieReviewItem[] = [
     language_code: 'te',
     category_ids: [5],
     image_url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80',
+    video_url: 'https://www.youtube.com/watch?v=0k1JzU0XQzE',
+    gallery: [
+      { Url: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80' },
+      { Url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80' },
+    ],
     chotarating: '3.5/5',
     externalRatings: [
       { platform_name: 'IMDb', platform_rating: '7.8/10' },
@@ -49,6 +55,10 @@ const INITIAL_MOCK_MOVIES: MovieReviewItem[] = [
     language_code: 'te',
     category_ids: [5],
     image_url: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=800&q=80',
+    video_url: 'https://www.youtube.com/watch?v=g3JUbgyljio',
+    gallery: [
+      { Url: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=800&q=80' },
+    ],
     chotarating: '4.0/5',
     externalRatings: [
       { platform_name: 'IMDb', platform_rating: '8.4/10' },
@@ -71,6 +81,10 @@ const INITIAL_MOCK_MOVIES: MovieReviewItem[] = [
     language_code: 'en',
     category_ids: [5],
     image_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80',
+    video_url: 'https://www.youtube.com/watch?v=kQDd1AhGIHk',
+    gallery: [
+      { Url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80' },
+    ],
     chotarating: '4.2/5',
     externalRatings: [
       { platform_name: 'IMDb', platform_rating: '8.1/10' },
@@ -292,6 +306,16 @@ export class RatingsRepository {
             language_code: p.language_code || p.lan || 'te',
             category_ids: p.category_ids || [],
             image_url: p.image_url || '',
+            video_url: p.video_url || p.videoUrl || '',
+            gallery: Array.isArray(p.gallery)
+              ? p.gallery
+                  .map((g: any) =>
+                    typeof g === 'string'
+                      ? { Url: g }
+                      : { Url: g?.Url || g?.url || '' }
+                  )
+                  .filter((g: any) => Boolean(g.Url))
+              : [],
             chotarating: p.chotarating || p.chotaMeter || '3.5/5',
             externalRatings: Array.isArray(p.externalRatings) ? p.externalRatings : [],
             draft: Boolean(p.draft),
@@ -342,6 +366,8 @@ export class RatingsRepository {
       location_ids: [19],
       isStickyPost: false,
       image_url: dto.image_url || null,
+      video_url: dto.video_url || '',
+      gallery: dto.gallery || [],
       chotarating: dto.chotarating || '3.5/5',
       externalRatings: dto.externalRatings || [],
       draft: Boolean(dto.draft),
@@ -391,6 +417,8 @@ export class RatingsRepository {
       location_ids: [19],
       isStickyPost: false,
       image_url: dto.image_url || null,
+      video_url: dto.video_url !== undefined ? dto.video_url : '',
+      gallery: dto.gallery !== undefined ? dto.gallery : [],
       chotarating: dto.chotarating,
       externalRatings: dto.externalRatings,
       draft: dto.draft !== undefined ? Boolean(dto.draft) : false,
@@ -779,5 +807,9 @@ export class RatingsRepository {
       throw new Error(response.data?.message || 'File upload failed');
     }
     return url;
+  }
+
+  static async uploadMediaFile(file: File): Promise<string> {
+    return this.uploadImage(file);
   }
 }

@@ -5,6 +5,10 @@ export interface PlatformRatingItem {
   platform_rating: string;
 }
 
+export interface MovieReviewGalleryItem {
+  Url: string;
+}
+
 export interface MovieReviewItem {
   id: number;
   title: string;
@@ -14,6 +18,8 @@ export interface MovieReviewItem {
   language_code: string;
   category_ids: number[];
   image_url: string;
+  video_url?: string;
+  gallery?: MovieReviewGalleryItem[];
   chotarating: string;
   externalRatings: PlatformRatingItem[];
   draft: boolean;
@@ -33,6 +39,8 @@ export interface CreateMovieReviewDto {
   language_code: string;
   category_ids: number[];
   image_url: string;
+  video_url?: string;
+  gallery?: MovieReviewGalleryItem[];
   chotarating: string;
   externalRatings: PlatformRatingItem[];
   draft: boolean;
