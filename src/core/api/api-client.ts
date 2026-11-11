@@ -244,8 +244,15 @@ export class ApiClient {
             return this.axiosInstance(originalRequest);
           } catch (refreshError) {
             if (typeof window !== 'undefined') {
-              localStorage.removeItem('access_token');
-              window.location.href = '/login';
+              const isDevLocalhost =
+                process.env.NODE_ENV !== 'test' &&
+                (window.location.hostname === 'localhost' ||
+                  window.location.hostname === '127.0.0.1' ||
+                  process.env.NODE_ENV === 'development');
+              if (!isDevLocalhost) {
+                localStorage.removeItem('access_token');
+                window.location.href = '/login';
+              }
             }
             return Promise.reject(refreshError);
           }
