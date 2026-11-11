@@ -16,21 +16,7 @@ export default function RootPage() {
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
     setCurrentPath(path);
 
-    const isDevLocalhost =
-      typeof window !== 'undefined' &&
-      process.env.NODE_ENV !== 'test' &&
-      (window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1' ||
-        process.env.NODE_ENV === 'development');
-
-    let token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-
-    if (!token && isDevLocalhost) {
-      token = 'dev-bypass-token';
-      try {
-        localStorage.setItem('access_token', 'dev-bypass-token');
-      } catch {}
-    }
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
     if (token) {
       setHasToken(true);

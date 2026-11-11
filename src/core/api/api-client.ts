@@ -244,15 +244,8 @@ export class ApiClient {
             return this.axiosInstance(originalRequest);
           } catch (refreshError) {
             if (typeof window !== 'undefined') {
-              const isDevLocalhost =
-                process.env.NODE_ENV !== 'test' &&
-                (window.location.hostname === 'localhost' ||
-                  window.location.hostname === '127.0.0.1' ||
-                  process.env.NODE_ENV === 'development');
-              if (!isDevLocalhost) {
-                localStorage.removeItem('access_token');
-                window.location.href = '/login';
-              }
+              localStorage.removeItem('access_token');
+              window.location.href = '/login';
             }
             return Promise.reject(refreshError);
           }
@@ -337,7 +330,7 @@ export const apiClient = new ApiClient(
   (
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'https://devapi.chotanews.com'
+    'https://api.chotanews.com'
   ).replace(/\/$/, '')
 );
 
