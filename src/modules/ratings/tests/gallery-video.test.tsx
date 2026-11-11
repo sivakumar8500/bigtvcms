@@ -53,7 +53,7 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByText(/0 Gallery/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\/6 \(Min 3 required\)/i)).toBeInTheDocument();
       expect(screen.getByText(/No gallery videos or images added yet/i)).toBeInTheDocument();
     });
 
@@ -69,7 +69,7 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByText(/2 Gallery/i)).toBeInTheDocument();
+      expect(screen.getByText(/2\/6 \(Min 3 required\)/i)).toBeInTheDocument();
       expect(screen.getByText('https://example.com/trailer1.mp4')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still1.jpg')).toBeInTheDocument();
       expect(screen.getByText('Video')).toBeInTheDocument();
@@ -197,10 +197,10 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
       expect(screen.getByDisplayValue('https://www.youtube.com/watch?v=trailer999')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still1.jpg')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still2.jpg')).toBeInTheDocument();
-      expect(screen.getByText(/2 Gallery/i)).toBeInTheDocument();
+      expect(screen.getByText(/2\/6 \(Min 3 required\)/i)).toBeInTheDocument();
     });
 
-    it('submits movie review with video_url and gallery formatted correctly', () => {
+    it('validates mandatory poster, trailer, and gallery items (min 3, max 6)', () => {
       const handleSave = jest.fn();
 
       render(
@@ -215,35 +215,85 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         </ThemeProvider>
       );
 
-      // Fill in title
       const titleInput = screen.getByPlaceholderText(/Devara Movie Review/i);
       fireEvent.change(titleInput, { target: { value: 'Game Changer Review' } });
 
-      // Fill in trailer video URL
+      const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+
+      // 1. Missing poster image
+      fireEvent.click(saveBtn);
+      expect(screen.getByText(/Poster Image URL is required/i)).toBeInTheDocument();
+
+      // Provide poster
+      const posterInput = screen.getByPlaceholderText(/https:\/\/pub-r2\.bigtvlive\.com\/movies/i);
+      fireEvent.change(posterInput, { target: { value: 'https://example.com/poster.jpg' } });
+
+      // 2. Missing trailer video URL
+      fireEvent.click(saveBtn);
+      expect(screen.getByText(/Trailer Video URL is required/i)).toBeInTheDocument();
+
+      // Provide trailer
       const videoInput = screen.getByPlaceholderText(/https:\/\/www.youtube.com\/watch\?v=\.\.\./i);
       fireEvent.change(videoInput, {
         target: { value: 'https://www.youtube.com/watch?v=gc_trailer_1' },
       });
 
-      // Add a gallery media item via direct URL
+      // 3. Less than 3 gallery items
+      fireEvent.click(saveBtn);
+      expect(screen.getByText(/Please add at least 3 gallery items \(Min 3 • Max 6\)/i)).toBeInTheDocument();
+
+      // Add 3 gallery items
       const galleryInput = screen.getByPlaceholderText(/Enter video or image URL/i);
       const addGalleryBtn = screen.getByRole('button', { name: /Add Media URL/i });
-      fireEvent.change(galleryInput, {
-        target: { value: 'https://pub-r2.bigtvlive.com/movies/still1.jpg' },
-      });
+
+      fireEvent.change(galleryInput, { target: { value: 'https://example.com/still1.jpg' } });
       fireEvent.click(addGalleryBtn);
 
-      // Submit form
-      const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+      fireEvent.change(galleryInput, { target: { value: 'https://example.com/still2.jpg' } });
+      fireEvent.click(addGalleryBtn);
+
+      fireEvent.change(galleryInput, { target: { value: 'https://example.com/still3.jpg' } });
+      fireEvent.click(addGalleryBtn);
+
+      // Now save with 3 gallery items
       fireEvent.click(saveBtn);
 
       expect(handleSave).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Game Changer Review',
+          image_url: 'https://example.com/poster.jpg',
           video_url: 'https://www.youtube.com/watch?v=gc_trailer_1',
-          gallery: [{ Url: 'https://pub-r2.bigtvlive.com/movies/still1.jpg' }],
+          gallery: [
+            { Url: 'https://example.com/still1.jpg' },
+            { Url: 'https://example.com/still2.jpg' },
+            { Url: 'https://example.com/still3.jpg' },
+          ],
         })
       );
+    });
+
+    it('enforces maximum 6 items limit in gallery uploader', () => {
+      const handleChange = jest.fn();
+      const sixItems = [
+        { Url: 'https://example.com/1.jpg' },
+        { Url: 'https://example.com/2.jpg' },
+        { Url: 'https://example.com/3.jpg' },
+        { Url: 'https://example.com/4.jpg' },
+        { Url: 'https://example.com/5.jpg' },
+        { Url: 'https://example.com/6.jpg' },
+      ];
+
+      render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={sixItems} onChange={handleChange} />
+        </ThemeProvider>
+      );
+
+      expect(screen.getByText(/6\/6 \(Max\)/i)).toBeInTheDocument();
+
+      // Add button should be disabled when full
+      const addBtn = screen.getByRole('button', { name: /Add Media URL/i });
+      expect(addBtn).toBeDisabled();
     });
   });
 

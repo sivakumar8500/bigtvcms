@@ -64,9 +64,20 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return;
 
+    if (gallery.length >= 6) {
+      setErrorMsg(t.errGalleryMax);
+      return;
+    }
+
+    const availableSlots = 6 - gallery.length;
+    const filesToUpload = fileArray.slice(0, availableSlots);
+    if (fileArray.length > availableSlots) {
+      setErrorMsg(t.errGalleryMax);
+    }
+
     // Filter valid files
     const validFiles: File[] = [];
-    for (const file of fileArray) {
+    for (const file of filesToUpload) {
       if (
         !file.type.startsWith('video/') &&
         !file.type.startsWith('image/') &&
@@ -83,7 +94,9 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
     }
 
     setIsUploading(true);
-    setErrorMsg(null);
+    if (fileArray.length <= availableSlots) {
+      setErrorMsg(null);
+    }
     setSuccessMsg(null);
 
     const uploadedItems: MovieReviewGalleryItem[] = [];
@@ -124,7 +137,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!disabled && !isUploading) {
+    if (!disabled && !isUploading && gallery.length < 6) {
       setIsDragOver(true);
     }
   };
@@ -139,7 +152,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-    if (disabled || isUploading) return;
+    if (disabled || isUploading || gallery.length >= 6) return;
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFilesUpload(e.dataTransfer.files);
@@ -150,21 +163,31 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
     const trimmed = directUrl.trim();
     if (!trimmed) return;
 
+    if (gallery.length >= 6) {
+      setErrorMsg(t.errGalleryMax);
+      return;
+    }
+
     onChange([...gallery, { Url: trimmed }]);
     setDirectUrl('');
+    setErrorMsg(null);
   };
 
   const handleRemoveItem = (index: number) => {
     const updated = gallery.filter((_, idx) => idx !== index);
     onChange(updated);
+    setErrorMsg(null);
   };
+
+  const isFull = gallery.length >= 6;
+  const isSatisfied = gallery.length >= 3 && gallery.length <= 6;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
       {/* Header with Title & Badge */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <VideoLibrary sx={{ color: '#2563eb', fontSize: '1.25rem' }} />
+          <VideoLibrary sx={{ color: isSatisfied ? '#10b981' : '#f59e0b', fontSize: '1.25rem' }} />
           <Typography
             variant="body2"
             sx={{
@@ -173,20 +196,26 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
               fontSize: '0.9rem',
             }}
           >
-            {t.labelGalleryVideos}
+            {t.labelGalleryMandatory || t.labelGalleryVideos}
           </Typography>
         </Box>
         <Chip
-          label={`${gallery.length} ${t.galleryCountBadge}`}
+          label={
+            gallery.length < 3
+              ? `${gallery.length}/6 (Min 3 required)`
+              : isFull
+              ? '6/6 (Max)'
+              : `${gallery.length}/6`
+          }
           size="small"
-          color={gallery.length > 0 ? 'primary' : 'default'}
-          sx={{ height: 22, fontSize: '0.72rem', fontWeight: 600 }}
+          color={gallery.length < 3 ? 'warning' : isFull ? 'primary' : 'success'}
+          sx={{ height: 22, fontSize: '0.72rem', fontWeight: 700 }}
         />
       </Box>
 
       {/* Helper text */}
       <Typography variant="caption" sx={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', mt: -1 }}>
-        {t.helperGalleryVideos}
+        {t.hintGalleryMinMax}
       </Typography>
 
       {errorMsg && (
@@ -209,7 +238,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
         accept="video/mp4,video/webm,video/quicktime,video/x-matroska,image/jpeg,image/png,image/webp,image/svg+xml,image/gif"
         multiple
         style={{ display: 'none' }}
-        disabled={disabled || isUploading}
+        disabled={disabled || isUploading || isFull}
       />
 
       {/* Drag & Drop Multi-file Upload Zone */}
@@ -218,7 +247,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => {
-          if (!disabled && !isUploading && fileInputRef.current) {
+          if (!disabled && !isUploading && !isFull && fileInputRef.current) {
             fileInputRef.current.click();
           }
         }}
@@ -232,7 +261,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
           borderRadius: '12px',
           p: { xs: 2, sm: 2.5 },
           textAlign: 'center',
-          cursor: disabled || isUploading ? 'not-allowed' : 'pointer',
+          cursor: disabled || isUploading || isFull ? 'not-allowed' : 'pointer',
           backgroundColor: isDragOver
             ? isDark
               ? 'rgba(37, 99, 235, 0.15)'
@@ -242,9 +271,9 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
             : 'rgba(0, 0, 0, 0.02)',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
-            borderColor: disabled || isUploading ? undefined : '#3b82f6',
+            borderColor: disabled || isUploading || isFull ? undefined : '#3b82f6',
             backgroundColor:
-              disabled || isUploading
+              disabled || isUploading || isFull
                 ? undefined
                 : isDark
                 ? 'rgba(255, 255, 255, 0.04)'
@@ -288,7 +317,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
                 fontSize: '0.9rem',
               }}
             >
-              {t.dragDropGalleryFiles}
+              {isFull ? (t.errGalleryMax || 'Maximum 6 gallery items allowed') : t.dragDropGalleryFiles}
             </Typography>
             <Typography
               variant="caption"
@@ -317,7 +346,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
             }
           }}
           fullWidth
-          disabled={disabled || isUploading}
+          disabled={disabled || isUploading || isFull}
           InputProps={{
             startAdornment: (
               <AddLink
@@ -334,7 +363,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
           variant="outlined"
           size="small"
           onClick={handleAddDirectUrl}
-          disabled={!directUrl.trim() || disabled || isUploading}
+          disabled={!directUrl.trim() || disabled || isUploading || isFull}
           sx={{
             textTransform: 'none',
             whiteSpace: 'nowrap',

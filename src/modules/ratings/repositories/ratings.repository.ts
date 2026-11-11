@@ -787,8 +787,25 @@ export class RatingsRepository {
   // IMAGE UPLOAD API
   // ----------------------------------------------------
   static async uploadImage(file: File): Promise<string> {
+    try {
+      const { UploadService } = await import('@/modules/media/services/upload.service');
+      const url = await UploadService.uploadImage(file);
+      if (url) return url;
+    } catch (uploadServiceErr) {
+      console.warn('UploadService.uploadImage failed, trying fallback endpoint:', uploadServiceErr);
+    }
+
     const formData = new FormData();
     formData.append('file', file);
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const headers: Record<string, string> = {
+      'Content-Type': 'multipart/form-data',
+      accept: '*/*',
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
 
     const response = await axios.post<{
       success: boolean;
@@ -796,10 +813,7 @@ export class RatingsRepository {
       data?: { url: string; id?: string; fileName?: string };
       url?: string;
     }>('https://api.pravasamedia.com/api/v1/files/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        accept: '*/*',
-      },
+      headers,
     });
 
     const url = response.data?.data?.url || response.data?.url;
@@ -810,6 +824,23 @@ export class RatingsRepository {
   }
 
   static async uploadMediaFile(file: File): Promise<string> {
+    if (file.type.startsWith('image/') || file.name.match(/\.(jpg|jpeg|png|webp|svg|gif)$/i)) {
+      return this.uploadImage(file);
+    }
+
+    try {
+      const { eventsApiClient } = await import('@/core/api/api-client');
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await eventsApiClient.post<any>('/reels/upload-video', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const videoUrl = res?.data?.url || res?.url;
+      if (videoUrl) return videoUrl;
+    } catch (videoUploadErr) {
+      console.warn('eventsApiClient video upload failed, trying fallback:', videoUploadErr);
+    }
+
     return this.uploadImage(file);
   }
 }

@@ -131,16 +131,32 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
       setErrorMsg(t.labelMovieTitle + ' is required');
       return;
     }
+    if (!imageUrl.trim()) {
+      setErrorMsg(t.errPosterRequired || t.labelPosterUrl + ' is required');
+      return;
+    }
+    if (!videoUrl.trim()) {
+      setErrorMsg(t.errTrailerRequired || 'Trailer Video URL is required');
+      return;
+    }
     if (!chotarating.trim()) {
       setErrorMsg(t.labelChotaRating + ' is required');
+      return;
+    }
+
+    const cleanedGallery = gallery.filter((item) => item.Url && item.Url.trim());
+    if (cleanedGallery.length < 3) {
+      setErrorMsg(t.errGalleryMin || 'Please add at least 3 gallery items (Min 3 • Max 6)');
+      return;
+    }
+    if (cleanedGallery.length > 6) {
+      setErrorMsg(t.errGalleryMax || 'Maximum 6 gallery items allowed');
       return;
     }
 
     const cleanedExternal = externalRatings.filter(
       (r) => r.platform_name.trim() && r.platform_rating.trim()
     );
-
-    const cleanedGallery = gallery.filter((item) => item.Url && item.Url.trim());
 
     if (movie) {
       onSave({
@@ -191,7 +207,7 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
         },
       }}
     >
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <DialogTitle
           sx={{
             display: 'flex',
@@ -302,12 +318,13 @@ export const MovieReviewModal: React.FC<MovieReviewModalProps> = ({
 
           {/* Trailer Video URL */}
           <TextField
-            label={t.labelTrailerVideoUrl}
+            label={t.labelTrailerVideoUrlMandatory}
             placeholder={t.placeholderTrailerVideoUrl}
             helperText={t.helperTrailerVideoUrl}
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
             fullWidth
+            required
             InputLabelProps={{ shrink: true }}
             InputProps={{
               startAdornment: (
