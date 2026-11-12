@@ -86,6 +86,12 @@ export class ApiClient {
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+
+        // When sending FormData, delete Content-Type so Axios/browser sets multipart boundary correctly
+        if (typeof FormData !== 'undefined' && config.data instanceof FormData && config.headers) {
+          delete config.headers['Content-Type'];
+          delete config.headers['content-type'];
+        }
         
         // Append device_id and language key header to every outgoing API request
         if (typeof window !== 'undefined') {

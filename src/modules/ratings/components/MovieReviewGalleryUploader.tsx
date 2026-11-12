@@ -87,11 +87,13 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
         return;
       }
       if (file.size > 50 * 1024 * 1024) {
-        setErrorMsg('Each file must be less than 50MB');
+        setErrorMsg(t.errFileSize50MB || 'Each file must be less than 50MB');
         return;
       }
       validFiles.push(file);
     }
+
+    if (validFiles.length === 0) return;
 
     setIsUploading(true);
     if (fileArray.length <= availableSlots) {
@@ -100,14 +102,20 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
     setSuccessMsg(null);
 
     const uploadedItems: MovieReviewGalleryItem[] = [];
+    const failedFiles: string[] = [];
 
     try {
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
         setUploadProgressText(`${t.uploadingGalleryFiles} (${i + 1}/${validFiles.length})`);
-        const url = await RatingsRepository.uploadMediaFile(file);
-        if (url) {
-          uploadedItems.push({ Url: url });
+        try {
+          const url = await RatingsRepository.uploadMediaFile(file);
+          if (url) {
+            uploadedItems.push({ Url: url });
+          }
+        } catch (fileErr) {
+          console.error(`Failed to upload ${file.name}:`, fileErr);
+          failedFiles.push(file.name);
         }
       }
 
@@ -115,6 +123,10 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
         onChange([...gallery, ...uploadedItems]);
         setSuccessMsg(t.uploadSuccess || 'Files uploaded successfully!');
         setTimeout(() => setSuccessMsg(null), 3500);
+      }
+
+      if (failedFiles.length > 0) {
+        setErrorMsg(`${t.uploadFailed || 'Failed to upload'}: ${failedFiles.join(', ')}`);
       }
     } catch (err: any) {
       console.error('Gallery file upload failed:', err);
@@ -180,14 +192,13 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
   };
 
   const isFull = gallery.length >= 6;
-  const isSatisfied = gallery.length >= 3 && gallery.length <= 6;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
       {/* Header with Title & Badge */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <VideoLibrary sx={{ color: isSatisfied ? '#10b981' : '#f59e0b', fontSize: '1.25rem' }} />
+          <VideoLibrary sx={{ color: gallery.length > 0 ? '#10b981' : '#3b82f6', fontSize: '1.25rem' }} />
           <Typography
             variant="body2"
             sx={{
@@ -196,26 +207,26 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
               fontSize: '0.9rem',
             }}
           >
-            {t.labelGalleryMandatory || t.labelGalleryVideos}
+            {t.labelGalleryOptional || t.labelGalleryVideos}
           </Typography>
         </Box>
         <Chip
           label={
-            gallery.length < 3
-              ? `${gallery.length}/6 (Min 3 required)`
-              : isFull
+            isFull
               ? '6/6 (Max)'
-              : `${gallery.length}/6`
+              : gallery.length > 0
+              ? `${gallery.length}/6`
+              : `0/6 (${t.badgeOptional || 'Optional'})`
           }
           size="small"
-          color={gallery.length < 3 ? 'warning' : isFull ? 'primary' : 'success'}
+          color={isFull ? 'primary' : gallery.length > 0 ? 'success' : 'default'}
           sx={{ height: 22, fontSize: '0.72rem', fontWeight: 700 }}
         />
       </Box>
 
       {/* Helper text */}
       <Typography variant="caption" sx={{ color: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', mt: -1 }}>
-        {t.hintGalleryMinMax}
+        {t.hintGalleryOptional || t.hintGalleryMinMax}
       </Typography>
 
       {errorMsg && (
@@ -467,7 +478,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
                     {isVid ? (
                       <Chip
                         icon={<PlayCircleFilled sx={{ fontSize: '0.85rem !important' }} />}
-                        label="Video"
+                        label={t.labelVideo || 'Video'}
                         size="small"
                         color="primary"
                         sx={{ height: 18, fontSize: '0.625rem', fontWeight: 700 }}
@@ -475,7 +486,7 @@ export const MovieReviewGalleryUploader: React.FC<MovieReviewGalleryUploaderProp
                     ) : (
                       <Chip
                         icon={<InsertPhoto sx={{ fontSize: '0.85rem !important' }} />}
-                        label="Photo"
+                        label={t.labelPhoto || 'Photo'}
                         size="small"
                         sx={{ height: 18, fontSize: '0.625rem', fontWeight: 700 }}
                       />

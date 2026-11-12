@@ -53,7 +53,7 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByText(/0\/6 \(Min 3 required\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\/6 \(Optional\)/i)).toBeInTheDocument();
       expect(screen.getByText(/No gallery videos or images added yet/i)).toBeInTheDocument();
     });
 
@@ -69,7 +69,7 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         </ThemeProvider>
       );
 
-      expect(screen.getByText(/2\/6 \(Min 3 required\)/i)).toBeInTheDocument();
+      expect(screen.getByText('2/6')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/trailer1.mp4')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still1.jpg')).toBeInTheDocument();
       expect(screen.getByText('Video')).toBeInTheDocument();
@@ -142,6 +142,57 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
       });
     });
 
+    it('uploads 3 images simultaneously and updates gallery', async () => {
+      const handleChange = jest.fn();
+      jest.spyOn(RatingsRepository, 'uploadMediaFile').mockImplementation(async (file: File) => {
+        return `https://api.pravasamedia.com/api/v1/files/uploaded-${file.name}`;
+      });
+
+      const { container } = render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={[]} onChange={handleChange} />
+        </ThemeProvider>
+      );
+
+      const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+      expect(fileInput).toBeInTheDocument();
+
+      const img1 = new File(['image1'], 'still1.png', { type: 'image/png' });
+      const img2 = new File(['image2'], 'still2.jpg', { type: 'image/jpeg' });
+      const img3 = new File(['image3'], 'still3.webp', { type: 'image/webp' });
+
+      fireEvent.change(fileInput, {
+        target: { files: [img1, img2, img3] },
+      });
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith([
+          { Url: 'https://api.pravasamedia.com/api/v1/files/uploaded-still1.png' },
+          { Url: 'https://api.pravasamedia.com/api/v1/files/uploaded-still2.jpg' },
+          { Url: 'https://api.pravasamedia.com/api/v1/files/uploaded-still3.webp' },
+        ]);
+      });
+    });
+
+    it('renders 3/6 badge when 3 gallery items are present', () => {
+      const mockGallery = [
+        { Url: 'https://example.com/still1.jpg' },
+        { Url: 'https://example.com/still2.jpg' },
+        { Url: 'https://example.com/still3.jpg' },
+      ];
+
+      render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={mockGallery} onChange={jest.fn()} />
+        </ThemeProvider>
+      );
+
+      expect(screen.getByText('3/6')).toBeInTheDocument();
+      expect(screen.getByText('#1')).toBeInTheDocument();
+      expect(screen.getByText('#2')).toBeInTheDocument();
+      expect(screen.getByText('#3')).toBeInTheDocument();
+    });
+
     it('validates file size and unsupported format', async () => {
       const { container } = render(
         <ThemeProvider>
@@ -158,6 +209,72 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
 
       const alert = await screen.findByRole('alert');
       expect(alert).toHaveTextContent(/Supports MP4, WebM, MOV, JPG, PNG, WebP/i);
+    });
+
+    it('handles drag and drop with 3 images', async () => {
+      const handleChange = jest.fn();
+      jest.spyOn(RatingsRepository, 'uploadMediaFile').mockImplementation(async (file: File) => {
+        return `https://api.pravasamedia.com/api/v1/files/dragged-${file.name}`;
+      });
+
+      render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={[]} onChange={handleChange} />
+        </ThemeProvider>
+      );
+
+      const dropZone = screen.getByText(/Drag & drop multiple videos or images here/i).closest('div');
+      expect(dropZone).toBeInTheDocument();
+
+      const img1 = new File(['1'], 'drag1.jpg', { type: 'image/jpeg' });
+      const img2 = new File(['2'], 'drag2.png', { type: 'image/png' });
+      const img3 = new File(['3'], 'drag3.webp', { type: 'image/webp' });
+
+      fireEvent.dragOver(dropZone!);
+      fireEvent.dragLeave(dropZone!);
+      fireEvent.drop(dropZone!, {
+        dataTransfer: {
+          files: [img1, img2, img3],
+        },
+      });
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith([
+          { Url: 'https://api.pravasamedia.com/api/v1/files/dragged-drag1.jpg' },
+          { Url: 'https://api.pravasamedia.com/api/v1/files/dragged-drag2.png' },
+          { Url: 'https://api.pravasamedia.com/api/v1/files/dragged-drag3.webp' },
+        ]);
+      });
+    });
+
+    it('triggers file input click when dropzone is clicked', () => {
+      const { container } = render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={[]} onChange={jest.fn()} />
+        </ThemeProvider>
+      );
+
+      const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;
+      const clickSpy = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
+
+      const dropZone = screen.getByText(/Drag & drop multiple videos or images here/i).closest('div');
+      fireEvent.click(dropZone!);
+
+      expect(clickSpy).toHaveBeenCalled();
+      clickSpy.mockRestore();
+    });
+
+    it('handles image error by hiding image element', () => {
+      const mockGallery = [{ Url: 'https://example.com/broken-image.jpg' }];
+      render(
+        <ThemeProvider>
+          <MovieReviewGalleryUploader gallery={mockGallery} onChange={jest.fn()} />
+        </ThemeProvider>
+      );
+
+      const img = screen.getByAltText('Gallery item 1');
+      fireEvent.error(img);
+      expect(img.style.display).toBe('none');
     });
   });
 
@@ -197,10 +314,10 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
       expect(screen.getByDisplayValue('https://www.youtube.com/watch?v=trailer999')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still1.jpg')).toBeInTheDocument();
       expect(screen.getByText('https://example.com/still2.jpg')).toBeInTheDocument();
-      expect(screen.getByText(/2\/6 \(Min 3 required\)/i)).toBeInTheDocument();
+      expect(screen.getByText('2/6')).toBeInTheDocument();
     });
 
-    it('validates mandatory poster, trailer, and gallery items (min 3, max 6)', () => {
+    it('validates mandatory poster and trailer, and allows optional gallery up to 6', () => {
       const handleSave = jest.fn();
 
       render(
@@ -238,11 +355,20 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
         target: { value: 'https://www.youtube.com/watch?v=gc_trailer_1' },
       });
 
-      // 3. Less than 3 gallery items
+      // 3. Optional gallery allows save with 0 gallery items
       fireEvent.click(saveBtn);
-      expect(screen.getByText(/Please add at least 3 gallery items \(Min 3 • Max 6\)/i)).toBeInTheDocument();
+      expect(handleSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Game Changer Review',
+          image_url: 'https://example.com/poster.jpg',
+          video_url: 'https://www.youtube.com/watch?v=gc_trailer_1',
+          gallery: [],
+        })
+      );
 
-      // Add 3 gallery items
+      handleSave.mockClear();
+
+      // Add gallery items if desired
       const galleryInput = screen.getByPlaceholderText(/Enter video or image URL/i);
       const addGalleryBtn = screen.getByRole('button', { name: /Add Media URL/i });
 
@@ -268,6 +394,66 @@ describe('Movie Reviews Gallery & Video URL Features', () => {
             { Url: 'https://example.com/still2.jpg' },
             { Url: 'https://example.com/still3.jpg' },
           ],
+        })
+      );
+    });
+
+    it('handles editing fields, adding and removing external ratings, and draft toggle', () => {
+      const handleSave = jest.fn();
+      const existingMovie: MovieReviewItem = {
+        id: 701,
+        title: 'Original Movie',
+        content: 'Original Content',
+        type: 'Standard',
+        subType: 'Reviews',
+        language_code: 'te',
+        category_ids: [5],
+        image_url: 'https://example.com/poster.jpg',
+        video_url: 'https://www.youtube.com/watch?v=trailer1',
+        gallery: [{ Url: 'https://example.com/g1.jpg' }],
+        chotarating: '4.0/5',
+        externalRatings: [{ platform_name: 'IMDb', platform_rating: '8.0/10' }],
+        draft: false,
+      };
+
+      render(
+        <ThemeProvider>
+          <MovieReviewModal
+            open={true}
+            movie={existingMovie}
+            isSaving={false}
+            onClose={jest.fn()}
+            onSave={handleSave}
+          />
+        </ThemeProvider>
+      );
+
+      // Verify existing platform
+      expect(screen.getByDisplayValue('IMDb')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('8.0/10')).toBeInTheDocument();
+
+      // Add external rating platform
+      const addPlatformBtn = screen.getByRole('button', { name: /Add Platform Rating/i });
+      fireEvent.click(addPlatformBtn);
+
+      // Edit content
+      const contentInput = screen.getByDisplayValue('Original Content');
+      fireEvent.change(contentInput, { target: { value: 'Updated thorough analysis' } });
+
+      // Toggle draft
+      const draftSwitch = screen.getByRole('checkbox', { name: /Save as Draft/i });
+      fireEvent.click(draftSwitch);
+
+      // Save
+      const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+      fireEvent.click(saveBtn);
+
+      expect(handleSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 701,
+          title: 'Original Movie',
+          content: 'Updated thorough analysis',
+          draft: true,
         })
       );
     });

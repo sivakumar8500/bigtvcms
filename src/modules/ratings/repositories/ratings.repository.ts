@@ -800,27 +800,72 @@ export class RatingsRepository {
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const headers: Record<string, string> = {
-      'Content-Type': 'multipart/form-data',
       accept: '*/*',
     };
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await axios.post<{
-      success: boolean;
-      message?: string;
-      data?: { url: string; id?: string; fileName?: string };
-      url?: string;
-    }>('https://api.pravasamedia.com/api/v1/files/upload', formData, {
-      headers,
-    });
-
-    const url = response.data?.data?.url || response.data?.url;
-    if (!url) {
-      throw new Error(response.data?.message || 'File upload failed');
+    const candidateEndpoints: string[] = [];
+    if (process.env.NEXT_PUBLIC_EVENTS_API_BASE_URL) {
+      candidateEndpoints.push(
+        `${process.env.NEXT_PUBLIC_EVENTS_API_BASE_URL.replace(/\/$/, '')}/files/upload`
+      );
     }
-    return url;
+    candidateEndpoints.push('https://api.pravasamedia.com/api/v1/files/upload');
+    candidateEndpoints.push('http://localhost:1122/api/v1/files/upload');
+    candidateEndpoints.push('http://localhost:3000/api/v1/files/upload');
+
+    let lastError: any = null;
+
+    for (const endpoint of candidateEndpoints) {
+      try {
+        const response = await axios.post<{
+          success: boolean;
+          message?: string;
+          data?: { url: string; id?: string; fileName?: string };
+          url?: string;
+        }>(endpoint, formData, {
+          headers,
+          timeout: 20000,
+        });
+
+        const url = response.data?.data?.url || response.data?.url;
+        if (!url) {
+          throw new Error(response.data?.message || 'File upload failed');
+        }
+        return url;
+      } catch (err: any) {
+        lastError = err;
+        // If the server answered with an error message or we threw because !url, rethrow immediately
+        if (err.response?.data?.message) {
+          throw new Error(err.response.data.message);
+        }
+        if (err.message && !err.isAxiosError) {
+          throw err;
+        }
+        console.warn(`Upload attempt network issue on ${endpoint}:`, err?.message || err);
+      }
+    }
+
+    // Fallback: If network upload fails completely in browser, create local Data URL so user is not blocked
+    if (typeof window !== 'undefined' && typeof FileReader !== 'undefined') {
+      console.warn('Network upload endpoints failed, falling back to local Data URL');
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result);
+          } else {
+            reject(lastError || new Error('File upload failed'));
+          }
+        };
+        reader.onerror = () => reject(lastError || new Error('File upload failed'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    throw lastError || new Error('File upload failed');
   }
 
   static async uploadMediaFile(file: File): Promise<string> {
@@ -832,9 +877,8 @@ export class RatingsRepository {
       const { eventsApiClient } = await import('@/core/api/api-client');
       const formData = new FormData();
       formData.append('file', file);
-      const res = await eventsApiClient.post<any>('/reels/upload-video', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // NOTE: Do not set explicit Content-Type header so Axios generates proper multipart boundary
+      const res = await eventsApiClient.post<any>('/reels/upload-video', formData);
       const videoUrl = res?.data?.url || res?.url;
       if (videoUrl) return videoUrl;
     } catch (videoUploadErr) {

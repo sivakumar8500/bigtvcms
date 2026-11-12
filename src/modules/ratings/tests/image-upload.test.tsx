@@ -70,7 +70,6 @@ describe('Ratings Image Upload', () => {
         expect.any(FormData),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Content-Type': 'multipart/form-data',
             accept: '*/*',
           }),
         })

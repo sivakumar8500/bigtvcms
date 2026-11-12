@@ -58,7 +58,7 @@ export const RatingsImageUploader: React.FC<RatingsImageUploaderProps> = ({
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setErrorMsg('Image file size must be less than 10MB');
+      setErrorMsg(t.errFileSize10MB || 'Image file size must be less than 10MB');
       return;
     }
 
@@ -323,7 +323,7 @@ export const RatingsImageUploader: React.FC<RatingsImageUploaderProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <CheckCircle sx={{ fontSize: '1rem', color: '#10b981' }} />
               <Typography variant="body2" sx={{ fontWeight: 600, color: isDark ? '#fff' : '#0f172a' }}>
-                Image Attached
+                {t.imageAttached || 'Image Attached'}
               </Typography>
             </Box>
             <Typography
